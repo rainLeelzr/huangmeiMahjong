@@ -23,25 +23,47 @@ public abstract class ScanTask {
      * 用户打出的牌
      */
     protected Mahjong putOutMahjong;
-
-    protected MahjongGameData mahjongGameData;
-
-    /**
-     * 具体的任务扫描器判定到某个用户可以执行某些操作时，向此列表添加元素
-     */
-    protected List<AfterPutOutCardOperate> canOperates;
-
     /**
      * 出牌的玩家
      */
     protected User user;
+    private MahjongGameData mahjongGameData;
+    /**
+     * 具体的任务扫描器判定到某个用户可以执行某些操作时，向此列表添加元素
+     */
+    private List<AfterPutOutCardOperate> canOperates;
 
     /**
      * 基本操作类型
      */
     public abstract BaseOperate getBaseOperate();
 
-    public abstract void scan()
+    public void scan()
+            throws InstantiationException, IllegalAccessException {
+        // 循环除了出牌的玩家，判断能不能有一些操作
+        List<PersonalCardInfo> personalCardInfos = mahjongGameData.getPersonalCardInfos();
+        for (PersonalCardInfo personalCardInfo : personalCardInfos) {
+            //log.debug("扫描{}前座位{}的手牌：{}{}",
+            //        getBaseOperate().getName(),
+            //        personalCardInfo.getRoomMember().getSeat(),
+            //        personalCardInfo.getHandCards().size(),
+            //        personalCardInfo.getHandCards());
+
+            if (!user.getId().equals(
+                    personalCardInfo.getRoomMember().getUserId())) {
+                Set<BaseOperate> myOperates = getMyOperates(
+                        personalCardInfo.getRoomMember().getUserId());
+                if (!myOperates.contains(getBaseOperate())) {
+                    if (doScan(personalCardInfo)) {
+                        // 添加可行操作
+                        myOperates.add(getBaseOperate());
+                    }
+                }
+            }
+        }
+    }
+
+    public abstract boolean doScan(PersonalCardInfo personalCardInfo)
             throws InstantiationException, IllegalAccessException;
 
     public User getUser() {
@@ -79,7 +101,7 @@ public abstract class ScanTask {
     /**
      * 获取本玩家的可行的操作列表
      */
-    public Set<BaseOperate> getMyOperates(Integer userId) {
+    private Set<BaseOperate> getMyOperates(Integer userId) {
         // 找出userId的个人牌信息
         PersonalCardInfo personalCardInfo = null;
         for (PersonalCardInfo cardInfo : mahjongGameData.getPersonalCardInfos()) {
@@ -94,6 +116,7 @@ public abstract class ScanTask {
         for (AfterPutOutCardOperate canOperate : canOperates) {
             if (canOperate.getRoomMember().getUserId().equals(userId)) {
                 afterPutOutCardOperate = canOperate;
+                break;
             }
         }
         if (afterPutOutCardOperate == null) {
@@ -106,9 +129,27 @@ public abstract class ScanTask {
     }
 
     /**
+     * 找出手牌中拥有的宝牌
+     */
+    protected List<Mahjong> getMyBaoMahjongs(Set<Mahjong> handCards) {
+        List<Mahjong> baoMahjongs = this.mahjongGameData.getBaoMahjongs();
+        List<Mahjong> myBaoMahjongs = new ArrayList<>(4);
+
+        if (baoMahjongs != null) {
+            for (Mahjong baoMahjong : baoMahjongs) {
+                if (handCards.contains(baoMahjong)) {
+                    myBaoMahjongs.add(baoMahjong);
+                }
+            }
+        }
+
+        return myBaoMahjongs;
+    }
+
+    /**
      * 按麻将字号分组
      */
-    public Map<Integer,Set<Mahjong>> groupByZiHao(Set<Mahjong> handCards){
+    protected Map<Integer, Set<Mahjong>> groupByZiHao(Set<Mahjong> handCards) {
         Map<Integer, Set<Mahjong>> Mahjongs = new HashMap<>(6);
         for (Mahjong handCard : handCards) {
             Integer ziHao = handCard.getZi();
@@ -125,8 +166,8 @@ public abstract class ScanTask {
     /**
      * 按麻将号码分组
      */
-    public Map<Integer, Set<Mahjong>> groupByNumber(Set<Mahjong> mahjongs) {
-        Map<Integer, Set<Mahjong>> sameNumberMahjongs= new HashMap<>(6);
+    protected Map<Integer, Set<Mahjong>> groupByNumber(Set<Mahjong> mahjongs) {
+        Map<Integer, Set<Mahjong>> sameNumberMahjongs = new HashMap<>(6);
         for (Mahjong handCard : mahjongs) {
             Integer number = handCard.getNumber();
             Set<Mahjong> numberMahjongs = sameNumberMahjongs.get(number);

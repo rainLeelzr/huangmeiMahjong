@@ -1,6 +1,7 @@
-package com.huangmei.commonhm.manager.scanTask;
+package com.huangmei.commonhm.manager.scanTask.abs;
 
 
+import com.huangmei.commonhm.manager.scanTask.ScanTask;
 import com.huangmei.commonhm.model.mahjong.BaseOperate;
 
 /**

@@ -1,11 +1,12 @@
 package com.huangmei.commonhm.manager.scanTask.impl;
 
-import com.huangmei.commonhm.manager.scanTask.AbstractHuScanTask;
-import com.huangmei.commonhm.model.mahjong.BaseOperate;
+import com.huangmei.commonhm.manager.scanTask.abs.AbstractHuScanTask;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 扫描是否硬七对
@@ -13,29 +14,7 @@ import java.util.*;
 public class YingQiDuiHu extends AbstractHuScanTask {
 
     @Override
-    public void scan() throws InstantiationException, IllegalAccessException {
-        // 循环除了出牌的玩家，判断有没有七对
-        List<PersonalCardInfo> personalCardInfos = mahjongGameData.getPersonalCardInfos();
-        for (PersonalCardInfo personalCardInfo : personalCardInfos) {
-            //log.debug("扫描{}前座位{}的手牌：{}{}",
-            //        getBaseOperate().getName(),
-            //        personalCardInfo.getRoomMember().getSeat(),
-            //        personalCardInfo.getHandCards().size(),
-            //        personalCardInfo.getHandCards());
-
-            if (!user.getId().equals(
-                    personalCardInfo.getRoomMember().getUserId())) {
-                if (isYingQiDui(personalCardInfo)) {
-                    // 添加七对的可行操作
-                    Set<BaseOperate> myOperates = getMyOperates(
-                            personalCardInfo.getRoomMember().getUserId());
-                    myOperates.add(getBaseOperate());
-                }
-            }
-        }
-    }
-
-    private boolean isYingQiDui(PersonalCardInfo personalCardInfo) {
+    public boolean doScan(PersonalCardInfo personalCardInfo) throws InstantiationException, IllegalAccessException {
         // todo 判断是否已经有碰，是则肯定不是七对
 
         // todo 判断是否已经有杠，是则肯定不是七对

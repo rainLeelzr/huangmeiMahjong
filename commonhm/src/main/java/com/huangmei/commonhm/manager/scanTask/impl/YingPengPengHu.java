@@ -1,11 +1,12 @@
 package com.huangmei.commonhm.manager.scanTask.impl;
 
-import com.huangmei.commonhm.manager.scanTask.AbstractHuScanTask;
-import com.huangmei.commonhm.model.mahjong.BaseOperate;
+import com.huangmei.commonhm.manager.scanTask.abs.AbstractHuScanTask;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 扫描是否硬碰碰胡
@@ -14,35 +15,13 @@ public class YingPengPengHu extends AbstractHuScanTask {
 
     private boolean hasEye = false;// 眼，初始化没有眼。只能有一对眼
 
-    @Override
-    public void scan() throws InstantiationException, IllegalAccessException {
-        // 循环除了出牌的玩家，判断有没有碰碰胡
-        List<PersonalCardInfo> personalCardInfos = mahjongGameData.getPersonalCardInfos();
-        for (PersonalCardInfo personalCardInfo : personalCardInfos) {
-            //log.debug("扫描{}前座位{}的手牌：{}{}",
-            //        getBaseOperate().getName(),
-            //        personalCardInfo.getRoomMember().getSeat(),
-            //        personalCardInfo.getHandCards().size(),
-            //        personalCardInfo.getHandCards());
-
-            if (!user.getId().equals(
-                    personalCardInfo.getRoomMember().getUserId())) {
-                if (isPengPengHu(personalCardInfo)) {
-                    // 添加胡的可行操作
-                    Set<BaseOperate> myOperates = getMyOperates(
-                            personalCardInfo.getRoomMember().getUserId());
-                    myOperates.add(getBaseOperate());
-                }
-            }
-        }
-    }
-
     /**
      * 判断依据：
      * 按花字号分组
      * 1：除了含有眼的哪，每组元素个数为3的整数倍数
      */
-    public boolean isPengPengHu(PersonalCardInfo personalCardInfo) {
+    @Override
+    public boolean doScan(PersonalCardInfo personalCardInfo) throws InstantiationException, IllegalAccessException {
         Set<Mahjong> handCards = new HashSet<>(personalCardInfo.getHandCards());
         handCards.add(putOutMahjong);
 

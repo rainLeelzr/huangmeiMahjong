@@ -1,16 +1,14 @@
 package com.huangmei.commonhm.manager.putOutCard;
 
-import com.huangmei.commonhm.manager.scanTask.impl.YingDaMingGang;
-import com.huangmei.commonhm.manager.scanTask.impl.YingPeng;
-import com.huangmei.commonhm.manager.scanTask.impl.YingPengPengHu;
 import com.huangmei.commonhm.manager.scanTask.ScanTask;
-import com.huangmei.commonhm.manager.scanTask.impl.YingQiDuiHu;
+import com.huangmei.commonhm.manager.scanTask.impl.*;
 import com.huangmei.commonhm.model.User;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.MahjongGameData;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -28,9 +26,18 @@ public class AfterPutOutCardManager {
 
     static {
         scanTasks = new ArrayList<>();
+        // 硬胡
         scanTasks.add(YingPengPengHu.class);
         scanTasks.add(YingQiDuiHu.class);
+        scanTasks.add(YingPingHu.class);
+
+        // 软胡
+        scanTasks.add(RuanPingHu.class);
+
+        // 硬杠
         scanTasks.add(YingDaMingGang.class);
+
+        // 硬碰
         scanTasks.add(YingPeng.class);
     }
 
@@ -45,6 +52,14 @@ public class AfterPutOutCardManager {
             task.setUser(user);
             task.setCanOperates(afterPutOutCardOperates);
             task.scan();
+        }
+        Iterator<AfterPutOutCardOperate> it = afterPutOutCardOperates
+                .iterator();
+        while (it.hasNext()) {
+            AfterPutOutCardOperate next = it.next();
+            if (next.getOperates().size() == 0) {
+                it.remove();
+            }
         }
         return afterPutOutCardOperates;
     }

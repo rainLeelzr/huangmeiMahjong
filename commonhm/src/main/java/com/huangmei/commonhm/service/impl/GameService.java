@@ -10,7 +10,7 @@ import com.huangmei.commonhm.model.mahjong.MahjongGameData;
 import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
 import com.huangmei.commonhm.redis.GameRedis;
 import com.huangmei.commonhm.redis.VersionRedis;
-import com.huangmei.commonhm.util.mock.ComboMahjongList;
+import com.huangmei.commonhm.util.mock.MockComboMahjongList;
 import com.huangmei.commonhm.util.CommonError;
 import com.huangmei.commonhm.util.JsonUtil;
 import org.slf4j.Logger;
@@ -102,7 +102,7 @@ public class GameService {
 
         Long nowVersion = versionRedis.nowVersion(room.getId());
         //Long nowVersion = 10l;
-        if (nowVersion != version) {
+        if (!nowVersion.equals(version)) {
             throw CommonError.SYS_VERSION_TIMEOUT.newException();
         }
 
@@ -174,9 +174,11 @@ public class GameService {
      */
     public MahjongGameData mockMahjongGameData(Room room, RoomMember[] roomMembers) {
         //硬对对胡{座位4,可以胡、}
-        //List<Mahjong> allMahjongs = ComboMahjongList.getYingDuiDuiHuMahjongs();
+        //List<Mahjong> allMahjongs = MockComboMahjongList.getYingDuiDuiHuMahjongs();
         //硬七对 {座位3,可以胡、}, {座位2,可以碰、}
-        List<Mahjong> allMahjongs = ComboMahjongList.getYingQiDuiMahjongs();
+        //List<Mahjong> allMahjongs = MockComboMahjongList.getYingQiDuiMahjongs();
+        //硬平胡 {座位2,可以碰、}, {座位4,可以胡、}
+        List<Mahjong> allMahjongs = MockComboMahjongList.getYingPingHuMahjongs();
 
         log.debug("allMahjongs.size:{}", allMahjongs.size());
 
@@ -195,6 +197,14 @@ public class GameService {
 
         // 掷骰
         mahjongGameData.setDices(MahjongGameData.rollDice());
+
+        // 宝牌
+        List<Mahjong> baoMahjongs = new ArrayList<>(4);
+        baoMahjongs.add(Mahjong.THREE_TIAO_1);
+        baoMahjongs.add(Mahjong.THREE_TIAO_2);
+        baoMahjongs.add(Mahjong.THREE_TIAO_3);
+        baoMahjongs.add(Mahjong.THREE_TIAO_4);
+        mahjongGameData.setBaoMahjongs(baoMahjongs);
 
         // 获取新版本号
         Long version = versionRedis.nextVersion(roomMembers[0].getRoomId());

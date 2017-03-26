@@ -1,12 +1,8 @@
 package com.huangmei.commonhm.manager.scanTask.impl;
 
-import com.huangmei.commonhm.manager.scanTask.AbstractGangScanTask;
-import com.huangmei.commonhm.model.mahjong.BaseOperate;
+import com.huangmei.commonhm.manager.scanTask.abs.AbstractGangScanTask;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
-
-import java.util.List;
-import java.util.Set;
 
 /**
  * 扫描是否可以硬大明杠
@@ -17,31 +13,9 @@ public class YingDaMingGang extends AbstractGangScanTask {
     private boolean hasGang = false;
 
     @Override
-    public void scan() throws InstantiationException, IllegalAccessException {
-        // 循环除了出牌的玩家，判断有没有硬杠
-        List<PersonalCardInfo> personalCardInfos = mahjongGameData.getPersonalCardInfos();
-        for (PersonalCardInfo personalCardInfo : personalCardInfos) {
-            //log.debug("扫描{}前座位{}的手牌：{}{}",
-            //        getBaseOperate().getName(),
-            //        personalCardInfo.getRoomMember().getSeat(),
-            //        personalCardInfo.getHandCards().size(),
-            //        personalCardInfo.getHandCards());
-
-            if (!user.getId().equals(
-                    personalCardInfo.getRoomMember().getUserId())) {
-                if (canGang(personalCardInfo)) {
-                    // 添加杠的可行操作
-                    Set<BaseOperate> myOperates = getMyOperates(
-                            personalCardInfo.getRoomMember().getUserId());
-                    myOperates.add(getBaseOperate());
-                }
-            }
-        }
-    }
-
-
-    private boolean canGang(PersonalCardInfo personalCardInfo) {
-        if(hasGang){
+    public boolean doScan(PersonalCardInfo personalCardInfo)
+            throws InstantiationException, IllegalAccessException {
+        if (hasGang) {
             return false;
         }
 
@@ -58,6 +32,4 @@ public class YingDaMingGang extends AbstractGangScanTask {
         }
         return false;
     }
-
-
 }

@@ -53,6 +53,15 @@ public class MahjongGameData {
     private List<OutCard> outCards;
 
     /**
+     * 宝牌
+     */
+    private List<Mahjong> baoMahjongs;
+
+    /**
+     * 宝牌可以变成以下的牌
+     */
+    private List<Mahjong> baoMahjongMakeUpMahjongs;
+    /**
      * 消息版本号
      */
     private Long version;
@@ -144,6 +153,52 @@ public class MahjongGameData {
         return new Integer[]{
                 RandomUtils.nextInt(6) + 1,
                 RandomUtils.nextInt(6) + 1};
+    }
+
+    public static void main(String[] args) {
+        MahjongGameData data = new MahjongGameData();
+        List<Mahjong> baoMahjongs = new ArrayList<>(4);
+        baoMahjongs.add(Mahjong.THREE_TIAO_1);
+        baoMahjongs.add(Mahjong.THREE_TIAO_2);
+        baoMahjongs.add(Mahjong.THREE_TIAO_3);
+        baoMahjongs.add(Mahjong.THREE_TIAO_4);
+        data.setBaoMahjongs(baoMahjongs);
+        data.getBaoMahjongMakeUpMahjongs();
+    }
+
+    public List<Mahjong> getBaoMahjongMakeUpMahjongs() {
+        if (baoMahjongMakeUpMahjongs == null && this.baoMahjongs != null) {
+            // 初始化宝牌能变成的牌
+            List<Mahjong> allMahjongs = Mahjong.getAllMahjongs();
+            List<Mahjong> temps = new ArrayList<>(allMahjongs.size()
+                    - this.baoMahjongs.size());
+            for (Mahjong tempMahjong : allMahjongs) {
+                if (!this.baoMahjongs.contains(tempMahjong)) {
+                    temps.add(tempMahjong);
+                }
+            }
+            this.baoMahjongMakeUpMahjongs =
+                    new ArrayList<>(temps.size() / 4);
+            for (int i = 0; i < temps.size(); i += 4) {
+                this.baoMahjongMakeUpMahjongs
+                        .add(temps.get(i));
+            }
+        }
+        //System.out.println(this.baoMahjongs);
+        //System.out.println(this.baoMahjongMakeUpMahjongs);
+        return baoMahjongMakeUpMahjongs;
+    }
+
+    public void setBaoMahjongMakeUpMahjongs(List<Mahjong> baoMahjongMakeUpMahjongs) {
+        this.baoMahjongMakeUpMahjongs = baoMahjongMakeUpMahjongs;
+    }
+
+    public List<Mahjong> getBaoMahjongs() {
+        return baoMahjongs;
+    }
+
+    public void setBaoMahjongs(List<Mahjong> baoMahjongs) {
+        this.baoMahjongs = baoMahjongs;
     }
 
     public Long getVersion() {
