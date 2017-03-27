@@ -15,6 +15,7 @@ public class YingPeng extends AbstractPengScanTask {
     @Override
     public boolean doScan(PersonalCardInfo personalCardInfo)
             throws InstantiationException, IllegalAccessException {
+        log.debug("座位{}进行硬碰扫描！", personalCardInfo.getRoomMember().getSeat());
         if (hasPeng) {
             return false;
         }

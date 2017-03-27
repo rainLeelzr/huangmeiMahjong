@@ -4,8 +4,8 @@ import com.huangmei.commonhm.manager.scanTask.abs.AbstractHuScanTask;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 扫描是否硬平胡
@@ -16,9 +16,9 @@ public class YingPingHu extends AbstractHuScanTask {
 
     @Override
     public boolean doScan(PersonalCardInfo personalCardInfo) throws InstantiationException, IllegalAccessException {
-        Set<Mahjong> handCards = new HashSet<>(personalCardInfo.getHandCards());
+        List<Mahjong> handCards = new ArrayList<>(personalCardInfo.getHandCards());
         handCards.add(putOutMahjong);
-
+        log.debug("座位{}进行硬平胡扫描！", personalCardInfo.getRoomMember().getSeat());
         return isPinghu(handCards);
     }
 

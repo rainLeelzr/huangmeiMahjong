@@ -15,6 +15,7 @@ public class YingDaMingGang extends AbstractGangScanTask {
     @Override
     public boolean doScan(PersonalCardInfo personalCardInfo)
             throws InstantiationException, IllegalAccessException {
+        log.debug("座位{}进行硬大明杠扫描！", personalCardInfo.getRoomMember().getSeat());
         if (hasGang) {
             return false;
         }

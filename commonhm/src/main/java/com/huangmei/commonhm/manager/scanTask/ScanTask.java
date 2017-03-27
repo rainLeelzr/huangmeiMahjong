@@ -131,7 +131,7 @@ public abstract class ScanTask {
     /**
      * 找出手牌中拥有的宝牌
      */
-    protected List<Mahjong> getMyBaoMahjongs(Set<Mahjong> handCards) {
+    protected List<Mahjong> getMyBaoMahjongs(Collection<Mahjong> handCards) {
         List<Mahjong> baoMahjongs = this.mahjongGameData.getBaoMahjongs();
         List<Mahjong> myBaoMahjongs = new ArrayList<>(4);
 
@@ -149,13 +149,13 @@ public abstract class ScanTask {
     /**
      * 按麻将字号分组
      */
-    protected Map<Integer, Set<Mahjong>> groupByZiHao(Set<Mahjong> handCards) {
-        Map<Integer, Set<Mahjong>> Mahjongs = new HashMap<>(6);
+    protected Map<Integer, List<Mahjong>> groupByZiHao(List<Mahjong> handCards) {
+        Map<Integer, List<Mahjong>> Mahjongs = new HashMap<>(6);
         for (Mahjong handCard : handCards) {
             Integer ziHao = handCard.getZi();
-            Set<Mahjong> ziHaoMahjongs = Mahjongs.get(ziHao);
+            List<Mahjong> ziHaoMahjongs = Mahjongs.get(ziHao);
             if (ziHaoMahjongs == null) {
-                ziHaoMahjongs = new HashSet<>(19);//ceil(14/0.75)
+                ziHaoMahjongs = new ArrayList<>(8);
                 Mahjongs.put(ziHao, ziHaoMahjongs);
             }
             ziHaoMahjongs.add(handCard);
@@ -166,13 +166,13 @@ public abstract class ScanTask {
     /**
      * 按麻将号码分组
      */
-    protected Map<Integer, Set<Mahjong>> groupByNumber(Set<Mahjong> mahjongs) {
-        Map<Integer, Set<Mahjong>> sameNumberMahjongs = new HashMap<>(6);
+    protected Map<Integer, List<Mahjong>> groupByNumber(List<Mahjong> mahjongs) {
+        Map<Integer, List<Mahjong>> sameNumberMahjongs = new HashMap<>(6);
         for (Mahjong handCard : mahjongs) {
             Integer number = handCard.getNumber();
-            Set<Mahjong> numberMahjongs = sameNumberMahjongs.get(number);
+            List<Mahjong> numberMahjongs = sameNumberMahjongs.get(number);
             if (numberMahjongs == null) {
-                numberMahjongs = new HashSet<>(6);//ceil(14/0.75)
+                numberMahjongs = new ArrayList<>(14);
                 sameNumberMahjongs.put(number, numberMahjongs);
             }
             numberMahjongs.add(handCard);

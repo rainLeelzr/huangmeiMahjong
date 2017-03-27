@@ -14,7 +14,9 @@ import java.util.*;
 public abstract class AbstractHuScanTask extends ScanTask {
 
 
-    private static int[] noHuSize = new int[]{1, 4, 7, 10, 13};
+    private static int[] NO_HU_SIZE = new int[]{1, 4, 7, 10, 13};
+
+    private static int[] NO_HU_SIZE_QIDUI = new int[]{1, 3, 5, 7, 9, 11, 13};
 
     @Override
     public BaseOperate getBaseOperate() {
@@ -28,10 +30,30 @@ public abstract class AbstractHuScanTask extends ScanTask {
         // 按麻将的字号分组
         Map<Integer, List<Mahjong>> ziHaoMahjongs = groupByZiHao(handCards);
 
-        if (preCheck(ziHaoMahjongs)) {
+        if (preCheck(ziHaoMahjongs, false)) {
             for (List<Mahjong> mahjongSet : ziHaoMahjongs.values()) {
                 //log.debug("按麻将的字号分组:{}", mahjongSet);
                 if (!checkPingHu(new ArrayList<>(mahjongSet))) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * 判断给定的牌是否七对
+     */
+    protected boolean isQiDui(List<Mahjong> handCards) {
+        // 按麻将的字号分组
+        Map<Integer, List<Mahjong>> ziHaoMahjongs = groupByZiHao(handCards);
+
+        if (preCheck(ziHaoMahjongs, true)) {
+            for (List<Mahjong> mahjongSet : ziHaoMahjongs.values()) {
+                //log.debug("按麻将的字号分组:{}", mahjongSet);
+                if (!checkQiDui(new ArrayList<>(mahjongSet))) {
                     return false;
                 }
             }
@@ -48,7 +70,7 @@ public abstract class AbstractHuScanTask extends ScanTask {
         // 按麻将的字号分组
         Map<Integer, List<Mahjong>> ziHaoMahjongs = groupByZiHao(handCards);
 
-        if (preCheck(ziHaoMahjongs)) {
+        if (preCheck(ziHaoMahjongs, false)) {
             for (List<Mahjong> mahjongSet : ziHaoMahjongs.values()) {
                 //log.debug("按麻将的字号分组:{}", mahjongSet);
                 if (!checkPengPengHu(new ArrayList<>(mahjongSet))) {
@@ -63,11 +85,14 @@ public abstract class AbstractHuScanTask extends ScanTask {
 
     /**
      * 执行具体的胡牌算法前，先简单判断给定的牌是否符合必要的胡牌条件
-     * 此检查适用所有胡牌基本类型，即碰碰胡、七对、平胡
+     * 此检查适用碰碰胡、平胡
      */
-    protected boolean preCheck(Map<Integer, List<Mahjong>> ziHaoMahjongs) {
+    private boolean preCheck(Map<Integer, List<Mahjong>> ziHaoMahjongs, boolean isQiDui) {
         for (List<Mahjong> mahjongs : ziHaoMahjongs.values()) {
             // 检查每个字号组合的大小符不合胡牌大小
+
+            int[] noHuSize = isQiDui ? NO_HU_SIZE_QIDUI : NO_HU_SIZE;
+
             for (int size : noHuSize) {
                 if (size == mahjongs.size()) {
                     return false;
@@ -90,7 +115,7 @@ public abstract class AbstractHuScanTask extends ScanTask {
      * 根据传入的list，组成AAA、ABC、AA组合
      * 组合成功，返回true，不成功返回false
      */
-    protected boolean checkPingHu(List<Mahjong> mahjongs) {
+    private boolean checkPingHu(List<Mahjong> mahjongs) {
         if (mahjongs.size() == 0) {
             return true;
         }
@@ -117,6 +142,27 @@ public abstract class AbstractHuScanTask extends ScanTask {
                 return true;
             } else {
                 return checkPingHu(mahjongs);
+            }
+        }
+    }
+
+    /**
+     * 根据传入的list，组成AA组合
+     * 组合成功，返回true，不成功返回false
+     */
+    private boolean checkQiDui(List<Mahjong> mahjongs) {
+        if (mahjongs.size() == 0) {
+            return true;
+        }
+
+        Combo combo = AA(mahjongs);
+        if (combo == null) {
+            return false;
+        } else {
+            if (mahjongs.size() == 0) {
+                return true;
+            } else {
+                return checkQiDui(mahjongs);
             }
         }
     }
