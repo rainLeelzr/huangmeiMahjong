@@ -21,13 +21,17 @@ public abstract class AbstractHuScanTask extends ScanTask {
         return BaseOperate.HU;
     }
 
-    protected boolean isPinghu(Set<Mahjong> handCards) {
+    /**
+     * 判断给定的牌是否平胡
+     */
+    protected boolean isPinghu(List<Mahjong> handCards) {
         // 按麻将的字号分组
-        Map<Integer, Set<Mahjong>> ziHaoMahjongs = groupByZiHao(handCards);
+        Map<Integer, List<Mahjong>> ziHaoMahjongs = groupByZiHao(handCards);
 
         if (preCheck(ziHaoMahjongs)) {
-            for (Set<Mahjong> mahjongSet : ziHaoMahjongs.values()) {
-                if (!check(new ArrayList<>(mahjongSet))) {
+            for (List<Mahjong> mahjongSet : ziHaoMahjongs.values()) {
+                //log.debug("按麻将的字号分组:{}", mahjongSet);
+                if (!checkPingHu(new ArrayList<>(mahjongSet))) {
                     return false;
                 }
             }
@@ -37,8 +41,32 @@ public abstract class AbstractHuScanTask extends ScanTask {
         }
     }
 
-    protected boolean preCheck(Map<Integer, Set<Mahjong>> ziHaoMahjongs) {
-        for (Set<Mahjong> mahjongs : ziHaoMahjongs.values()) {
+    /**
+     * 判断给定的牌是否碰碰胡
+     */
+    protected boolean isPengPengHu(List<Mahjong> handCards) {
+        // 按麻将的字号分组
+        Map<Integer, List<Mahjong>> ziHaoMahjongs = groupByZiHao(handCards);
+
+        if (preCheck(ziHaoMahjongs)) {
+            for (List<Mahjong> mahjongSet : ziHaoMahjongs.values()) {
+                //log.debug("按麻将的字号分组:{}", mahjongSet);
+                if (!checkPengPengHu(new ArrayList<>(mahjongSet))) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * 执行具体的胡牌算法前，先简单判断给定的牌是否符合必要的胡牌条件
+     * 此检查适用所有胡牌基本类型，即碰碰胡、七对、平胡
+     */
+    protected boolean preCheck(Map<Integer, List<Mahjong>> ziHaoMahjongs) {
+        for (List<Mahjong> mahjongs : ziHaoMahjongs.values()) {
             // 检查每个字号组合的大小符不合胡牌大小
             for (int size : noHuSize) {
                 if (size == mahjongs.size()) {
@@ -62,7 +90,7 @@ public abstract class AbstractHuScanTask extends ScanTask {
      * 根据传入的list，组成AAA、ABC、AA组合
      * 组合成功，返回true，不成功返回false
      */
-    protected boolean check(List<Mahjong> mahjongs) {
+    protected boolean checkPingHu(List<Mahjong> mahjongs) {
         if (mahjongs.size() == 0) {
             return true;
         }
@@ -75,20 +103,46 @@ public abstract class AbstractHuScanTask extends ScanTask {
                 if (combo == null) {
                     return false;
                 } else {
-                    return check(mahjongs);
+                    return checkPingHu(mahjongs);
                 }
             } else {
                 if (mahjongs.size() == 0) {
                     return true;
                 } else {
-                    return check(mahjongs);
+                    return checkPingHu(mahjongs);
                 }
             }
         } else {
             if (mahjongs.size() == 0) {
                 return true;
             } else {
-                return check(mahjongs);
+                return checkPingHu(mahjongs);
+            }
+        }
+    }
+
+    /**
+     * 根据传入的list，组成AAA、AA组合
+     * 组合成功，返回true，不成功返回false
+     */
+    private boolean checkPengPengHu(List<Mahjong> mahjongs) {
+        if (mahjongs.size() == 0) {
+            return true;
+        }
+
+        Combo combo = AAA(mahjongs);
+        if (combo == null) {
+            combo = AA(mahjongs);
+            if (combo == null) {
+                return false;
+            } else {
+                return checkPengPengHu(mahjongs);
+            }
+        } else {
+            if (mahjongs.size() == 0) {
+                return true;
+            } else {
+                return checkPengPengHu(mahjongs);
             }
         }
     }
@@ -96,7 +150,7 @@ public abstract class AbstractHuScanTask extends ScanTask {
     /**
      * 从列表第一只为指定开始牌，找出一个AAA的组合
      */
-    protected Combo AAA(List<Mahjong> mahjongs) {
+    private Combo AAA(List<Mahjong> mahjongs) {
         if (mahjongs.size() < 3) {
             return null;
         }
@@ -140,7 +194,7 @@ public abstract class AbstractHuScanTask extends ScanTask {
     /**
      * 从列表第一只为指定开始牌，找出一个ABC的组合
      */
-    protected Combo ABC(List<Mahjong> mahjongs) {
+    private Combo ABC(List<Mahjong> mahjongs) {
         if (mahjongs.size() < 3) {
             return null;
         }
@@ -184,7 +238,7 @@ public abstract class AbstractHuScanTask extends ScanTask {
     /**
      * 从列表第一只为指定开始牌，找出一个AA的组合
      */
-    protected Combo AA(List<Mahjong> mahjongs) {
+    private Combo AA(List<Mahjong> mahjongs) {
         Combo combo = new Combo();
         combo.type = Combo.Type.AA;
         List<Mahjong> AAMahjong = new ArrayList<>(2);
