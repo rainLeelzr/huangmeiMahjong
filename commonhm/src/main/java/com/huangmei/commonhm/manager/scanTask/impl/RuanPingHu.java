@@ -146,56 +146,6 @@ public class RuanPingHu extends AbstractHuScanTask {
     //    }
     //}
 
-    /**
-     * 循环实现dimValue中的笛卡尔积
-     *
-     * @param dimValue 原始数据
-     */
-    private static List<List<Mahjong>> circulate(List<List<Mahjong>> dimValue) {
-        int total = 1;
-        for (List<Mahjong> list : dimValue) {
-            total *= list.size();
-        }
-        List<List<Mahjong>> myResult = new ArrayList<>(total);
-
-        int itemLoopNum;
-        int loopPerItem;
-        int now = 1;
-        for (List<Mahjong> list : dimValue) {
-            now *= list.size();
-
-            int index = 0;
-            int currentSize = list.size();
-
-            itemLoopNum = total / now;
-            loopPerItem = total / (itemLoopNum * currentSize);
-            int myIndex = 0;
-
-            for (Mahjong string : list) {
-                for (int i = 0; i < loopPerItem; i++) {
-                    if (myIndex == list.size()) {
-                        myIndex = 0;
-                    }
-
-                    for (int j = 0; j < itemLoopNum; j++) {
-                        if (myResult.size() == index) {
-                            List<Mahjong> temp = new ArrayList<>(dimValue
-                                    .size());
-                            temp.add(list.get(myIndex));
-                            myResult.add(temp);
-                        } else {
-                            myResult.get(index).add(list.get(myIndex));
-                        }
-                        index++;
-                    }
-                    myIndex++;
-                }
-
-            }
-        }
-
-        return myResult;
-    }
 
     @Override
     public boolean doScan(PersonalCardInfo personalCardInfo)
@@ -230,8 +180,6 @@ public class RuanPingHu extends AbstractHuScanTask {
                     personalCardInfo.getRoomMember().getSeat(),
                     handCards
             );
-            // 被替换的宝牌
-            List<Mahjong> removed = new ArrayList<>(myBaoMahjongs.size());
 
             for (int i = 0; i < myBaoMahjongs.size(); i++) {
                 handCards.remove(myBaoMahjongs.get(i));
@@ -249,21 +197,6 @@ public class RuanPingHu extends AbstractHuScanTask {
             for (int i = 0; i < myBaoMahjongs.size(); i++) {
                 handCards.remove(mahjongs.get(i));
                 handCards.add(myBaoMahjongs.get(i));
-            }
-
-
-        }
-
-        for (Mahjong myBaoMahjong : myBaoMahjongs) {
-            for (Mahjong mahjong : getMahjongGameData().getBaoMahjongMakeUpMahjongs()) {
-                if (handCards.contains(myBaoMahjong)) {
-                    handCards.remove(myBaoMahjong);
-                }
-                handCards.add(mahjong);
-                if (isPinghu(handCards)) {
-                    return true;
-                }
-                handCards.remove(mahjong);
             }
         }
 

@@ -43,7 +43,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
      */
     public Map<String, Object> createRoom(JSONObject data) {
 
-        Map<String, Object> result = new HashMap<String, Object>(2);
+        Map<String, Object> result = new HashMap<String, Object>(3);
         String uId = (String) data.get("uId");
         String times = (String) data.get("times");
         Integer multiple = (Integer) data.get("multiple");
@@ -128,6 +128,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
         roomMemberDao.update(roomMember);
         result.put("roomMember", roomMember);
         result.put("room", room);
+        result.put("user",user);
         roomRedis.joinRoom(roomMember);
         return result;
 
@@ -204,6 +205,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                     }
                 }
             }
+            //查出房间中所有
             return result;
         } else {
             throw CommonError.USER_NOT_EXIST.newException();
@@ -326,7 +328,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
      */
     @Override
     public Map<String, Object> dismissRoom(JSONObject data) {
-        Map<String, Object> result = new HashMap<>(2);
+        Map<String, Object> result = new HashMap<>(3);
         Integer type;
         boolean r;
         String uId = (String) data.get("uId");
@@ -348,6 +350,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                 type = 2;
                 r = false;
             }
+            result.put("room",room);
             result.put("type", type);
             result.put("result", r);
             return result;
@@ -375,44 +378,53 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
         userCriteria.setUId(Entity.Value.eq(uId));
         User user = userDao.selectOne(userCriteria);
 
+        if (user!=null){
+            RoomMember roomMember=new RoomMember();
+            roomMember.setUserId(user.getId());
+            roomMember=roomMemberDao.selectByUserIdForCheck(roomMember);
 
-        RoomMember roomMember=new RoomMember();
-        roomMember.setUserId(user.getId());
-        roomMember=roomMemberDao.selectByUserIdForCheck(roomMember);
+            Entity.RoomCriteria roomCriteria = new Entity.RoomCriteria();
+            roomCriteria.setRoomCode(Entity.Value.eq(roomCode));
+            Room room = dao.selectOne(roomCriteria);
+            if (room!=null){
 
-        Entity.RoomCriteria roomCriteria = new Entity.RoomCriteria();
-        roomCriteria.setRoomCode(Entity.Value.eq(roomCode));
-        Room room = dao.selectOne(roomCriteria);
-        Set<RoomMember> roomMembers = roomRedis.getRoomMembers(room.getId().toString());
+                Set<RoomMember> roomMembers = roomRedis.getRoomMembers(room.getId().toString());
 
-        if (isAgree) {//有玩家同意解散,将该玩家的状态临时改成退出状态
-            roomMember.setState(RoomMember.state.OUT_ROOM.getCode());
-            roomMemberDao.update(roomMember);
-            List<RoomMember> rms = roomMemberDao.selectForDismiss(roomMember);
-            if (rms.size() == Room.playerLimit - 1) {//统计房间中为退出状态玩家的数量,假如数量=3,说明所有玩家都同意解散房间
-                for (RoomMember rm : roomMembers) {
-                    Entity.UserCriteria uc = new Entity.UserCriteria();
-                    uc.setId(Entity.Value.eq(rm.getUserId()));
-                    user = userDao.selectOne(uc);
-                    data.put("uId",user.getUId().toString());
-                    outRoom(data);
+                if (isAgree) {//有玩家同意解散,将该玩家的状态临时改成退出状态
+                    roomMember.setState(RoomMember.state.OUT_ROOM.getCode());
+                    roomMemberDao.update(roomMember);
+                    List<RoomMember> rms = roomMemberDao.selectForDismiss(roomMember);
+                    if (rms.size() == Room.playerLimit - 1) {//统计房间中为退出状态玩家的数量,假如数量=3,说明所有玩家都同意解散房间
+                        for (RoomMember rm : roomMembers) {
+                            Entity.UserCriteria uc = new Entity.UserCriteria();
+                            uc.setId(Entity.Value.eq(rm.getUserId()));
+                            user = userDao.selectOne(uc);
+                            data.put("uId",user.getUId().toString());
+                            outRoom(data);
+                        }
+                        type=1;//所有玩家同意解散房间,已经解散房间
+                    }else{
+                        type=2;//还有玩家没有表态
+                        isAgree=false;
+                    }
+
+                } else {//有玩家不同意解散,即游戏继续,房间中所有玩家的状态都改成待准备
+                    for (RoomMember member : roomMembers) {
+                        member.setState(RoomMember.state.UNREADY.getCode());
+                        roomMemberDao.update(member);
+                    }
+                    type=3;//有玩家反对解散房间,游戏继续
                 }
-                type=1;//所有玩家同意解散房间,已经解散房间
-            }else{
-                type=2;//还有玩家没有表态
-                isAgree=false;
+                result.put("type",type);
+                result.put("result",isAgree);
+                return result;
+            }else {
+                throw CommonError.ROOM_NOT_EXIST.newException();
             }
-
-        } else {//有玩家不同意解散,即游戏继续,房间中所有玩家的状态都改成待准备
-            for (RoomMember member : roomMembers) {
-                member.setState(RoomMember.state.UNREADY.getCode());
-                roomMemberDao.update(member);
-            }
-            type=3;//有玩家反对解散房间,游戏继续
+        }else {
+            throw  CommonError.USER_NOT_EXIST.newException();
         }
-        result.put("type",type);
-        result.put("result",isAgree);
-        return result;
+
     }
 
 
@@ -452,6 +464,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                     type = 1;
                 }
                 result.put("type", type);
+                result.put("roomMember", roomMember);
                 return result;
             } else {
                 throw CommonError.ROOM_READY_ERROR.newException();

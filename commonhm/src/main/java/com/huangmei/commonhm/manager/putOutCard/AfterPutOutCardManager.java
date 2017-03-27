@@ -32,6 +32,7 @@ public class AfterPutOutCardManager {
         scanTasks.add(YingPingHu.class);
 
         // 软胡
+        scanTasks.add(RuanQiDuiHu.class);
         scanTasks.add(RuanPingHu.class);
 
         // 硬杠

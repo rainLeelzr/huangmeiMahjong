@@ -257,6 +257,66 @@ public class MockComboMahjongList {
 
         // 自定义所有4个玩家的初始麻将牌
         Mahjong[] m = new Mahjong[]{
+                all.remove(all.indexOf(Mahjong.ONE_WANG_1)),
+                null, null,
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null,
+                /////////////////////////////////////////////////
+                all.remove(all.indexOf(Mahjong.ONE_WANG_3)),
+                all.remove(all.indexOf(Mahjong.ONE_WANG_2)),
+                null,
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null,
+                /////////////////////////////////////////////////
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null,
+                /////////////////////////////////////////////////
+                all.remove(all.indexOf(Mahjong.TWO_WANG_4)),
+                all.remove(all.indexOf(Mahjong.FIVE_WANG_2)),
+                all.remove(all.indexOf(Mahjong.FIVE_WANG_3)),
+                all.remove(all.indexOf(Mahjong.FIVE_WANG_1)),
+                all.remove(all.indexOf(Mahjong.TWO_TIAO_2)),
+                all.remove(all.indexOf(Mahjong.THREE_TIAO_3)),
+                all.remove(all.indexOf(Mahjong.FOUR_TIAO_1)),
+                all.remove(all.indexOf(Mahjong.THREE_WANG_2)),
+                all.remove(all.indexOf(Mahjong.THREE_WANG_3)),
+                all.remove(all.indexOf(Mahjong.THREE_WANG_1)),
+                all.remove(all.indexOf(Mahjong.SEVEN_TONG_2)),
+                all.remove(all.indexOf(Mahjong.EIGHT_TONG_2)),
+                all.remove(all.indexOf(Mahjong.SIX_TONG_1)),
+                /////////////////////////////////////////////////
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null
+        };
+        for (int i = 0; i < m.length; i++) {
+            if (m[i] == null) {
+                m[i] = getOneForm(all);
+            }
+        }
+
+        return Arrays.asList(m);
+    }
+
+    /**
+     * 软七对的麻将组合
+     */
+    public static List<Mahjong> getRuanQiDuiMahjongs() {
+        List<Mahjong> all = Mahjong.getAllMahjongs();
+
+        // 自定义所有4个玩家的初始麻将牌
+        Mahjong[] m = new Mahjong[]{
                 all.remove(all.indexOf(Mahjong.ONE_WANG_4)),
                 null, null,
                 null, null, null,
@@ -282,14 +342,14 @@ public class MockComboMahjongList {
                 all.remove(all.indexOf(Mahjong.THREE_TIAO_2)),
                 all.remove(all.indexOf(Mahjong.FIVE_WANG_3)),
                 all.remove(all.indexOf(Mahjong.FIVE_WANG_1)),
-                all.remove(all.indexOf(Mahjong.SIX_TIAO_2)),
+                all.remove(all.indexOf(Mahjong.FIVE_TIAO_2)),
                 all.remove(all.indexOf(Mahjong.FIVE_TIAO_3)),
-                all.remove(all.indexOf(Mahjong.FOUR_TIAO_1)),
-                all.remove(all.indexOf(Mahjong.THREE_WANG_2)),
-                all.remove(all.indexOf(Mahjong.THREE_TIAO_3)),
+                all.remove(all.indexOf(Mahjong.FOUR_WANG_1)),
+                all.remove(all.indexOf(Mahjong.FOUR_WANG_2)),
+                all.remove(all.indexOf(Mahjong.THREE_WANG_3)),
                 all.remove(all.indexOf(Mahjong.THREE_WANG_1)),
                 all.remove(all.indexOf(Mahjong.SEVEN_TONG_2)),
-                all.remove(all.indexOf(Mahjong.EIGHT_TONG_2)),
+                all.remove(all.indexOf(Mahjong.SEVEN_TONG_1)),
                 all.remove(all.indexOf(Mahjong.SIX_TONG_1)),
                 /////////////////////////////////////////////////
                 null, null, null, null, null, null, null, null, null, null,

@@ -115,8 +115,12 @@ public class SessionManager {
      */
     public void userExitRoom(RoomMember roomMember, WebSocketSession session) {
         //删除userId所在的房间
-        roomSessions.remove(roomMember.getRoomId().toString());
+        List<WebSocketSession> webSocketSessions = roomSessions.get(roomMember.getRoomId().toString());
+        if (webSocketSessions != null) {
+            webSocketSessions.remove(session);
+        }
         sessionIdRooms.remove(session.getId());
+
     }
 
     /**

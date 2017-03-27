@@ -10,6 +10,7 @@ import com.huangmei.commonhm.service.UserService;
 import com.huangmei.commonhm.service.impl.GameService;
 import com.huangmei.commonhm.util.*;
 import com.huangmei.interfaces.monitor.MonitorManager;
+import com.huangmei.interfaces.websocket.MessageManager;
 import com.huangmei.interfaces.websocket.SessionManager;
 import net.sf.json.JSONObject;
 import org.slf4j.Logger;
@@ -46,6 +47,9 @@ public class ActionRouter {
 
     @Autowired
     private SessionManager sessionManager;
+
+    @Autowired
+    private MessageManager messageManager;
 
     @Pid(PidValue.LOGIN)
     public JsonResultY login(WebSocketSession session, JSONObject data)
@@ -133,12 +137,15 @@ public class ActionRouter {
         if (result != null) {
             sessionManager.userJoinRoom((RoomMember) result.get("roomMember"), (Room) result.get(("room")), session);
         }
-
-        return new JsonResultY.Builder()
+        JsonResultY jsonResultY = new JsonResultY.Builder()
                 .setPid(PidValue.JOIN_ROOM.getPid())
                 .setError(CommonError.SYS_SUSSES)
                 .setData(result)
                 .build();
+
+        messageManager.sendMessageToRoomUsers(((Room) result.get(("room"))).getId().toString(),jsonResultY);
+
+        return null;
     }
     @Pid(PidValue.OUT_ROOM)
     @LoginResource
@@ -146,25 +153,30 @@ public class ActionRouter {
             throws Exception {
         Map<String, Object> result = roomService.outRoom(data);
         if (result != null) {
+            JsonResultY jsonResultY = new JsonResultY.Builder()
+                    .setPid(PidValue.OUT_ROOM.getPid())
+                    .setError(CommonError.SYS_SUSSES)
+                    .setData(result)
+                    .build();
+            messageManager.sendMessageToRoomUsers(((Room) result.get(("room"))).getId().toString(),jsonResultY);
             sessionManager.userExitRoom((RoomMember) result.get("roomMember"),session);
         }
 
-        return new JsonResultY.Builder()
-                .setPid(PidValue.OUT_ROOM.getPid())
-                .setError(CommonError.SYS_SUSSES)
-                .setData(true)
-                .build();
+
+        return null;
     }
     @Pid(PidValue.READY)
     @LoginResource
     public JsonResultY ready(WebSocketSession session, JSONObject data)
             throws Exception {
         Map<String, Object> result= roomService.ready(data);
-        return new JsonResultY.Builder()
+        JsonResultY jsonResultY= new JsonResultY.Builder()
                 .setPid(PidValue.READY.getPid())
                 .setError(CommonError.SYS_SUSSES)
                 .setData(result)
                 .build();
+        messageManager.sendMessageToRoomUsers(((RoomMember) result.get(("roomMember"))).getRoomId().toString(),jsonResultY);
+        return null;
     }
 
     @Pid(PidValue.DISMISS_ROOM)
@@ -172,12 +184,14 @@ public class ActionRouter {
     public JsonResultY dismissRoom(WebSocketSession session, JSONObject data)
             throws Exception {
         Map<String, Object> result = roomService.dismissRoom(data);
+
         return new JsonResultY.Builder()
                 .setPid(PidValue.DISMISS_ROOM.getPid())
                 .setError(CommonError.SYS_SUSSES)
                 .setData(result)
                 .build();
     }
+
     @Pid(PidValue.AGREE_DISMISS)
     @LoginResource
     public JsonResultY agreeDismiss(WebSocketSession session, JSONObject data)

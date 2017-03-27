@@ -13,10 +13,60 @@ import java.util.*;
  */
 public abstract class AbstractHuScanTask extends ScanTask {
 
-
     private static int[] NO_HU_SIZE = new int[]{1, 4, 7, 10, 13};
-
     private static int[] NO_HU_SIZE_QIDUI = new int[]{1, 3, 5, 7, 9, 11, 13};
+    private boolean hasEyes = false;
+
+    /**
+     * 循环实现dimValue中的笛卡尔积
+     *
+     * @param dimValue 原始数据
+     */
+    protected static List<List<Mahjong>> circulate(List<List<Mahjong>> dimValue) {
+        int total = 1;
+        for (List<Mahjong> list : dimValue) {
+            total *= list.size();
+        }
+        List<List<Mahjong>> myResult = new ArrayList<>(total);
+
+        int itemLoopNum;
+        int loopPerItem;
+        int now = 1;
+        for (List<Mahjong> list : dimValue) {
+            now *= list.size();
+
+            int index = 0;
+            int currentSize = list.size();
+
+            itemLoopNum = total / now;
+            loopPerItem = total / (itemLoopNum * currentSize);
+            int myIndex = 0;
+
+            for (Mahjong string : list) {
+                for (int i = 0; i < loopPerItem; i++) {
+                    if (myIndex == list.size()) {
+                        myIndex = 0;
+                    }
+
+                    for (int j = 0; j < itemLoopNum; j++) {
+                        if (myResult.size() == index) {
+                            List<Mahjong> temp = new ArrayList<>(dimValue
+                                    .size());
+                            temp.add(list.get(myIndex));
+                            myResult.add(temp);
+                        } else {
+                            myResult.get(index).add(list.get(myIndex));
+                        }
+                        index++;
+                    }
+                    myIndex++;
+                }
+
+            }
+        }
+
+        return myResult;
+    }
 
     @Override
     public BaseOperate getBaseOperate() {
@@ -105,6 +155,7 @@ public abstract class AbstractHuScanTask extends ScanTask {
                 if (AA == null) {
                     return false;
                 }
+                hasEyes = true;
             }
         }
 
@@ -128,6 +179,11 @@ public abstract class AbstractHuScanTask extends ScanTask {
                 if (combo == null) {
                     return false;
                 } else {
+                    if (hasEyes) {
+                        return false;
+                    } else {
+                        hasEyes = true;
+                    }
                     return checkPingHu(mahjongs);
                 }
             } else {
