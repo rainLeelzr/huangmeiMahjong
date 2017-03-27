@@ -152,29 +152,41 @@ public class ActionRouter {
         return new JsonResultY.Builder()
                 .setPid(PidValue.OUT_ROOM.getPid())
                 .setError(CommonError.SYS_SUSSES)
-                .setData(result)
+                .setData(true)
                 .build();
     }
     @Pid(PidValue.READY)
     @LoginResource
     public JsonResultY ready(WebSocketSession session, JSONObject data)
             throws Exception {
-        RoomMember roomMember= roomService.ready(data);
+        Map<String, Object> result= roomService.ready(data);
         return new JsonResultY.Builder()
                 .setPid(PidValue.READY.getPid())
                 .setError(CommonError.SYS_SUSSES)
-                .setData(roomMember)
+                .setData(result)
                 .build();
     }
-    @Pid(PidValue.START_GAME)
+
+    @Pid(PidValue.DISMISS_ROOM)
     @LoginResource
-    public JsonResultY startGame(WebSocketSession session, JSONObject data)
+    public JsonResultY dismissRoom(WebSocketSession session, JSONObject data)
             throws Exception {
-        RoomMember roomMember= roomService.startGame(data);
+        Map<String, Object> result = roomService.dismissRoom(data);
         return new JsonResultY.Builder()
-                .setPid(PidValue.READY.getPid())
+                .setPid(PidValue.DISMISS_ROOM.getPid())
                 .setError(CommonError.SYS_SUSSES)
-                .setData(roomMember)
+                .setData(result)
+                .build();
+    }
+    @Pid(PidValue.AGREE_DISMISS)
+    @LoginResource
+    public JsonResultY agreeDismiss(WebSocketSession session, JSONObject data)
+            throws Exception {
+        Map<String, Object> result = roomService.agreeDismiss(data);
+        return new JsonResultY.Builder()
+                .setPid(PidValue.AGREE_DISMISS.getPid())
+                .setError(CommonError.SYS_SUSSES)
+                .setData(result)
                 .build();
     }
 

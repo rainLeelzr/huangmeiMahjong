@@ -18,7 +18,7 @@ http://www.springframework.org/schema/context/spring-context-3.0.xsd
 			<!--<bean-->
 				<!--class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
 				<!--<property name="targetObject" ref="checkRedisConnect" />-->
-				<!--<property name="targetMethod" value="check" />-->
+				<!--<property name="targetMethod" value="checkPingHu" />-->
 				<!--<property name="concurrent" value="false" />-->
 			<!--</bean>-->
 		<!--</property>-->

@@ -26,6 +26,8 @@ public class MahjongGameData {
         classMap.put("roomMember", RoomMember.class);
         classMap.put("handCards", Mahjong.class);
         classMap.put("leftCards", Mahjong.class);
+        classMap.put("baoMahjongs", Mahjong.class);
+        classMap.put("baoMahjongMakeUpMahjongs", Mahjong.class);
     }
 
     // 庄家的座位号，从1开始
@@ -142,6 +144,12 @@ public class MahjongGameData {
         }
 
         mahjongGameData.leftCardCount = leftCards.size();
+
+        // 设定宝娘
+        // todome 设定宝娘
+
+        // 设定宝牌
+        // todome 设定宝牌
 
         return mahjongGameData;
     }

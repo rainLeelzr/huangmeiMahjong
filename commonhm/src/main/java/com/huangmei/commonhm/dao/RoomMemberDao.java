@@ -9,4 +9,5 @@ public interface RoomMemberDao extends BaseDao<Integer, RoomMember> {
     RoomMember selectByUserIdForCheck(RoomMember roomMember);
     RoomMember selectByUserIdForReady(RoomMember roomMember);
     List<RoomMember> selectForStart(RoomMember roomMember);
+    List<RoomMember> selectForDismiss(RoomMember roomMember);
 }

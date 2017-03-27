@@ -7,7 +7,7 @@ http://www.springframework.org/schema/mvc
 http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
 	<!-- 自动扫描controller包下的所有类，使其认为spring mvc的控制器 -->
-	<context:component-scan base-package="com.com.huangmei" />
+	<context:component-scan base-package="com.huangmei" />
 
 	<mvc:annotation-driven>
 	    <mvc:message-converters>
@@ -28,7 +28,7 @@ http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 	            </property>
 	            <!-- 配置 objectMapper 为我们自定义扩展后的 CustomMapper -->
 	            <property name="objectMapper">
-	                <bean class="com.com.huangmei.interfaces.util.CustomMapper">
+	                <bean class="com.huangmei.interfaces.util.CustomMapper">
 	                </bean>
 	            </property>
 	        </bean>
@@ -55,7 +55,7 @@ http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 		 <mvc:interceptors>  
       <mvc:interceptor>  
         <mvc:mapping path="/**"/>  
-        <bean class="com.com.huangmei.interfaces.interceptor.RequestInterceptor">
+        <bean class="com.huangmei.interfaces.interceptor.RequestInterceptor">
 
         </bean>  
       </mvc:interceptor>  

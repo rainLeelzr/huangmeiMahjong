@@ -129,6 +129,58 @@ public class MockComboMahjongList {
     }
 
     /**
+     * 硬杠的麻将组合
+     */
+    public static List<Mahjong> getYingGangMahjongs() {
+        List<Mahjong> all = Mahjong.getAllMahjongs();
+
+        // 自定义所有4个玩家的初始麻将牌
+        Mahjong[] m = new Mahjong[]{
+                all.remove(all.indexOf(Mahjong.ONE_WANG_4)),
+                null, null,
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null,
+                /////////////////////////////////////////////////
+                all.remove(all.indexOf(Mahjong.ONE_WANG_1)),
+                all.remove(all.indexOf(Mahjong.ONE_WANG_2)),
+                all.remove(all.indexOf(Mahjong.ONE_WANG_3)),
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null,
+                /////////////////////////////////////////////////
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null,
+                /////////////////////////////////////////////////
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null,
+                /////////////////////////////////////////////////
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null
+        };
+        for (int i = 0; i < m.length; i++) {
+            if (m[i] == null) {
+                m[i] = getOneForm(all);
+            }
+        }
+
+        return Arrays.asList(m);
+    }
+
+    /**
      * 硬七对的麻将组合
      */
     public static List<Mahjong> getYingQiDuiMahjongs() {
@@ -195,5 +247,65 @@ public class MockComboMahjongList {
     private static Mahjong getOneForm(List<Mahjong> mahjongs) {
         int i = RandomUtils.nextInt(mahjongs.size());
         return mahjongs.remove(i);
+    }
+
+    /**
+     * 软平胡的麻将组合
+     */
+    public static List<Mahjong> getRuanPingHuMahjongs() {
+        List<Mahjong> all = Mahjong.getAllMahjongs();
+
+        // 自定义所有4个玩家的初始麻将牌
+        Mahjong[] m = new Mahjong[]{
+                all.remove(all.indexOf(Mahjong.ONE_WANG_4)),
+                null, null,
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null,
+                /////////////////////////////////////////////////
+                all.remove(all.indexOf(Mahjong.ONE_WANG_1)),
+                all.remove(all.indexOf(Mahjong.ONE_WANG_2)),
+                null,
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null,
+                /////////////////////////////////////////////////
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null,
+                /////////////////////////////////////////////////
+                all.remove(all.indexOf(Mahjong.ONE_WANG_3)),
+                all.remove(all.indexOf(Mahjong.THREE_TIAO_2)),
+                all.remove(all.indexOf(Mahjong.FIVE_WANG_3)),
+                all.remove(all.indexOf(Mahjong.FIVE_WANG_1)),
+                all.remove(all.indexOf(Mahjong.SIX_TIAO_2)),
+                all.remove(all.indexOf(Mahjong.FIVE_TIAO_3)),
+                all.remove(all.indexOf(Mahjong.FOUR_TIAO_1)),
+                all.remove(all.indexOf(Mahjong.THREE_WANG_2)),
+                all.remove(all.indexOf(Mahjong.THREE_TIAO_3)),
+                all.remove(all.indexOf(Mahjong.THREE_WANG_1)),
+                all.remove(all.indexOf(Mahjong.SEVEN_TONG_2)),
+                all.remove(all.indexOf(Mahjong.EIGHT_TONG_2)),
+                all.remove(all.indexOf(Mahjong.SIX_TONG_1)),
+                /////////////////////////////////////////////////
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null
+        };
+        for (int i = 0; i < m.length; i++) {
+            if (m[i] == null) {
+                m[i] = getOneForm(all);
+            }
+        }
+
+        return Arrays.asList(m);
     }
 }

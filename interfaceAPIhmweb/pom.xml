@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>architecturehm</artifactId>
-    <groupId>com.com.huangmei</groupId>
+    <groupId>com.huangmei</groupId>
     <version>1.0</version>
     <relativePath>..</relativePath>
   </parent>
@@ -10,7 +10,7 @@
   <packaging>war</packaging>
   <dependencies>
     <dependency>
-      <groupId>com.com.huangmei</groupId>
+      <groupId>com.huangmei</groupId>
       <artifactId>commonhm</artifactId>
       <version>1.0</version>
     </dependency>

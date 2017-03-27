@@ -89,7 +89,7 @@ public class BaseDaoImpl<K extends Serializable, E extends Entity> implements Ba
 	}
 	
 	protected String statement(String id) {
-		return String.format("com.com.huangmei.commonhm.dao.%sDao.%s", entityClass.getSimpleName(), id);
+		return String.format("com.huangmei.commonhm.dao.%sDao.%s", entityClass.getSimpleName(), id);
 	}
 	
 	{

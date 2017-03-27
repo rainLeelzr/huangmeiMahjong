@@ -102,12 +102,12 @@ public interface Entity extends Serializable {
 
         protected Set<Criterion> criterions = new LinkedHashSet<Criterion>();
 
-      
+
         public boolean isOrderly() {
             return orderbies.size() > 0;
         }
 
-   
+
         public boolean isNotEmpty() {
             return criterions.size() > 0;
         }
@@ -120,12 +120,12 @@ public interface Entity extends Serializable {
             return limit;
         }
 
-    
+
         public Set<OrderBy> getOrderbies() {
             return orderbies;
         }
 
-   
+
         public Set<Criterion> getCriterions() {
             return criterions;
         }
@@ -142,7 +142,7 @@ public interface Entity extends Serializable {
             return this;
         }
 
-     
+
         public Map<String, Object> toMapParameter() {
             Map<String, Object> param = new HashMap<String, Object>();
             param.put("criteria", this);
@@ -811,6 +811,10 @@ public interface Entity extends Serializable {
 
         public void setRoomCode(Criterion criterion) {
             this.addCriterion(criterion.setField("room_code"));
+        }
+
+        public void setStart(Criterion criterion) {
+            this.addCriterion(criterion.setField("start"));
         }
 
         public void setState(Criterion criterion) {

@@ -31,6 +31,7 @@ public class RoomMember implements Entity {
         }
     }
 
+
     /**  */
     protected Integer id;
 

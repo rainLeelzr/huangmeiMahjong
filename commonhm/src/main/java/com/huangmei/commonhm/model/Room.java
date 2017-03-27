@@ -3,8 +3,9 @@ package com.huangmei.commonhm.model;
 public class Room implements Entity {
 
     public static final int playerLimit = 4;
-    
+
     private static final long serialVersionUID = 1L;
+
     public static enum payType {
         PAY_BY_ONE(1, "一人支付"),
         PAY_BY_FOUR(2, "四人支付");
@@ -27,6 +28,7 @@ public class Room implements Entity {
             this.name = name;
         }
     }
+
     public static enum type {
         COINS_ROOM(1, "金币场"),
         FRIENDS_ROOM(2, "好友场");
@@ -49,6 +51,7 @@ public class Room implements Entity {
             this.name = name;
         }
     }
+
     public static enum multiple {
         COINS_WITH_2000(2000, "2000金币场"),
         COINS_WITH_20000(20000, "20000金币场");
@@ -67,6 +70,27 @@ public class Room implements Entity {
         }
 
         multiple(int code, String name) {
+            this.code = code;
+            this.name = name;
+        }
+    }
+    public static enum start {
+        UNSTART(1, "未开始游戏"),
+        STARTED(2, "已开始游戏");
+
+        private int code;
+
+        private String name;
+
+        public int getCode() {
+            return code;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        start(int code, String name) {
             this.code = code;
             this.name = name;
         }
@@ -96,6 +120,8 @@ public class Room implements Entity {
     /**  */
     protected Integer roomCode;
 
+    /**  */
+    protected Integer start;
     /**  */
     protected Integer state;
 
@@ -170,6 +196,14 @@ public class Room implements Entity {
 
     public void setRoomCode(Integer roomCode) {
         this.roomCode = roomCode;
+    }
+
+    public Integer getStart() {
+        return start;
+    }
+
+    public void setStart(Integer start) {
+        this.start = start;
     }
 
     public Integer getState() {

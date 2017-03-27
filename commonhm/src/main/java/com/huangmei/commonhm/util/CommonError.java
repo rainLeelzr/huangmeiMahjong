@@ -32,9 +32,9 @@ public enum CommonError {
     ROOM_NOT_EXIST(300001, "房间不存在", RoomNotExistException.class),
     ROOM_FULL(300002, "房间已满", RoomMemberFullException.class),
     ROOM_USER_IN_ROOM(300003, "玩家已经在房间中,不能再加入房间", UserInRoomException.class),
-    ROOM_USER_NOT_IN_ROOM(300004, "玩家没有在房间中", UserNotInRoomException.class),
+    ROOM_USER_NOT_IN_ROOM(300004, "玩家没有在房间中,不能退出房间", UserNotInRoomException.class),
     ROOM_READY_ERROR(300005, "玩家准备动作失败", ReadyErrorException.class),
-    ROOM_UNREADY(300005, "开始游戏失败,还有玩家没有准备", UnReadyException.class),
+    ROOM_UNREADY(300006, "开始游戏失败,还有玩家没有准备", UnReadyException.class),
 
     /**
      * 游戏过程

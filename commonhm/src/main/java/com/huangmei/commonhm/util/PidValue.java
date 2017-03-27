@@ -25,8 +25,9 @@ public enum PidValue {
     CREATE_ROOM(2000, "创建房间"),
     JOIN_ROOM(2001, "加入房间"),
     OUT_ROOM(2002, "退出房间"),
-    READY(2003, "用户准备"),
-    START_GAME(2004, "开始游戏"),
+    DISMISS_ROOM(2003, "申请解散房间"),
+    AGREE_DISMISS(2004, "是否同意解散房间"),
+    READY(2005, "用户准备"),
 
     /**
      * 游戏过程

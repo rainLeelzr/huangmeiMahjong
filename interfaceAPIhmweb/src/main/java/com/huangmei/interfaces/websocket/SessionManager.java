@@ -147,7 +147,7 @@ public class SessionManager {
         sessionIdUsers.remove(session.getId());
 
         //删除userId所在的房间
-
+        roomSessions.remove(session.getId());
 
     }
 
@@ -168,6 +168,7 @@ public class SessionManager {
         sessionIdUsers.remove(session.getId());
 
         //删除userId所在的房间
+        roomSessions.remove(session.getId());
 
     }
 

@@ -12,7 +12,8 @@ public class RoomMemberDaoImpl extends BaseDaoImpl<Integer, RoomMember> implemen
     @Override
     public RoomMember selectByUserIdForCheck(RoomMember roomMember) {
         return sqlSessionTemplate.selectOne(
-                statement("selectByUserIdForCheck")
+                statement("selectByUserIdForCheck"),
+                roomMember
         );
     }
 
@@ -20,7 +21,8 @@ public class RoomMemberDaoImpl extends BaseDaoImpl<Integer, RoomMember> implemen
     public RoomMember selectByUserIdForReady(RoomMember roomMember) {
 
         return sqlSessionTemplate.selectOne(
-                statement("selectByUserIdForReady")
+                statement("selectByUserIdForReady"),
+                roomMember
         );
     }
 
@@ -28,6 +30,13 @@ public class RoomMemberDaoImpl extends BaseDaoImpl<Integer, RoomMember> implemen
     public List<RoomMember> selectForStart(RoomMember roomMember) {
         return sqlSessionTemplate.selectList(
                 statement("selectForStart"),
+                roomMember
+        );
+    }
+    @Override
+    public List<RoomMember> selectForDismiss(RoomMember roomMember) {
+        return sqlSessionTemplate.selectList(
+                statement("selectForDismiss"),
                 roomMember
         );
     }

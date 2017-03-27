@@ -175,10 +175,14 @@ public class GameService {
     public MahjongGameData mockMahjongGameData(Room room, RoomMember[] roomMembers) {
         //硬对对胡{座位4,可以胡、}
         //List<Mahjong> allMahjongs = MockComboMahjongList.getYingDuiDuiHuMahjongs();
-        //硬七对 {座位3,可以胡、}, {座位2,可以碰、}
+        //硬七对  {座位2,可以碰、}, {座位3,可以胡、}
         //List<Mahjong> allMahjongs = MockComboMahjongList.getYingQiDuiMahjongs();
         //硬平胡 {座位2,可以碰、}, {座位4,可以胡、}
-        List<Mahjong> allMahjongs = MockComboMahjongList.getYingPingHuMahjongs();
+        //List<Mahjong> allMahjongs = MockComboMahjongList.getYingPingHuMahjongs();
+        //软平胡 {座位2,可以碰、}, {座位4,可以胡、}
+        //List<Mahjong> allMahjongs = MockComboMahjongList.getRuanPingHuMahjongs();
+        //硬杠 {座位2,可以碰、杠、}
+        List<Mahjong> allMahjongs = MockComboMahjongList.getYingGangMahjongs();
 
         log.debug("allMahjongs.size:{}", allMahjongs.size());
 
@@ -205,6 +209,7 @@ public class GameService {
         baoMahjongs.add(Mahjong.THREE_TIAO_3);
         baoMahjongs.add(Mahjong.THREE_TIAO_4);
         mahjongGameData.setBaoMahjongs(baoMahjongs);
+        log.debug("宝牌:{}", baoMahjongs);
 
         // 获取新版本号
         Long version = versionRedis.nextVersion(roomMembers[0].getRoomId());

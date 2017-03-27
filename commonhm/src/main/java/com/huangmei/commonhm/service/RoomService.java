@@ -13,7 +13,10 @@ public interface RoomService extends BaseService<Integer, Room> {
 
     Map<String,Object> outRoom(JSONObject data);
 
-    RoomMember ready(JSONObject data);
+    Map<String, Object> ready(JSONObject data);
 
-    RoomMember startGame(JSONObject data);
+
+    Map<String, Object> dismissRoom(JSONObject data);
+
+    Map<String, Object> agreeDismiss(JSONObject data);
 }

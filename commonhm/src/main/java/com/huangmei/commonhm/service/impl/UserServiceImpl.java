@@ -69,7 +69,6 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
 
             RoomMember roomMember = new RoomMember();
             roomMember.setUserId(user.getId());
-            roomMember.setState(RoomMember.state.OUT_ROOM.getCode());
             roomMember= roomMemberDao.selectByUserIdForCheck(roomMember);
             if (roomMember!=null) {
                 login_type = 2;
@@ -90,7 +89,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
 
     @Override
     public User logout(JSONObject data) {
-        Integer uId = data.getInt("uId");
+        String uId = (String) data.get("uId");
         Entity.UserCriteria userCriteria=new Entity.UserCriteria();
         userCriteria.setUId(Entity.Value.eq(uId));
         User user = dao.selectOne(userCriteria);

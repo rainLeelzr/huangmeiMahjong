@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-  <groupId>com.com.huangmei</groupId>
+  <groupId>com.huangmei</groupId>
   <artifactId>architecturehm</artifactId>
     <version>1.0</version>
     <relativePath>..</relativePath>
@@ -10,7 +10,7 @@
   <packaging>war</packaging>
   	<dependencies>
 			<dependency>
-			<groupId>com.com.huangmei</groupId>
+			<groupId>com.huangmei</groupId>
 			<artifactId>managerbackhmweb</artifactId>
 			<version>1.0</version>
 				<type>war</type>
@@ -18,7 +18,7 @@
 		</dependency>
 		
 			<dependency>
-			<groupId>com.com.huangmei</groupId>
+			<groupId>com.huangmei</groupId>
 			<artifactId>interfaceAPIhmweb</artifactId>
 			<version>1.0</version>
 				<type>war</type>
@@ -42,11 +42,11 @@
 				<configuration>
 				<overlays>
 						<overlay>
-							<groupId>com.com.huangmei</groupId>
+							<groupId>com.huangmei</groupId>
 							<artifactId>managerbackhmweb</artifactId>
 						</overlay>
 							<overlay>
-							<groupId>com.com.huangmei</groupId>
+							<groupId>com.huangmei</groupId>
 							<artifactId>interfaceAPIhmweb</artifactId>
 						</overlay>
 					</overlays> 

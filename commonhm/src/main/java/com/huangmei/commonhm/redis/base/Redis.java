@@ -562,5 +562,19 @@ public class Redis {
             return stringRedisTemplate.boundZSetOps(key).remove(str);
         }
 
+        /**
+         * 移除有序集 key 中的score范围在score1~score2的记录，不存在的成员将被忽略
+         */
+        public void deleteByScore(String key, double score1, double score2) {
+            stringRedisTemplate.boundZSetOps(key).removeRangeByScore(score1, score2);
+        }
+
+        /**
+         * 移除有序集 key 中中的range(row)范围在range1~range2的记录，不存在的成员将被忽略
+         */
+        public void deleteByRange(String key, long range1, long range2) {
+            stringRedisTemplate.boundZSetOps(key).removeRange(range1, range2);
+        }
+
     }
 }
