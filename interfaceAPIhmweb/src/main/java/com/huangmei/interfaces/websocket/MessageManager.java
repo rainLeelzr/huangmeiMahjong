@@ -73,6 +73,21 @@ public class MessageManager {
 
     }
 
+    /**
+     * 给某个用户发送消息
+     *
+     * @param userId      userId
+     * @param jsonResultY jsonResultY
+     */
+    public void sendMessageByUserId(Integer userId, JsonResultY jsonResultY) {
+        WebSocketSession userSession = sessionManager.getByUserId(userId);
+        if (userSession == null) {
+            log.error("给userId为[{}]的用户发送消息失败，从userIdSessions中没有id的信息", userId);
+            return;
+        }
+        send(userSession, jsonResultY);
+    }
+
     private static class SendMessageRunnable implements Runnable {
 
         private MessageManager messageManager;
