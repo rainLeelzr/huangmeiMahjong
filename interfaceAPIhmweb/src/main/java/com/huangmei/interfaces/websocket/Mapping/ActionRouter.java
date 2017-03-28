@@ -14,7 +14,6 @@ import com.huangmei.interfaces.monitor.MonitorManager;
 import com.huangmei.interfaces.websocket.MessageManager;
 import com.huangmei.interfaces.websocket.SessionManager;
 import net.sf.json.JSONObject;
-import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -172,6 +171,7 @@ public class ActionRouter {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     @Pid(PidValue.READY)
     @LoginResource
     public JsonResultY ready(WebSocketSession session, JSONObject data)
@@ -179,7 +179,8 @@ public class ActionRouter {
         Map<String, Object> result = roomService.ready(data);
         Integer type = (Integer) result.get("type");
         if (type == 2) {
-            List<MahjongGameData> singlePlayerGameDatas = (List<MahjongGameData>) result.get("playerGameData");
+            List<MahjongGameData> singlePlayerGameDatas =
+                    (List<MahjongGameData>) result.get("playerGameData");
             for (MahjongGameData singlePlayerGameData : singlePlayerGameDatas) {
                 Map<String, Object> myResult = new HashMap<>();
                 myResult.put("type", 2);
