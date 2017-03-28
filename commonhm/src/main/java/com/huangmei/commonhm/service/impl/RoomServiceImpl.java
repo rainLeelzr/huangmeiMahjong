@@ -137,6 +137,9 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
         roomMember.setSeat((int) (count + 1));
         roomMemberDao.update(roomMember);
         result.put("room", room);
+        //查出房间中所有玩家
+        Set<RoomMember> roomMembers = roomRedis.getRoomMembers(roomMember.getRoomId().toString());
+        result.put("roomMembers",roomMembers);
         roomRedis.joinRoom(roomMember);
         return result;
 
@@ -213,9 +216,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                     }
                 }
             }
-            //查出房间中所有玩家
-            Set<RoomMember> roomMembers = roomRedis.getRoomMembers(roomMember.getRoomId().toString());
-            result.put("roomMembers",roomMembers);
+
             result.put("user",user);
             return result;
         } else {
@@ -478,7 +479,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                     type = 1;
                 }
                 result.put("type", type);
-                result.put("roomMembers", roomMembers);
+                result.put("roomMember", roomMember);
                 return result;
             } else {
                 throw CommonError.ROOM_READY_ERROR.newException();
