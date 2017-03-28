@@ -216,8 +216,15 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                     }
                 }
             }
-
-            result.put("user",user);
+            ArrayList<User> users = new ArrayList<>();
+            Set<RoomMember>  roomMembers = (Set<RoomMember>) result.get("roomMembers");
+            for (RoomMember member : roomMembers) {
+                Entity.UserCriteria uc = new Entity.UserCriteria();
+                uc.setId(Entity.Value.eq(member.getUserId()));
+                user = userDao.selectOne(userCriteria);
+                users.add(user);
+            }
+            result.put("users",users);
             return result;
         } else {
             throw CommonError.USER_NOT_EXIST.newException();

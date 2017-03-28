@@ -106,12 +106,12 @@ public class SessionManager {
     /**
      * 用户加入房间
      */
-    public void userJoinRoom(RoomMember roomMember, Room room, WebSocketSession session) {
+    public void userJoinRoom(Room room, WebSocketSession session) {
         // 添加userId到房间
-        List<WebSocketSession> webSocketSessions = roomSessions.get(roomMember.getRoomId().toString());
+        List<WebSocketSession> webSocketSessions = roomSessions.get(room.getId().toString());
         if (webSocketSessions == null) {
             webSocketSessions = new ArrayList<>(4);
-            roomSessions.put(roomMember.getRoomId().toString(), webSocketSessions);
+            roomSessions.put(room.getId().toString(), webSocketSessions);
         }
         webSocketSessions.add(session);
         sessionIdRooms.put(session.getId(), room);

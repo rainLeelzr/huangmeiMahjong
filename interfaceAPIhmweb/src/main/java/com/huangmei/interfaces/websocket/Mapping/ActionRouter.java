@@ -124,7 +124,7 @@ public class ActionRouter {
 
         Map<String, Object> result = roomService.createRoom(data);
         if (result != null) {
-            sessionManager.userJoinRoom((RoomMember) result.get("roomMember"), (Room) result.get(("room")), session);
+            sessionManager.userJoinRoom((Room) result.get(("room")), session);
         }
 
         return new JsonResultY.Builder()
@@ -140,7 +140,7 @@ public class ActionRouter {
             throws Exception {
         Map<String, Object> result = roomService.joinRoom(data);
         if (result != null) {
-            sessionManager.userJoinRoom((RoomMember) result.get("roomMember"), (Room) result.get(("room")), session);
+            sessionManager.userJoinRoom((Room) result.get(("room")), session);
         }
         JsonResultY jsonResultY = new JsonResultY.Builder()
                 .setPid(PidValue.JOIN_ROOM.getPid())
