@@ -38,11 +38,17 @@ public class GetACardManager extends AbstractManager implements InitializingBean
         // 硬暗杠
         scanTasks.add(YingAnGang.class);
 
-        // 硬碰
-        scanTasks.add(YingPeng.class);
+        // 硬加杠
+        scanTasks.add(YingJiaGang.class);
 
         // 软暗杠
         scanTasks.add(RuanAnGang.class);
+
+        // 软加杠
+        scanTasks.add(RuanJiaGang.class);
+
+        // 硬碰
+        scanTasks.add(YingPeng.class);
 
         // 软碰
         scanTasks.add(RuanPeng.class);
