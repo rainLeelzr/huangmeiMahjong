@@ -69,14 +69,16 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                 room.setState(Room.state.wait.getCode());
                 room.setRoomCode(Integer.parseInt(CommonUtil.createRandomNumeric(4)));
                 if (multiple != null) {//创建金币房
-                    result = creatCoinRoom(multiple, room, result);
+                    result = createCoinRoom(multiple, room, result);
+
                 } else {//创建好友房
                     if (user.getDiamond() >= (payType == Room.payType.PAY_BY_ONE.getCode() ? diamond : diamond / Room.playerLimit)) {
-                        result = creatFriendRoom(user, times, diamond, payType, room, result);
+                        result = createFriendRoom(user, times, diamond, payType, room, result);
                     } else {
                         throw CommonError.USER_LACK_DIAMONDS.newException();
                     }
                 }
+                result.put("user",user);
                 return result;
             } else {
                 throw CommonError.USER_NOT_EXIST.newException();
@@ -86,23 +88,23 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
         }
     }
 
-    private Map<String, Object> creatCoinRoom(Integer multiple, Room room, Map<String, Object> result) {
+    private Map<String, Object> createCoinRoom(Integer multiple, Room room, Map<String, Object> result) {
         room.setMultiple(multiple);
         dao.save(room);
         result.put("room", room);
-        RoomMember roomMember = creatRoomMember(room, room.getCreatedUserId());
+        RoomMember roomMember = createRoomMember(room, room.getCreatedUserId());
         result.put("roomMember", roomMember);
         roomRedis.createRoom(room, roomMember);
         return result;
     }
 
-    private Map<String, Object> creatFriendRoom(User user, String times, Integer diamond, Integer payType, Room room, Map<String, Object> result) {
+    private Map<String, Object> createFriendRoom(User user, String times, Integer diamond, Integer payType, Room room, Map<String, Object> result) {
         room.setDiamond(diamond);
         room.setPayType(payType);
         room.setTimes(times);
         dao.save(room);
         result.put("room", room);
-        RoomMember roomMember = creatRoomMember(room, room.getCreatedUserId());
+        RoomMember roomMember = createRoomMember(room, room.getCreatedUserId());
         result.put("roomMember", roomMember);
         roomRedis.createRoom(room, roomMember);
 
@@ -110,7 +112,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
         return result;
     }
 
-    private RoomMember creatRoomMember(Room room, Integer createdUserId) {
+    private RoomMember createRoomMember(Room room, Integer createdUserId) {
         RoomMember roomMember = new RoomMember();
         roomMember.setState(RoomMember.state.UNREADY.getCode());
         roomMember.setJoinTime(new Date());
@@ -123,12 +125,10 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
     }
 
     private Map<String, Object> joinRoomMember(Room room, Long count, User user, Map<String, Object> result) {
-        RoomMember roomMember = creatRoomMember(room, user.getId());
+        RoomMember roomMember = createRoomMember(room, user.getId());
         roomMember.setSeat((int) (count + 1));
         roomMemberDao.update(roomMember);
-        result.put("roomMember", roomMember);
         result.put("room", room);
-        result.put("user",user);
         roomRedis.joinRoom(roomMember);
         return result;
 
@@ -205,7 +205,10 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                     }
                 }
             }
-            //查出房间中所有
+            //查出房间中所有玩家
+            Set<RoomMember> roomMembers = roomRedis.getRoomMembers(roomMember.getRoomId().toString());
+            result.put("roomMembers",roomMembers);
+            result.put("user",user);
             return result;
         } else {
             throw CommonError.USER_NOT_EXIST.newException();
@@ -305,9 +308,8 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                 roomMember.setLeaveTime(new Date());
                 roomMemberDao.update(roomMember);
 
-                result.put("roomMember", roomMember);
+                result.put("roomMembers", roomMembers);
                 result.put("userId", user.getId());
-
                 return result;
             } else {
                 throw CommonError.ROOM_USER_NOT_IN_ROOM.newException();
@@ -464,7 +466,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                     type = 1;
                 }
                 result.put("type", type);
-                result.put("roomMember", roomMember);
+                result.put("roomMembers", roomMembers);
                 return result;
             } else {
                 throw CommonError.ROOM_READY_ERROR.newException();
