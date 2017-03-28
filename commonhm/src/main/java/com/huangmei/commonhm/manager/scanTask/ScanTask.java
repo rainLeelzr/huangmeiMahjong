@@ -101,7 +101,7 @@ public abstract class ScanTask {
     /**
      * 获取本玩家的可行的操作列表
      */
-    private Set<BaseOperate> getMyOperates(Integer userId) {
+    protected Set<BaseOperate> getMyOperates(Integer userId) {
         // 找出userId的个人牌信息
         PersonalCardInfo personalCardInfo = null;
         for (PersonalCardInfo cardInfo : mahjongGameData.getPersonalCardInfos()) {

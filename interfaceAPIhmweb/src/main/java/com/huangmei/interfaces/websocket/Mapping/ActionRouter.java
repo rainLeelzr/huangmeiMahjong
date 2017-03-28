@@ -224,9 +224,9 @@ public class ActionRouter {
         }
 
         // 初始化游戏数据
-        Map<String, Object> mahjongGameDatas = gameService.firstPutOutCard
-                (room, roomMembers);
-        JsonUtil.toJson(mahjongGameDatas);
+        //Map<String, Object> mahjongGameDatas = gameService.firstPutOutCard
+        //        (room, roomMembers);
+        //JsonUtil.toJson(mahjongGameDatas);
 
         // version
 

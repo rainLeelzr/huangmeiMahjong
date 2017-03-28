@@ -32,14 +32,21 @@ public class AfterPutOutCardManager {
         scanTasks.add(YingPingHu.class);
 
         // 软胡
+        scanTasks.add(RuanPengPengHu.class);
         scanTasks.add(RuanQiDuiHu.class);
         scanTasks.add(RuanPingHu.class);
 
-        // 硬杠
+        // 硬大明杠
         scanTasks.add(YingDaMingGang.class);
 
         // 硬碰
         scanTasks.add(YingPeng.class);
+
+        // 软大明杠
+        scanTasks.add(RuanDaMingGang.class);
+
+        // 软碰
+        scanTasks.add(RuanPeng.class);
     }
 
     public ArrayList<AfterPutOutCardOperate> scan(MahjongGameData mahjongGameData, Mahjong putOutMahjong, User user) throws

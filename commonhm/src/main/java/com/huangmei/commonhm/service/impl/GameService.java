@@ -38,7 +38,16 @@ public class GameService {
      * 一局游戏开始时，生成麻将的初始数据。
      */
     public Map<String, Object> firstPutOutCard(
-            Room room, RoomMember[] roomMembers) {
+            Room room, List<RoomMember> roomMembers) {
+
+        // 对roomMembers按座位号升序
+        Collections.sort(roomMembers, new Comparator<RoomMember>() {
+            @Override
+            public int compare(RoomMember o1, RoomMember o2) {
+                return o1.getSeat() - o2.getSeat();
+            }
+        });
+
         Map<String, Object> result = new HashMap<>(6);
 
         int players = room.getPlayers();
@@ -50,27 +59,30 @@ public class GameService {
 
 
         // 获取新版本号
-        Long version = versionRedis.nextVersion(roomMembers[0].getRoomId());
+        Long version = versionRedis.nextVersion(room.getId());
         mahjongGameData.setVersion(version);
 
         // 拆分成4份手牌数据，传给客户端
+        List<MahjongGameData> singlePlayerGameDatas = new ArrayList<>(players);
         for (int i = 0; i < players; i++) {
-            MahjongGameData playerGameData = new MahjongGameData();
-            playerGameData.setBankerSite(mahjongGameData.getBankerSite());
-            playerGameData.setDices(mahjongGameData.getDices());
-            playerGameData.setLeftCardCount(mahjongGameData.getLeftCardCount());
-            playerGameData.setOutCards(mahjongGameData.getOutCards());
-            playerGameData.setVersion(version);
+            MahjongGameData singlePlayerGameData = new MahjongGameData();
+            singlePlayerGameDatas.add(singlePlayerGameData);
+
+            singlePlayerGameData.setBankerSite(mahjongGameData.getBankerSite());
+            singlePlayerGameData.setDices(mahjongGameData.getDices());
+            singlePlayerGameData.setLeftCardCount(mahjongGameData.getLeftCardCount());
+            singlePlayerGameData.setOutCards(mahjongGameData.getOutCards());
+            singlePlayerGameData.setVersion(version);
 
             // 添加玩家信息RoomMember
             List<PersonalCardInfo> personalCardInfos = new ArrayList<>(1);
             PersonalCardInfo personalCardInfo = mahjongGameData.getPersonalCardInfos().get(i);
-            personalCardInfo.setRoomMember(roomMembers[i]);
+            personalCardInfo.setRoomMember(roomMembers.get(i));
             personalCardInfos.add(personalCardInfo);
-            playerGameData.setPersonalCardInfos(personalCardInfos);
+            singlePlayerGameData.setPersonalCardInfos(personalCardInfos);
 
-            result.put("player" + (i + 1), playerGameData);
         }
+        result.put("playerGameData", singlePlayerGameDatas);
 
         log.debug("初始化一局麻将添加玩家信息RoomMember的数据:{}", JsonUtil.toJson(mahjongGameData));
 
@@ -167,7 +179,6 @@ public class GameService {
         return false;
 
     }
-
 
 
 }
