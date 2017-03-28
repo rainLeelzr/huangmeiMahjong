@@ -11,8 +11,16 @@ public class Combo {
     public List<Mahjong> mahjongs;
 
     public enum Type {
+        // 杠
+        AAAA(),
+
+        // 碰
         AAA(),
+
+        // 顺子
         ABC(),
+
+        // 眼
         AA();
 
         Type() {
