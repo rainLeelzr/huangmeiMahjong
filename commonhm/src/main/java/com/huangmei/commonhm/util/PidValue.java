@@ -34,20 +34,23 @@ public enum PidValue {
      */
     PUT_OUT_CARD(3000, "出牌"),
 
-    YING_CHI_HU(3101, "硬吃胡"),
-    RUAN_CHI_HU(3102, "软吃胡"),
+    YING_ZI_MO(3101, "硬自摸"),
+    RUAN_ZI_MO(3102, "软自摸"),
 
-    YING_AN_GANG(3103, "硬暗杠"),
-    RUAN_AN_GANG(3104, "软暗杠"),
+    YING_CHI_HU(3103, "硬吃胡"),
+    RUAN_CHI_HU(3104, "软吃胡"),
 
-    YING_DA_MING_GANG(3105, "硬大明杠"),
-    RUAN_DA_MING_GANG(3106, "软大明杠"),
+    YING_AN_GANG(3105, "硬暗杠"),
+    RUAN_AN_GANG(3106, "软暗杠"),
 
-    YING_JIA_GANG(3107, "硬加杠"),
-    RUAN_JIA_GANG(3108, "软加杠"),
+    YING_DA_MING_GANG(3107, "硬大明杠"),
+    RUAN_DA_MING_GANG(3108, "软大明杠"),
 
-    YING_PENG(3109, "硬碰"),
-    RUAN_PENG(3110, "软碰"),
+    YING_JIA_GANG(3109, "硬加杠"),
+    RUAN_JIA_GANG(3110, "软加杠"),
+
+    YING_PENG(3111, "硬碰"),
+    RUAN_PENG(3112, "软碰"),
 
     GUO(3200, "过"),
 
