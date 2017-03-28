@@ -12,6 +12,7 @@
     <button onclick="putOutCard()">打牌3000</button>
     <button onclick="login()">登录</button>
     <button onclick="createRoom()">创建好友房</button>
+    <button onclick="ready()">准备</button>
     <hr/>
     <button onclick="closeWebSocket()">关闭WebSocket连接</button>
     <hr/>
@@ -87,7 +88,12 @@
     }
 
     function createRoom() {
-        var message = '{"pid":2000,"data":{"uId":"13791","times":"16","type":2,"payType":1,"diamond":8}}';
+        var message = '{"pid":2000,"data":{"uId":"819347","times":"16","type":2,"payType":1,"diamond":8}}';
+        websocket.send(message);
+    }
+
+    function ready() {
+        var message = '{"pid":2005,"data":{"uId":"741695"}}';
         websocket.send(message);
     }
 

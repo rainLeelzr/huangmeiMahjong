@@ -191,7 +191,7 @@ public class MockComboMahjongList {
     /**
      * 硬大明杠的麻将组合
      */
-    public static List<Mahjong> getYingDaMingGangMahjongs() {
+    public static List<Mahjong> getYingMingGangMahjongs() {
         List<Mahjong> all = Mahjong.getAllMahjongs();
 
         // 自定义所有4个玩家的初始麻将牌

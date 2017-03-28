@@ -13,7 +13,7 @@ public interface RoomService extends BaseService<Integer, Room> {
 
     Map<String,Object> outRoom(JSONObject data);
 
-    Map<String, Object> ready(JSONObject data);
+    Map<String, Object> ready(JSONObject data) throws IllegalAccessException, InstantiationException;
 
 
     Map<String, Object> dismissRoom(JSONObject data);

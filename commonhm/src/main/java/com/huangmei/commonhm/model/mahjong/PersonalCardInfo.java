@@ -1,5 +1,6 @@
 package com.huangmei.commonhm.model.mahjong;
 
+import com.huangmei.commonhm.manager.operate.BaseOperate;
 import com.huangmei.commonhm.model.RoomMember;
 import com.huangmei.commonhm.model.mahjong.algorithm.Combo;
 
@@ -25,7 +26,7 @@ public class PersonalCardInfo {
     /**
      * 手牌Id
      */
-    private Set<Integer> handCardIds;
+    private List<Integer> handCardIds;
 
     /**
      * 客户端可以选择的操作，例如胡、碰、杠，不包含过
@@ -47,11 +48,11 @@ public class PersonalCardInfo {
      */
     private List<Combo> gangs;
 
-    public Set<Integer> getHandCardIds() {
+    public List<Integer> getHandCardIds() {
         return handCardIds;
     }
 
-    public void setHandCardIds(Set<Integer> handCardIds) {
+    public void setHandCardIds(List<Integer> handCardIds) {
         this.handCardIds = handCardIds;
     }
 

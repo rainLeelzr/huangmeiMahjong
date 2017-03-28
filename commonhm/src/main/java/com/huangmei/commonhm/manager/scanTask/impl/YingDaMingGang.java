@@ -1,6 +1,7 @@
 package com.huangmei.commonhm.manager.scanTask.impl;
 
-import com.huangmei.commonhm.manager.scanTask.abs.AbstractGangScanTask;
+import com.huangmei.commonhm.manager.operate.Operate;
+import com.huangmei.commonhm.manager.putOutCard.scanTask.AbstractGangScanTask;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
 
@@ -9,13 +10,17 @@ import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
  */
 public class YingDaMingGang extends AbstractGangScanTask {
 
+    @Override
+    public Operate getOperate() {
+        return Operate.YING_DA_MING_GANG;
+    }
+
     // 是否已经有碰扫描出来有人可以硬杠
     private boolean hasGang = false;
 
     @Override
     public boolean doScan(PersonalCardInfo personalCardInfo)
             throws InstantiationException, IllegalAccessException {
-        log.debug("座位{}进行硬大明杠扫描！", personalCardInfo.getRoomMember().getSeat());
         if (hasGang) {
             return false;
         }

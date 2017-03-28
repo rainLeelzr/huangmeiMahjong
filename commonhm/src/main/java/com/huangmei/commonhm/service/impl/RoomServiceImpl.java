@@ -455,7 +455,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
      * @return
      */
     @Override
-    public Map<String, Object> ready(JSONObject data) {
+    public Map<String, Object> ready(JSONObject data) throws IllegalAccessException, InstantiationException {
         Map<String, Object> result = new HashMap<>(2);
         Integer type;
         String uId = (String) data.get("uId");

@@ -1,13 +1,15 @@
-package com.huangmei.commonhm.model.mahjong;
+package com.huangmei.commonhm.manager.operate;
 
 /**
  * 基本操作类型
  */
 public enum BaseOperate {
-    PENG("碰"),
+    // 优先级高的要写在前面
+    HU("胡"),//胡包括自摸、吃胡
+
     GANG("杠"),
 
-    HU("胡");//胡包括自摸、吃胡
+    PENG("碰");
 
     private String name;
 

@@ -1,17 +1,19 @@
-package com.huangmei.commonhm.manager.scanTask.abs;
+package com.huangmei.commonhm.manager.putOutCard.scanTask;
 
 
-import com.huangmei.commonhm.manager.scanTask.ScanTask;
-import com.huangmei.commonhm.model.mahjong.BaseOperate;
+import com.huangmei.commonhm.manager.scanTask.BaseScanTask;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.algorithm.Combo;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 扫描用户是否可以吃胡
  */
-public abstract class AbstractHuScanTask extends ScanTask {
+public abstract class AbstractHuScanTask extends BaseScanTask {
 
     private static int[] NO_HU_SIZE = new int[]{1, 4, 7, 10, 13};
     private static int[] NO_HU_SIZE_QIDUI = new int[]{1, 3, 5, 7, 9, 11, 13};
@@ -66,11 +68,6 @@ public abstract class AbstractHuScanTask extends ScanTask {
         }
 
         return myResult;
-    }
-
-    @Override
-    public BaseOperate getBaseOperate() {
-        return BaseOperate.HU;
     }
 
     /**

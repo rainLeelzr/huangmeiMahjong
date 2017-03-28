@@ -1,6 +1,7 @@
 package com.huangmei.commonhm.manager.scanTask.impl;
 
-import com.huangmei.commonhm.manager.scanTask.abs.AbstractHuScanTask;
+import com.huangmei.commonhm.manager.operate.Operate;
+import com.huangmei.commonhm.manager.putOutCard.scanTask.AbstractHuScanTask;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
 
@@ -12,13 +13,17 @@ import java.util.List;
  */
 public class YingPingHu extends AbstractHuScanTask {
 
+    @Override
+    public Operate getOperate() {
+        return Operate.YING_PENG;
+    }
+
     private static int[] noHuSize = new int[]{1, 4, 7, 10, 13};
 
     @Override
     public boolean doScan(PersonalCardInfo personalCardInfo) throws InstantiationException, IllegalAccessException {
         List<Mahjong> handCards = new ArrayList<>(personalCardInfo.getHandCards());
         handCards.add(putOutMahjong);
-        log.debug("座位{}进行硬平胡扫描！", personalCardInfo.getRoomMember().getSeat());
         return isPinghu(handCards);
     }
 

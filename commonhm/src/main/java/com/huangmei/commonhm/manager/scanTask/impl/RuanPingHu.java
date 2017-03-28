@@ -1,15 +1,24 @@
 package com.huangmei.commonhm.manager.scanTask.impl;
 
-import com.huangmei.commonhm.manager.scanTask.abs.AbstractHuScanTask;
+import com.huangmei.commonhm.manager.operate.Operate;
+import com.huangmei.commonhm.manager.putOutCard.scanTask.AbstractHuScanTask;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * 扫描是否软平胡
  */
 public class RuanPingHu extends AbstractHuScanTask {
+
+    @Override
+    public Operate getOperate() {
+        return Operate.RUAN_CHI_HU;
+    }
+
     ///**
     // * 递归实现dimValue中的笛卡尔积，结果放在result中
     // *
@@ -176,20 +185,20 @@ public class RuanPingHu extends AbstractHuScanTask {
         List<List<Mahjong>> circulateResult = circulate(baoMahjongs);
         for (List<Mahjong> mahjongs : circulateResult) {
             Collections.sort(handCards);
-            log.debug("座位{}进行软平胡扫描宝牌变换前：{}",
-                    personalCardInfo.getRoomMember().getSeat(),
-                    handCards
-            );
+            //log.debug("座位{}进行软平胡扫描宝牌变换前：{}",
+            //        personalCardInfo.getRoomMember().getSeat(),
+            //        handCards
+            //);
 
             for (int i = 0; i < myBaoMahjongs.size(); i++) {
                 handCards.remove(myBaoMahjongs.get(i));
                 handCards.add(mahjongs.get(i));
             }
             Collections.sort(handCards);
-            log.debug("座位{}进行软平胡扫描宝牌变换后：{}",
-                    personalCardInfo.getRoomMember().getSeat(),
-                    handCards
-            );
+            //log.debug("座位{}进行软平胡扫描宝牌变换后：{}",
+            //        personalCardInfo.getRoomMember().getSeat(),
+            //        handCards
+            //);
             if (isPinghu(handCards)) {
                 return true;
             }

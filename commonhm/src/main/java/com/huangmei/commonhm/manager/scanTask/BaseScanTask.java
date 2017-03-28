@@ -1,8 +1,9 @@
 package com.huangmei.commonhm.manager.scanTask;
 
-import com.huangmei.commonhm.manager.putOutCard.AfterPutOutCardOperate;
+import com.huangmei.commonhm.manager.operate.CanDoOperate;
+import com.huangmei.commonhm.manager.operate.Operate;
+import com.huangmei.commonhm.manager.picker.PersonalCardInfoPicker;
 import com.huangmei.commonhm.model.User;
-import com.huangmei.commonhm.model.mahjong.BaseOperate;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.MahjongGameData;
 import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
@@ -14,10 +15,10 @@ import java.util.*;
 /**
  * 扫描任务接口
  */
-public abstract class ScanTask {
+public abstract class BaseScanTask {
 
     protected static final Logger log = LoggerFactory.getLogger
-            (ScanTask.class);
+            (BaseScanTask.class);
 
     /**
      * 用户打出的牌
@@ -27,40 +28,42 @@ public abstract class ScanTask {
      * 出牌的玩家
      */
     protected User user;
-    private MahjongGameData mahjongGameData;
+
+    protected MahjongGameData mahjongGameData;
+
+    /**
+     * 需要对这些玩家的手牌进行扫描
+     */
+    protected List<PersonalCardInfo> toBeScanPersonalCardInfos;
+
     /**
      * 具体的任务扫描器判定到某个用户可以执行某些操作时，向此列表添加元素
      */
-    private List<AfterPutOutCardOperate> canOperates;
+    private List<CanDoOperate> canOperates;
+    /**
+     * 提取器，从mahjongGameData中提取出需要扫描的玩家手牌
+     */
+    private PersonalCardInfoPicker personalCardInfoPicker;
 
     /**
      * 基本操作类型
      */
-    public abstract BaseOperate getBaseOperate();
+    public abstract Operate getOperate();
 
-    public void scan()
-            throws InstantiationException, IllegalAccessException {
-        // 循环除了出牌的玩家，判断能不能有一些操作
-        List<PersonalCardInfo> personalCardInfos = mahjongGameData.getPersonalCardInfos();
-        for (PersonalCardInfo personalCardInfo : personalCardInfos) {
-            //log.debug("扫描{}前座位{}的手牌：{}{}",
-            //        getBaseOperate().getName(),
-            //        personalCardInfo.getRoomMember().getSeat(),
-            //        personalCardInfo.getHandCards().size(),
-            //        personalCardInfo.getHandCards());
+    public List<PersonalCardInfo> getToBeScanPersonalCardInfos() {
+        return toBeScanPersonalCardInfos;
+    }
 
-            if (!user.getId().equals(
-                    personalCardInfo.getRoomMember().getUserId())) {
-                Set<BaseOperate> myOperates = getMyOperates(
-                        personalCardInfo.getRoomMember().getUserId());
-                if (!myOperates.contains(getBaseOperate())) {
-                    if (doScan(personalCardInfo)) {
-                        // 添加可行操作
-                        myOperates.add(getBaseOperate());
-                    }
-                }
-            }
-        }
+    public void setToBeScanPersonalCardInfos(List<PersonalCardInfo> toBeScanPersonalCardInfos) {
+        this.toBeScanPersonalCardInfos = toBeScanPersonalCardInfos;
+    }
+
+    public PersonalCardInfoPicker getPersonalCardInfoPicker() {
+        return personalCardInfoPicker;
+    }
+
+    public void setPersonalCardInfoPicker(PersonalCardInfoPicker personalCardInfoPicker) {
+        this.personalCardInfoPicker = personalCardInfoPicker;
     }
 
     public abstract boolean doScan(PersonalCardInfo personalCardInfo)
@@ -74,11 +77,11 @@ public abstract class ScanTask {
         this.user = user;
     }
 
-    public List<AfterPutOutCardOperate> getCanOperates() {
+    public List<CanDoOperate> getCanOperates() {
         return canOperates;
     }
 
-    public void setCanOperates(List<AfterPutOutCardOperate> canOperates) {
+    public void setCanOperates(List<CanDoOperate> canOperates) {
         this.canOperates = canOperates;
     }
 
@@ -98,10 +101,51 @@ public abstract class ScanTask {
         this.putOutMahjong = putOutMahjong;
     }
 
+    public void scan() throws IllegalAccessException, InstantiationException {
+        toBeScanPersonalCardInfos = personalCardInfoPicker.pick(mahjongGameData, user);
+
+        for (PersonalCardInfo toBeScanPersonalCardInfo : toBeScanPersonalCardInfos) {
+            Set<Operate> myOperates = getMyOperates(
+                    toBeScanPersonalCardInfo.getRoomMember().getUserId());
+            boolean contain = false;
+            for (Operate myOperate : myOperates) {
+                if(myOperate.getBaseOperate() == getOperate().getBaseOperate()){
+                    contain = true;
+                    break;
+                }
+            }
+
+            if (!contain) {
+                log.debug(
+                        "座位{}进行{}扫描，手牌：{}",
+                        toBeScanPersonalCardInfo.getRoomMember().getSeat(),
+                        getOperate().getName(),
+                        toBeScanPersonalCardInfo.getHandCards()
+                );
+                if (doScan(toBeScanPersonalCardInfo)) {
+                    log.debug(
+                            "座位{}可以{}",
+                            toBeScanPersonalCardInfo.getRoomMember().getSeat(),
+                            getOperate().getName()
+                    );
+                    // 添加可行操作
+                    myOperates.add(getOperate());
+                }
+            } else {
+                log.debug(
+                        "座位{}已有{},无需再扫描{}！",
+                        toBeScanPersonalCardInfo.getRoomMember().getSeat(),
+                        getOperate().getBaseOperate().getName(),
+                        getOperate().getName()
+                );
+            }
+        }
+    }
+
     /**
      * 获取本玩家的可行的操作列表
      */
-    protected Set<BaseOperate> getMyOperates(Integer userId) {
+    protected Set<Operate> getMyOperates(Integer userId) {
         // 找出userId的个人牌信息
         PersonalCardInfo personalCardInfo = null;
         for (PersonalCardInfo cardInfo : mahjongGameData.getPersonalCardInfos()) {
@@ -112,20 +156,20 @@ public abstract class ScanTask {
         }
 
         // 找出userId的可行的操作列表
-        AfterPutOutCardOperate afterPutOutCardOperate = null;
-        for (AfterPutOutCardOperate canOperate : canOperates) {
+        CanDoOperate canDoOperate = null;
+        for (CanDoOperate canOperate : canOperates) {
             if (canOperate.getRoomMember().getUserId().equals(userId)) {
-                afterPutOutCardOperate = canOperate;
+                canDoOperate = canOperate;
                 break;
             }
         }
-        if (afterPutOutCardOperate == null) {
-            afterPutOutCardOperate = new AfterPutOutCardOperate();
-            afterPutOutCardOperate.setRoomMember(personalCardInfo.getRoomMember());
-            afterPutOutCardOperate.setOperates(new HashSet<BaseOperate>());
-            canOperates.add(afterPutOutCardOperate);
+        if (canDoOperate == null) {
+            canDoOperate = new CanDoOperate();
+            canDoOperate.setRoomMember(personalCardInfo.getRoomMember());
+            canDoOperate.setOperates(new TreeSet<Operate>());
+            canOperates.add(canDoOperate);
         }
-        return afterPutOutCardOperate.getOperates();
+        return canDoOperate.getOperates();
     }
 
     /**

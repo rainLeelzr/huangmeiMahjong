@@ -1,6 +1,7 @@
 package com.huangmei.commonhm.manager.scanTask.impl;
 
-import com.huangmei.commonhm.manager.scanTask.abs.AbstractHuScanTask;
+import com.huangmei.commonhm.manager.operate.Operate;
+import com.huangmei.commonhm.manager.putOutCard.scanTask.AbstractHuScanTask;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
 
@@ -13,6 +14,12 @@ import java.util.List;
  */
 public class RuanPengPengHu extends AbstractHuScanTask {
 
+    @Override
+    public Operate getOperate() {
+        return Operate.RUAN_CHI_HU;
+    }
+
+
     /**
      * 判断依据：
      * 按花字号分组
@@ -20,8 +27,6 @@ public class RuanPengPengHu extends AbstractHuScanTask {
      */
     @Override
     public boolean doScan(PersonalCardInfo personalCardInfo) throws InstantiationException, IllegalAccessException {
-        log.debug("座位{}进行软碰碰胡扫描！", personalCardInfo.getRoomMember().getSeat());
-
         List<Mahjong> handCards = new ArrayList<>(personalCardInfo.getHandCards());
         handCards.add(putOutMahjong);
 
@@ -44,20 +49,20 @@ public class RuanPengPengHu extends AbstractHuScanTask {
         List<List<Mahjong>> circulateResult = circulate(baoMahjongs);
         for (List<Mahjong> mahjongs : circulateResult) {
             Collections.sort(handCards);
-            log.debug("座位{}进行软碰碰胡扫描宝牌变换前：{}",
-                    personalCardInfo.getRoomMember().getSeat(),
-                    handCards
-            );
+            //log.debug("座位{}进行软碰碰胡扫描宝牌变换前：{}",
+            //        personalCardInfo.getRoomMember().getSeat(),
+            //        handCards
+            //);
 
             for (int i = 0; i < myBaoMahjongs.size(); i++) {
                 handCards.remove(myBaoMahjongs.get(i));
                 handCards.add(mahjongs.get(i));
             }
             Collections.sort(handCards);
-            log.debug("座位{}进行软碰碰胡对扫描宝牌变换后：{}",
-                    personalCardInfo.getRoomMember().getSeat(),
-                    handCards
-            );
+            //log.debug("座位{}进行软碰碰胡对扫描宝牌变换后：{}",
+            //        personalCardInfo.getRoomMember().getSeat(),
+            //        handCards
+            //);
             if (isPengPengHu(handCards)) {
                 return true;
             }

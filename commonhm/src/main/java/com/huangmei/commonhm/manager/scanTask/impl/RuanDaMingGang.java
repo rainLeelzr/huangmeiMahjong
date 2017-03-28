@@ -1,6 +1,7 @@
 package com.huangmei.commonhm.manager.scanTask.impl;
 
-import com.huangmei.commonhm.manager.scanTask.abs.AbstractGangScanTask;
+import com.huangmei.commonhm.manager.operate.Operate;
+import com.huangmei.commonhm.manager.putOutCard.scanTask.AbstractGangScanTask;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
 
@@ -13,10 +14,13 @@ import java.util.List;
 public class RuanDaMingGang extends AbstractGangScanTask {
 
     @Override
+    public Operate getOperate() {
+        return Operate.RUAN_DA_MING_GANG;
+    }
+
+    @Override
     public boolean doScan(PersonalCardInfo personalCardInfo)
             throws InstantiationException, IllegalAccessException {
-        log.debug("座位{}进行软大明杠扫描！", personalCardInfo.getRoomMember().getSeat());
-
         List<Mahjong> handCards = new ArrayList<>(personalCardInfo.getHandCards());
         List<Mahjong> myBaoMahjongs = getMyBaoMahjongs(handCards);
         // 如果没有宝牌，则不能软大明杠

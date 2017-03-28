@@ -1,8 +1,9 @@
 package com.huangmei.commonhm.service.impl;
 
 import com.huangmei.commonhm.dao.RoomMemberDao;
+import com.huangmei.commonhm.manager.getACard.GetACardManager;
 import com.huangmei.commonhm.manager.putOutCard.AfterPutOutCardManager;
-import com.huangmei.commonhm.manager.putOutCard.AfterPutOutCardOperate;
+import com.huangmei.commonhm.manager.operate.CanDoOperate;
 import com.huangmei.commonhm.model.Room;
 import com.huangmei.commonhm.model.RoomMember;
 import com.huangmei.commonhm.model.User;
@@ -35,6 +36,9 @@ public class GameService {
     private AfterPutOutCardManager afterPutOutCardManager;
 
     @Autowired
+    private GetACardManager getACardManager;
+
+    @Autowired
     private RoomMemberDao roomMemberDao;
 
     /***
@@ -42,7 +46,8 @@ public class GameService {
      * 一局游戏开始时，生成麻将的初始数据。
      */
     public Map<String, Object> firstPutOutCard(
-            Room room, List<RoomMember> roomMembers) {
+            Room room, List<RoomMember> roomMembers)
+            throws InstantiationException, IllegalAccessException {
 
         // 对roomMembers按座位号升序
         Collections.sort(roomMembers, new Comparator<RoomMember>() {
@@ -72,6 +77,21 @@ public class GameService {
             roomMemberDao.update(roomMember);
         }
 
+        // 扫描摸到牌的人可以的操作
+        ArrayList<CanDoOperate> canOperates =
+                getACardManager.scan(
+                        mahjongGameData,
+                        mahjongGameData
+                                .getPersonalCardInfos()
+                                .get(bankerSite)
+                                .getTouchMahjong(),
+                        new User(mahjongGameData
+                                .getPersonalCardInfos()
+                                .get(bankerSite)
+                                .getRoomMember()
+                                .getUserId())
+                );
+
         // 拆分成4份手牌数据，传给客户端
         List<MahjongGameData> singlePlayerGameDatas = new ArrayList<>(players);
         for (int i = 0; i < players; i++) {
@@ -91,6 +111,8 @@ public class GameService {
             for (Mahjong mahjong : personalCardInfo.getHandCards()) {
                 handCardIds.add(mahjong.getId());
             }
+            personalCardInfo.setHandCardIds(handCardIds);
+            personalCardInfo.setHandCards(null);
             personalCardInfo.setRoomMember(roomMembers.get(i));
             personalCardInfos.add(personalCardInfo);
             singlePlayerGameData.setPersonalCardInfos(personalCardInfos);
@@ -148,7 +170,7 @@ public class GameService {
         }
 
         // 扫描其他用户是否有吃胡、大明杠、碰的操作
-        ArrayList<AfterPutOutCardOperate> canOperates =
+        ArrayList<CanDoOperate> canOperates =
                 afterPutOutCardManager.scan(mahjongGameData, putOutMahjong, user);
         log.debug("扫描出来可以的操作：{}", canOperates);
 

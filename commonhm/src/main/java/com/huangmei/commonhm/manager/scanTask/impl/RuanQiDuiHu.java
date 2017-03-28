@@ -1,6 +1,7 @@
 package com.huangmei.commonhm.manager.scanTask.impl;
 
-import com.huangmei.commonhm.manager.scanTask.abs.AbstractHuScanTask;
+import com.huangmei.commonhm.manager.operate.Operate;
+import com.huangmei.commonhm.manager.putOutCard.scanTask.AbstractHuScanTask;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
 
@@ -12,6 +13,11 @@ import java.util.List;
  * 扫描是否软七对
  */
 public class RuanQiDuiHu extends AbstractHuScanTask {
+
+    @Override
+    public Operate getOperate() {
+        return Operate.RUAN_CHI_HU;
+    }
 
     @Override
     public boolean doScan(PersonalCardInfo personalCardInfo)
@@ -44,20 +50,20 @@ public class RuanQiDuiHu extends AbstractHuScanTask {
         List<List<Mahjong>> circulateResult = circulate(baoMahjongs);
         for (List<Mahjong> mahjongs : circulateResult) {
             Collections.sort(handCards);
-            log.debug("座位{}进行软七对扫描宝牌变换前：{}",
-                    personalCardInfo.getRoomMember().getSeat(),
-                    handCards
-            );
+            //log.debug("座位{}进行软七对扫描宝牌变换前：{}",
+            //        personalCardInfo.getRoomMember().getSeat(),
+            //        handCards
+            //);
 
             for (int i = 0; i < myBaoMahjongs.size(); i++) {
                 handCards.remove(myBaoMahjongs.get(i));
                 handCards.add(mahjongs.get(i));
             }
             Collections.sort(handCards);
-            log.debug("座位{}进行软七对扫描宝牌变换后：{}",
-                    personalCardInfo.getRoomMember().getSeat(),
-                    handCards
-            );
+            //log.debug("座位{}进行软七对扫描宝牌变换后：{}",
+            //        personalCardInfo.getRoomMember().getSeat(),
+            //        handCards
+            //);
             if (isQiDui(handCards)) {
                 return true;
             }

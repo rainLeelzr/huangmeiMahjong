@@ -1,7 +1,6 @@
-package com.huangmei.commonhm.manager.putOutCard;
+package com.huangmei.commonhm.manager.operate;
 
 import com.huangmei.commonhm.model.RoomMember;
-import com.huangmei.commonhm.model.mahjong.BaseOperate;
 
 import java.util.Set;
 
@@ -9,11 +8,11 @@ import java.util.Set;
  * 储存别人出牌后某个玩家可以的操作
  * 如胡、杠、碰
  */
-public class AfterPutOutCardOperate {
+public class CanDoOperate implements Comparable {
 
     private RoomMember roomMember;
 
-    private Set<BaseOperate> operates;
+    private Set<Operate> operates;
 
     public RoomMember getRoomMember() {
         return roomMember;
@@ -23,24 +22,29 @@ public class AfterPutOutCardOperate {
         this.roomMember = roomMember;
     }
 
-    public Set<BaseOperate> getOperates() {
+    public Set<Operate> getOperates() {
         return operates;
     }
 
-    public void setOperates(Set<BaseOperate> operates) {
+    public void setOperates(Set<Operate> operates) {
         this.operates = operates;
     }
 
     @Override
     public String toString() {
         String o = "";
-        for (BaseOperate operate : operates) {
+        for (Operate operate : operates) {
             o += operate.getName() + "、";
         }
         return String.format("{座位%s,可以%s}", roomMember.getSeat(), o);
-        //return "{\"AfterPutOutCardOperate\":{"
+        //return "{\"CanDoOperate\":{"
         //        + "\"roomMember\":" + roomMember
         //        + ", \"operates\":" + operates
         //        + "}}";
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        return this.getRoomMember().getSeat() - ((CanDoOperate) o).getRoomMember().getSeat();
     }
 }
