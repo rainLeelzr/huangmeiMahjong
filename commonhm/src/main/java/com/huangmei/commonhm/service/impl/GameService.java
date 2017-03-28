@@ -1,5 +1,6 @@
 package com.huangmei.commonhm.service.impl;
 
+import com.huangmei.commonhm.dao.RoomMemberDao;
 import com.huangmei.commonhm.manager.putOutCard.AfterPutOutCardManager;
 import com.huangmei.commonhm.manager.putOutCard.AfterPutOutCardOperate;
 import com.huangmei.commonhm.model.Room;
@@ -33,6 +34,9 @@ public class GameService {
     @Autowired
     private AfterPutOutCardManager afterPutOutCardManager;
 
+    @Autowired
+    private RoomMemberDao roomMemberDao;
+
     /***
      * 初始化数据包括：骰子的点数、每个人的手牌、剩余的牌等信息。
      * 一局游戏开始时，生成麻将的初始数据。
@@ -61,6 +65,12 @@ public class GameService {
         // 获取新版本号
         Long version = versionRedis.nextVersion(room.getId());
         mahjongGameData.setVersion(version);
+
+        // roomMember改为游戏中
+        for (RoomMember roomMember : roomMembers) {
+            roomMember.setState(RoomMember.state.PLAYING.getCode());
+            roomMemberDao.update(roomMember);
+        }
 
         // 拆分成4份手牌数据，传给客户端
         List<MahjongGameData> singlePlayerGameDatas = new ArrayList<>(players);

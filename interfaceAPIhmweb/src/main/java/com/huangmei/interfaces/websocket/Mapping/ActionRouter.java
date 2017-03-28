@@ -4,6 +4,7 @@ import com.huangmei.commonhm.model.Room;
 import com.huangmei.commonhm.model.RoomMember;
 import com.huangmei.commonhm.model.User;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
+import com.huangmei.commonhm.model.mahjong.MahjongGameData;
 import com.huangmei.commonhm.redis.base.Redis;
 import com.huangmei.commonhm.service.RoomService;
 import com.huangmei.commonhm.service.UserService;
@@ -13,6 +14,7 @@ import com.huangmei.interfaces.monitor.MonitorManager;
 import com.huangmei.interfaces.websocket.MessageManager;
 import com.huangmei.interfaces.websocket.SessionManager;
 import net.sf.json.JSONObject;
+import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -71,12 +75,13 @@ public class ActionRouter {
                 .setData(result)
                 .build();
     }
+
     @Pid(PidValue.LONOUT)
     public JsonResultY logout(WebSocketSession session, JSONObject data)
             throws Exception {
 
         User user = userService.logout(data);
-       sessionManager.userLogout(user,session);
+        sessionManager.userLogout(user, session);
 
         return new JsonResultY.Builder()
                 .setPid(PidValue.LONOUT.getPid())
@@ -143,10 +148,11 @@ public class ActionRouter {
                 .setData(result)
                 .build();
 
-        messageManager.sendMessageToRoomUsers(((Room) result.get(("room"))).getId().toString(),jsonResultY);
+        messageManager.sendMessageToRoomUsers(((Room) result.get(("room"))).getId().toString(), jsonResultY);
 
         return null;
     }
+
     @Pid(PidValue.OUT_ROOM)
     @LoginResource
     public JsonResultY outRoom(WebSocketSession session, JSONObject data)
@@ -158,24 +164,49 @@ public class ActionRouter {
                     .setError(CommonError.SYS_SUSSES)
                     .setData(result)
                     .build();
-            messageManager.sendMessageToRoomUsers(((Room) result.get(("room"))).getId().toString(),jsonResultY);
-            sessionManager.userExitRoom((RoomMember) result.get("roomMember"),session);
+            messageManager.sendMessageToRoomUsers(((Room) result.get(("room"))).getId().toString(), jsonResultY);
+            sessionManager.userExitRoom((RoomMember) result.get("roomMember"), session);
         }
 
 
         return null;
     }
+
     @Pid(PidValue.READY)
     @LoginResource
     public JsonResultY ready(WebSocketSession session, JSONObject data)
             throws Exception {
-        Map<String, Object> result= roomService.ready(data);
-        JsonResultY jsonResultY= new JsonResultY.Builder()
-                .setPid(PidValue.READY.getPid())
-                .setError(CommonError.SYS_SUSSES)
-                .setData(result)
-                .build();
-        messageManager.sendMessageToRoomUsers(((RoomMember) result.get(("roomMember"))).getRoomId().toString(),jsonResultY);
+        Map<String, Object> result = roomService.ready(data);
+        Integer type = (Integer) result.get("type");
+        if (type == 2) {
+            List<MahjongGameData> singlePlayerGameDatas = (List<MahjongGameData>) result.get("playerGameData");
+            for (MahjongGameData singlePlayerGameData : singlePlayerGameDatas) {
+                Map<String, Object> myResult = new HashMap<>();
+                myResult.put("type", 2);
+                myResult.put("playerGameData", singlePlayerGameData);
+                JsonResultY jsonResultY = new JsonResultY.Builder()
+                        .setPid(PidValue.READY.getPid())
+                        .setError(CommonError.SYS_SUSSES)
+                        .setData(myResult)
+                        .build();
+                messageManager.sendMessageByUserId(singlePlayerGameData
+                                .getPersonalCardInfos()
+                                .get(0)
+                                .getRoomMember()
+                                .getUserId(),
+                        jsonResultY);
+            }
+        } else {
+            JsonResultY jsonResultY = new JsonResultY.Builder()
+                    .setPid(PidValue.READY.getPid())
+                    .setError(CommonError.SYS_SUSSES)
+                    .setData(result)
+                    .build();
+            messageManager.sendMessageToRoomUsers(
+                    ((RoomMember) result.get(("roomMember"))).getRoomId().toString(),
+                    jsonResultY);
+        }
+
         return null;
     }
 

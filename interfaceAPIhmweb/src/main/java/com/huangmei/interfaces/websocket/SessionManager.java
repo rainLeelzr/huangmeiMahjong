@@ -62,6 +62,13 @@ public class SessionManager {
     }
 
     /**
+     * 根据userId获取session
+     */
+    public WebSocketSession getByUserId(Integer userId){
+        return userIdSessions.get(userId.toString());
+    }
+
+    /**
      * 获取房间里的所有user session
      */
     public Collection<WebSocketSession> getRoomSessions(String roomId) {

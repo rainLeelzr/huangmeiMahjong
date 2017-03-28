@@ -469,11 +469,11 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                 List<RoomMember> roomMembers = roomMemberDao.selectForStart(roomMember);
                 if (roomMembers != null && roomMembers.size() == Room.playerLimit) {//所有玩家都已经准备,可以发牌
                     //调用开始发牌接口
-                    //room.setStart(Room.start.STARTED.getCode());
                     Room room = roomDao.selectOne(roomMember.getRoomId());
+                    room.setStart(Room.start.STARTED.getCode());
                     Map<String, Object> mahjongGameData = gameService.firstPutOutCard(room, roomMembers);
                     result.putAll(mahjongGameData);
-
+                    roomMember.setState(RoomMember.state.PLAYING.getCode());
                     type = 2;
                 } else {
                     type = 1;
