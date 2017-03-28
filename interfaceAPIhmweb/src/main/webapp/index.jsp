@@ -4,10 +4,14 @@
     <title>Java后端WebSocket的Tomcat实现</title>
 </head>
 <body>
-    Welcome<br/><input id="text" type="text"/>
+    Welcome<br/>
+    <input id="text" type="text" style="width: 100%"/>
+    <br/>
     <button onclick="send()">发送消息</button>
     <button onclick="debug()">调试1</button>
     <button onclick="putOutCard()">打牌3000</button>
+    <button onclick="login()">登录</button>
+    <button onclick="createRoom()">创建好友房</button>
     <hr/>
     <button onclick="closeWebSocket()">关闭WebSocket连接</button>
     <hr/>
@@ -74,6 +78,16 @@
 
     function putOutCard() {
         var message = '{pid:3000,data:{mahjongId:393,version:10}}';
+        websocket.send(message);
+    }
+
+    function login() {
+        var message = '{"pid":1000,"data":{"openId":"13791","nickName":"13791","sex":1,"image":"2222"}}';
+        websocket.send(message);
+    }
+
+    function createRoom() {
+        var message = '{"pid":2000,"data":{"uId":"13791","times":"16","type":2,"payType":1,"diamond":8}}';
         websocket.send(message);
     }
 

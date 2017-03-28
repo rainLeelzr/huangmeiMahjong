@@ -87,6 +87,10 @@ public class GameService {
             // 添加玩家信息RoomMember
             List<PersonalCardInfo> personalCardInfos = new ArrayList<>(1);
             PersonalCardInfo personalCardInfo = mahjongGameData.getPersonalCardInfos().get(i);
+            List<Integer> handCardIds = new ArrayList<>(personalCardInfo.getHandCards().size());
+            for (Mahjong mahjong : personalCardInfo.getHandCards()) {
+                handCardIds.add(mahjong.getId());
+            }
             personalCardInfo.setRoomMember(roomMembers.get(i));
             personalCardInfos.add(personalCardInfo);
             singlePlayerGameData.setPersonalCardInfos(personalCardInfos);

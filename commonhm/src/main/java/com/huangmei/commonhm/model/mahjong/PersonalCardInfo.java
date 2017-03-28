@@ -17,9 +17,15 @@ public class PersonalCardInfo {
     private RoomMember roomMember;
 
     /**
-     * 手牌
+     * 手牌枚举对象
      */
     private Set<Mahjong> handCards;
+
+
+    /**
+     * 手牌Id
+     */
+    private Set<Integer> handCardIds;
 
     /**
      * 客户端可以选择的操作，例如胡、碰、杠，不包含过
@@ -40,6 +46,14 @@ public class PersonalCardInfo {
      * 已经杠的牌
      */
     private List<Combo> gangs;
+
+    public Set<Integer> getHandCardIds() {
+        return handCardIds;
+    }
+
+    public void setHandCardIds(Set<Integer> handCardIds) {
+        this.handCardIds = handCardIds;
+    }
 
     public List<Combo> getPengs() {
         return pengs;
