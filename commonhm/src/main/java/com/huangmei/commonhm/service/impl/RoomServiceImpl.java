@@ -7,6 +7,7 @@ import com.huangmei.commonhm.model.Entity;
 import com.huangmei.commonhm.model.Room;
 import com.huangmei.commonhm.model.RoomMember;
 import com.huangmei.commonhm.model.User;
+import com.huangmei.commonhm.redis.GameRedis;
 import com.huangmei.commonhm.redis.RoomRedis;
 import com.huangmei.commonhm.service.RoomService;
 import com.huangmei.commonhm.util.CommonError;
@@ -22,12 +23,19 @@ import java.util.*;
 public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements RoomService {
 
     @Autowired
+    private GameService gameService;
+
+    @Autowired
     private RoomDao dao;
 
     @Autowired
     private UserDao userDao;
+
     @Autowired
     private RoomMemberDao roomMemberDao;
+
+    @Autowired
+    private RoomDao roomDao;
 
     @Autowired
     private RoomRedis roomRedis;
@@ -128,7 +136,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
         roomMemberDao.update(roomMember);
         result.put("roomMember", roomMember);
         result.put("room", room);
-        result.put("user",user);
+        result.put("user", user);
         roomRedis.joinRoom(roomMember);
         return result;
 
@@ -338,7 +346,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
         roomCriteria.setRoomCode(Entity.Value.eq(roomCode));
         Room room = dao.selectOne(roomCriteria);
 
-        if (room!=null){
+        if (room != null) {
             if (room.getStart() == Room.start.UNSTART.getCode()) {//未开始游戏,可以直接解散房间
                 Set<RoomMember> roomMembers = roomRedis.getRoomMembers(room.getId().toString());
                 for (int i = 0; i < roomMembers.size(); i++) {
@@ -350,11 +358,11 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                 type = 2;
                 r = false;
             }
-            result.put("room",room);
+            result.put("room", room);
             result.put("type", type);
             result.put("result", r);
             return result;
-        }else {
+        } else {
             throw CommonError.ROOM_NOT_EXIST.newException();
         }
 
@@ -378,15 +386,15 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
         userCriteria.setUId(Entity.Value.eq(uId));
         User user = userDao.selectOne(userCriteria);
 
-        if (user!=null){
-            RoomMember roomMember=new RoomMember();
+        if (user != null) {
+            RoomMember roomMember = new RoomMember();
             roomMember.setUserId(user.getId());
-            roomMember=roomMemberDao.selectByUserIdForCheck(roomMember);
+            roomMember = roomMemberDao.selectByUserIdForCheck(roomMember);
 
             Entity.RoomCriteria roomCriteria = new Entity.RoomCriteria();
             roomCriteria.setRoomCode(Entity.Value.eq(roomCode));
             Room room = dao.selectOne(roomCriteria);
-            if (room!=null){
+            if (room != null) {
 
                 Set<RoomMember> roomMembers = roomRedis.getRoomMembers(room.getId().toString());
 
@@ -399,13 +407,13 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                             Entity.UserCriteria uc = new Entity.UserCriteria();
                             uc.setId(Entity.Value.eq(rm.getUserId()));
                             user = userDao.selectOne(uc);
-                            data.put("uId",user.getUId().toString());
+                            data.put("uId", user.getUId().toString());
                             outRoom(data);
                         }
-                        type=1;//所有玩家同意解散房间,已经解散房间
-                    }else{
-                        type=2;//还有玩家没有表态
-                        isAgree=false;
+                        type = 1;//所有玩家同意解散房间,已经解散房间
+                    } else {
+                        type = 2;//还有玩家没有表态
+                        isAgree = false;
                     }
 
                 } else {//有玩家不同意解散,即游戏继续,房间中所有玩家的状态都改成待准备
@@ -413,16 +421,16 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                         member.setState(RoomMember.state.UNREADY.getCode());
                         roomMemberDao.update(member);
                     }
-                    type=3;//有玩家反对解散房间,游戏继续
+                    type = 3;//有玩家反对解散房间,游戏继续
                 }
-                result.put("type",type);
-                result.put("result",isAgree);
+                result.put("type", type);
+                result.put("result", isAgree);
                 return result;
-            }else {
+            } else {
                 throw CommonError.ROOM_NOT_EXIST.newException();
             }
-        }else {
-            throw  CommonError.USER_NOT_EXIST.newException();
+        } else {
+            throw CommonError.USER_NOT_EXIST.newException();
         }
 
     }
@@ -458,6 +466,9 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                 if (roomMembers != null && roomMembers.size() == Room.playerLimit) {//所有玩家都已经准备,可以发牌
                     //调用开始发牌接口
                     //room.setStart(Room.start.STARTED.getCode());
+                    Room room = roomDao.selectOne(roomMember.getRoomId());
+                    Map<String, Object> mahjongGameData = gameService.firstPutOutCard(room, roomMembers);
+                    result.putAll(mahjongGameData);
 
                     type = 2;
                 } else {
