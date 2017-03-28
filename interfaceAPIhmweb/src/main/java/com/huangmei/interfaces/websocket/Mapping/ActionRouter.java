@@ -20,10 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 客户端接入到此类的某一个方法
@@ -141,15 +138,38 @@ public class ActionRouter {
         if (result != null) {
             sessionManager.userJoinRoom((Room) result.get(("room")), session);
         }
+        Map<String, Object> myResult = new HashMap<>();
+        Set<RoomMember> roomMembers = (Set<RoomMember>) result.get(("roomMembers"));
+        for (RoomMember roomMember : roomMembers) {
+            if (roomMember.getUserId()==(Integer) result.get("userId")){
+                myResult.put("roomMember",roomMember);
+            }
+
+        }
+        List<User> users = (ArrayList<User>) result.get(("users"));
+        for (User user : users) {
+            if (user.getId()==(Integer) result.get("userId")){
+                myResult.put("user",user);
+            }
+
+        }
         JsonResultY jsonResultY = new JsonResultY.Builder()
+                .setPid(PidValue.JOIN_ROOM_MESSAGE.getPid())
+                .setError(CommonError.SYS_SUSSES)
+                .setData(myResult)
+                .build();
+
+        messageManager.sendMessageToOtherRoomUsers(
+                ((Room) result.get(("room"))).getId().toString(),
+                (Integer) result.get("userId"),
+                jsonResultY);
+
+        result.remove("userId");
+        return new JsonResultY.Builder()
                 .setPid(PidValue.JOIN_ROOM.getPid())
                 .setError(CommonError.SYS_SUSSES)
                 .setData(result)
                 .build();
-
-        messageManager.sendMessageToRoomUsers(((Room) result.get(("room"))).getId().toString(), jsonResultY);
-
-        return null;
     }
 
     @Pid(PidValue.OUT_ROOM)
@@ -183,7 +203,7 @@ public class ActionRouter {
                     (List<MahjongGameData>) result.get("playerGameData");
             for (MahjongGameData singlePlayerGameData : singlePlayerGameDatas) {
                 Map<String, Object> myResult = new HashMap<>();
-                myResult.put("type", 2);
+                //myResult.put("type", 2);
                 myResult.put("playerGameData", singlePlayerGameData);
                 JsonResultY jsonResultY = new JsonResultY.Builder()
                         .setPid(PidValue.READY.getPid())
@@ -198,13 +218,14 @@ public class ActionRouter {
                         jsonResultY);
             }
         } else {
+            result.remove("type" );
             JsonResultY jsonResultY = new JsonResultY.Builder()
                     .setPid(PidValue.READY.getPid())
                     .setError(CommonError.SYS_SUSSES)
                     .setData(result)
                     .build();
             messageManager.sendMessageToRoomUsers(
-                    ((RoomMember) result.get(("roomMember"))).getRoomId().toString(),
+                    (result.get("roomId")).toString(),
                     jsonResultY);
         }
 
@@ -217,11 +238,16 @@ public class ActionRouter {
             throws Exception {
         Map<String, Object> result = roomService.dismissRoom(data);
 
-        return new JsonResultY.Builder()
+        JsonResultY jsonResultY = new JsonResultY.Builder()
                 .setPid(PidValue.DISMISS_ROOM.getPid())
                 .setError(CommonError.SYS_SUSSES)
                 .setData(result)
                 .build();
+        messageManager.sendMessageToRoomUsers(
+                ((Room)(result.get("room"))).getId().toString(),
+                jsonResultY);
+
+        return null;
     }
 
     @Pid(PidValue.AGREE_DISMISS)

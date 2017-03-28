@@ -54,7 +54,10 @@ public class Room implements Entity {
 
     public static enum multiple {
         COINS_WITH_2000(2000, "2000金币场"),
-        COINS_WITH_20000(20000, "20000金币场");
+        COINS_WITH_20000(20000, "20000金币场"),
+        FRIENDS_WITH_2(2, "底分为2"),
+        FRIENDS_WITH_5(5, "底分为5"),
+        FRIENDS_WITH_10(10, "底分为10");
 
 
         private int code;

@@ -55,6 +55,13 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
             user.setDiamond(0);
             user.setHorn(0);
             Integer uId = CommonUtil.createUserCode();
+            List<User> users = dao.selectAll();
+            for (User u : users) {
+                if (u.getUId()==uId){
+                    uId= CommonUtil.createUserCode();//确保用户uId的不同
+                }
+            }
+
             user.setUId(uId);
             dao.save(user);
             login_type = 1;

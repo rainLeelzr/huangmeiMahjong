@@ -49,7 +49,12 @@ public enum PidValue {
     YING_PENG(3109, "硬碰"),
     RUAN_PENG(3110, "软碰"),
 
-    GUO(3200, "过"),;
+    GUO(3200, "过"),
+
+    /**
+     * 消息推送
+     */
+    JOIN_ROOM_MESSAGE(4000, "加入房间消息推送"),;
 
     private int pid;
 
