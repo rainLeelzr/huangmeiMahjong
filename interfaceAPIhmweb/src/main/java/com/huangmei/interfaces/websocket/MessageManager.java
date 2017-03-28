@@ -74,6 +74,30 @@ public class MessageManager {
     }
 
     /**
+     * 给某个房间里的除了自己的用户发送消息
+     *
+     * @param roomId      roomId
+     * @param jsonResultY jsonResultY
+     */
+    public void sendMessageToOtherRoomUsers(String roomId, Integer userId, JsonResultY jsonResultY) {
+        Collection<WebSocketSession> roomUsers = sessionManager
+                .getRoomSessions(roomId);
+        if (roomUsers == null) {
+            log.error("给房间id为[{}]里的用户发送消息失败，从roomSessions中没有此房间id的信息");
+            return;
+        }
+
+        WebSocketSession userSession = sessionManager.getByUserId(userId);
+
+        for (WebSocketSession session : roomUsers) {
+            if (userSession != session) {
+                send(session, jsonResultY);
+            }
+        }
+
+    }
+
+    /**
      * 给某个用户发送消息
      *
      * @param userId      userId

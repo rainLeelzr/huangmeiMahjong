@@ -1,9 +1,12 @@
 package com.huangmei.commonhm.util;
 
+import com.huangmei.commonhm.dao.RoomDao;
 import com.huangmei.commonhm.model.Entity;
+import com.huangmei.commonhm.model.Room;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.fanlychie.mybatis.TemplateGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
 import java.util.*;
@@ -15,7 +18,7 @@ public class CommonUtil {
      *
      * @Title: CommonUtil.java
      * @Package commons.lander.util
-     * @Description: 创建8位数字的用户唯一标识
+     * @Description: 创建6位数字的用户唯一标识
      * @author chenwenhao
      * @date 2016-12-1 上午9:01:01
      */
@@ -23,6 +26,22 @@ public class CommonUtil {
         int i = RandomUtils.nextInt(1000000);
         if (i < 100000) {
             i += 100000;
+        }
+        return i;
+    }
+    /***
+     *
+     * @Title: CommonUtil.java
+     * @Package commons.lander.util
+     * @Description: 创建4位数字的房间号码
+     * @author chenwenhao
+     * @date 2016-12-1 上午9:01:01
+     */
+    public static Integer createRoomCode() {
+
+        int i = RandomUtils.nextInt(10000);
+        if (i < 1000) {
+            i += 1000;
         }
         return i;
     }

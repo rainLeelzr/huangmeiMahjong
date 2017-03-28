@@ -32,7 +32,11 @@ public enum PidValue {
     /**
      * 游戏过程
      */
-    PUT_OUT_CARD(3000, "出牌"),;
+    PUT_OUT_CARD(3000, "出牌"),
+    /**
+     * 消息推送
+     */
+    JOIN_ROOM_MESSAGE(4000, "加入房间消息推送"),;
 
     private int pid;
 
