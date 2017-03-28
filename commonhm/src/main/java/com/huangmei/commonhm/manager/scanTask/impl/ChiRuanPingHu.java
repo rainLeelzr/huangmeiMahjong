@@ -10,13 +10,13 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 扫描是否软平胡
+ * 扫描是否吃软平胡
  */
-public class RuanPingHu extends AbstractHuScanTask {
+public class ChiRuanPingHu extends AbstractHuScanTask {
 
     @Override
     public Operate getOperate() {
-        return Operate.RUAN_CHI_HU;
+        return Operate.CHI_RUAN_PING_HU;
     }
 
     ///**

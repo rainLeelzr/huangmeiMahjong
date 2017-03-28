@@ -17,7 +17,7 @@ public class RuanPeng extends AbstractPengScanTask {
 
     @Override
     public Operate getOperate() {
-        return Operate.YING_PENG;
+        return Operate.RUAN_PENG;
     }
 
     @Override
@@ -27,7 +27,7 @@ public class RuanPeng extends AbstractPengScanTask {
                 personalCardInfo.getRoomMember().getUserId());
         // 有大明杠肯定有碰
         for (Operate myOperate : myOperates) {
-            if(myOperate.getBaseOperate() == BaseOperate.GANG){
+            if (myOperate.getBaseOperate() == BaseOperate.GANG) {
                 return true;
             }
         }

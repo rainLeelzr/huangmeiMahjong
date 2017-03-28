@@ -9,13 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 扫描是否硬碰碰胡
+ * 扫描是否吃硬碰碰胡
  */
-public class YingPengPengHu extends AbstractHuScanTask {
+public class ChiYingPengPengHu extends AbstractHuScanTask {
 
     @Override
     public Operate getOperate() {
-        return Operate.YING_CHI_HU;
+        return Operate.CHI_YING_PENG_PENG_HU;
     }
 
     /**

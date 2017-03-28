@@ -10,13 +10,13 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 扫描是否软七对
+ * 扫描是否吃软七对
  */
-public class RuanQiDuiHu extends AbstractHuScanTask {
+public class ChiRuanQiDuiHu extends AbstractHuScanTask {
 
     @Override
     public Operate getOperate() {
-        return Operate.RUAN_CHI_HU;
+        return Operate.CHI_RUAN_QI_DUI_HU;
     }
 
     @Override
@@ -26,7 +26,6 @@ public class RuanQiDuiHu extends AbstractHuScanTask {
 
         // todome 判断是否已经有杠，是则肯定不是七对
 
-        log.debug("座位{}进行软七对扫描！", personalCardInfo.getRoomMember().getSeat());
         List<Mahjong> handCards = new ArrayList<>(personalCardInfo.getHandCards());
         handCards.add(putOutMahjong);
 

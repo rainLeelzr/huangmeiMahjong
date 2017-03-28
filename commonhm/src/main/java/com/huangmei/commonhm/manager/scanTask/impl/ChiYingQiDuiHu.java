@@ -9,13 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 扫描是否硬七对
+ * 扫描是否吃硬七对
  */
-public class YingQiDuiHu extends AbstractHuScanTask {
+public class ChiYingQiDuiHu extends AbstractHuScanTask {
 
     @Override
     public Operate getOperate() {
-        return Operate.YING_PENG;
+        return Operate.CHI_YING_QI_DUI_HU;
     }
 
     @Override

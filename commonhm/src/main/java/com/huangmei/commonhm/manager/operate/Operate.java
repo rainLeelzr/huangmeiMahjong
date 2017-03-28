@@ -8,8 +8,23 @@ import com.huangmei.commonhm.util.PidValue;
  */
 public enum Operate {
 
-    YING_CHI_HU(PidValue.YING_CHI_HU, BaseOperate.HU, "硬吃胡"),
-    RUAN_CHI_HU(PidValue.RUAN_CHI_HU, BaseOperate.HU, "软吃胡"),
+    ZI_MO_YING_PENG_PENG_HU(PidValue.YING_ZI_MO, BaseOperate.HU, "自摸硬碰碰胡"),
+    ZI_MO_RUAN_PENG_PENG_HU(PidValue.RUAN_ZI_MO, BaseOperate.HU, "自摸软碰碰胡"),
+
+    ZI_MO_YING_QI_DUI_HU(PidValue.YING_ZI_MO, BaseOperate.HU, "自摸硬七对胡"),
+    ZI_MO_RUAN_QI_DUI_HU(PidValue.RUAN_ZI_MO, BaseOperate.HU, "自摸软七对胡"),
+
+    ZI_MO_YING_PING_HU(PidValue.YING_ZI_MO, BaseOperate.HU, "自摸硬平胡"),
+    ZI_MO_RUAN_PING_HU(PidValue.RUAN_ZI_MO, BaseOperate.HU, "自摸软平胡"),
+
+    CHI_YING_PENG_PENG_HU(PidValue.YING_CHI_HU, BaseOperate.HU, "吃硬碰碰胡"),
+    CHI_RUAN_PENG_PENG_HU(PidValue.RUAN_CHI_HU, BaseOperate.HU, "吃软碰碰胡"),
+
+    CHI_YING_QI_DUI_HU(PidValue.YING_CHI_HU, BaseOperate.HU, "吃硬七对胡"),
+    CHI_RUAN_QI_DUI_HU(PidValue.RUAN_CHI_HU, BaseOperate.HU, "吃软七对胡"),
+
+    CHI_YING_PING_HU(PidValue.YING_CHI_HU, BaseOperate.HU, "吃硬平胡"),
+    CHI_RUAN_PING_HU(PidValue.RUAN_CHI_HU, BaseOperate.HU, "吃软平胡"),
 
     YING_AN_GANG(PidValue.YING_AN_GANG, BaseOperate.GANG, "硬暗杠"),
     RUAN_AN_GANG(PidValue.RUAN_AN_GANG, BaseOperate.GANG, "软暗杠"),

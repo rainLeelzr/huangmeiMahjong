@@ -26,23 +26,23 @@ public class GetACardManager extends AbstractManager implements InitializingBean
         scanTasks = new ArrayList<>();
 
         // 硬胡
-        scanTasks.add(YingPengPengHu.class);
-        scanTasks.add(YingQiDuiHu.class);
-        scanTasks.add(YingPingHu.class);
+        scanTasks.add(ZiMoYingPengPengHu.class);
+        scanTasks.add(ZiMoYingQiDuiHu.class);
+        scanTasks.add(ZiMoYingPingHu.class);
 
         // 软胡
-        scanTasks.add(RuanPengPengHu.class);
-        scanTasks.add(RuanQiDuiHu.class);
-        scanTasks.add(RuanPingHu.class);
+        scanTasks.add(ZiMoRuanPengPengHu.class);
+        scanTasks.add(ZiMoRuanQiDuiHu.class);
+        scanTasks.add(ZiMoRuanPingHu.class);
 
-        // 硬杠
-        scanTasks.add(YingDaMingGang.class);
+        // 硬暗杠
+        scanTasks.add(YingAnGang.class);
 
         // 硬碰
         scanTasks.add(YingPeng.class);
 
-        // 软大明杠
-        scanTasks.add(RuanDaMingGang.class);
+        // 软暗杠
+        scanTasks.add(RuanAnGang.class);
 
         // 软碰
         scanTasks.add(RuanPeng.class);

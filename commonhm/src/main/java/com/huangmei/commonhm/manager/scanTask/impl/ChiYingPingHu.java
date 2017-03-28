@@ -9,13 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 扫描是否硬平胡
+ * 扫描是否吃硬平胡
  */
-public class YingPingHu extends AbstractHuScanTask {
+public class ChiYingPingHu extends AbstractHuScanTask {
 
     @Override
     public Operate getOperate() {
-        return Operate.YING_PENG;
+        return Operate.CHI_YING_PING_HU;
     }
 
     private static int[] noHuSize = new int[]{1, 4, 7, 10, 13};

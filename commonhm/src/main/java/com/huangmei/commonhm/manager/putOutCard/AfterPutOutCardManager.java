@@ -25,14 +25,14 @@ public class AfterPutOutCardManager extends AbstractManager implements Initializ
     public void afterPropertiesSet() throws Exception {
         scanTasks = new ArrayList<>();
         // 硬胡
-        scanTasks.add(YingPengPengHu.class);
-        scanTasks.add(YingQiDuiHu.class);
-        scanTasks.add(YingPingHu.class);
+        scanTasks.add(ChiYingPengPengHu.class);
+        scanTasks.add(ChiYingQiDuiHu.class);
+        scanTasks.add(ChiYingPingHu.class);
 
         // 软胡
-        scanTasks.add(RuanPengPengHu.class);
-        scanTasks.add(RuanQiDuiHu.class);
-        scanTasks.add(RuanPingHu.class);
+        scanTasks.add(ChiRuanPengPengHu.class);
+        scanTasks.add(ChiRuanQiDuiHu.class);
+        scanTasks.add(ChiRuanPingHu.class);
 
         // 硬大明杠
         scanTasks.add(YingDaMingGang.class);
