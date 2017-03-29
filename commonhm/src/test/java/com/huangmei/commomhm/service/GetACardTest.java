@@ -263,8 +263,6 @@ public class GetACardTest extends AbstractTestClass {
             leftCards.add(allMahjongs.get(index));
         }
 
-        mahjongGameData.setLeftCardCount(leftCards.size());
-
         // 麻将数据存redis
         gameRedis.saveMahjongGameData(mahjongGameData);
 
@@ -344,8 +342,6 @@ public class GetACardTest extends AbstractTestClass {
         for (; index < allMahjongs.size(); index++) {
             leftCards.add(allMahjongs.get(index));
         }
-
-        mahjongGameData.setLeftCardCount(leftCards.size());
 
         // 麻将数据存redis
         gameRedis.saveMahjongGameData(mahjongGameData);
@@ -500,8 +496,6 @@ public class GetACardTest extends AbstractTestClass {
         for (; index < allMahjongs.size(); index++) {
             leftCards.add(allMahjongs.get(index));
         }
-
-        mahjongGameData.setLeftCardCount(leftCards.size());
 
         // 麻将数据存redis
         gameRedis.saveMahjongGameData(mahjongGameData);
@@ -658,8 +652,6 @@ public class GetACardTest extends AbstractTestClass {
             leftCards.add(allMahjongs.get(index));
         }
 
-        mahjongGameData.setLeftCardCount(leftCards.size());
-
         // 麻将数据存redis
         gameRedis.saveMahjongGameData(mahjongGameData);
 
@@ -815,8 +807,6 @@ public class GetACardTest extends AbstractTestClass {
             leftCards.add(allMahjongs.get(index));
         }
 
-        mahjongGameData.setLeftCardCount(leftCards.size());
-
         // 麻将数据存redis
         gameRedis.saveMahjongGameData(mahjongGameData);
 
@@ -970,8 +960,6 @@ public class GetACardTest extends AbstractTestClass {
         for (; index < allMahjongs.size(); index++) {
             leftCards.add(allMahjongs.get(index));
         }
-
-        mahjongGameData.setLeftCardCount(leftCards.size());
 
         // 麻将数据存redis
         gameRedis.saveMahjongGameData(mahjongGameData);
@@ -1127,8 +1115,6 @@ public class GetACardTest extends AbstractTestClass {
             leftCards.add(allMahjongs.get(index));
         }
 
-        mahjongGameData.setLeftCardCount(leftCards.size());
-
         // 麻将数据存redis
         gameRedis.saveMahjongGameData(mahjongGameData);
 
@@ -1163,7 +1149,7 @@ public class GetACardTest extends AbstractTestClass {
         //Long version = versionRedis.nextVersion(room.getId());
 
 
-        MahjongGameData temp = gameRedis.getMahjongGameData(room.getId());
+        MahjongGameData temp;
         //temp = gameRedis.getMahjongGameData(room.getId());
 
         temp = mockYingJiaGangData(room, roomMembers);
@@ -1282,8 +1268,6 @@ public class GetACardTest extends AbstractTestClass {
         for (; index < allMahjongs.size(); index++) {
             leftCards.add(allMahjongs.get(index));
         }
-
-        mahjongGameData.setLeftCardCount(leftCards.size());
 
         // 添加座位4的碰
         PersonalCardInfo personalCardInfo = mahjongGameData.getPersonalCardInfos().get(3);
@@ -1450,8 +1434,6 @@ public class GetACardTest extends AbstractTestClass {
         for (; index < allMahjongs.size(); index++) {
             leftCards.add(allMahjongs.get(index));
         }
-
-        mahjongGameData.setLeftCardCount(leftCards.size());
 
         // 添加座位4的碰
         PersonalCardInfo personalCardInfo = mahjongGameData.getPersonalCardInfos().get(3);

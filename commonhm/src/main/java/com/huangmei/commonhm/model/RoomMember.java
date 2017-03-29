@@ -19,15 +19,6 @@ public class RoomMember implements Entity {
     protected Integer state;
     /**  */
     protected Integer userId;
-    private Integer uId;//用户的uId
-
-    public Integer getuId() {
-        return uId;
-    }
-
-    public void setuId(Integer uId) {
-        this.uId = uId;
-    }
 
     public Integer getId() {
         return id;

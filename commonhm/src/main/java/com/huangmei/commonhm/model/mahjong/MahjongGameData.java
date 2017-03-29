@@ -33,9 +33,6 @@ public class MahjongGameData {
     // 庄家的座位号，从1开始
     private Integer bankerSite;
 
-    // 庄家的uId，从1开始
-    private Integer bankerUId;
-
     // 骰子
     private Integer[] dices;
 
@@ -46,11 +43,6 @@ public class MahjongGameData {
      * 剩下可以被摸牌的麻将，有先后顺序
      */
     private List<Mahjong> leftCards;
-
-    /**
-     * 剩下可以被摸牌的麻将的数量
-     */
-    private Integer leftCardCount;
 
     /**
      * 玩家打出的牌
@@ -153,8 +145,6 @@ public class MahjongGameData {
             leftCards.add(allMahjongs.get(index));
         }
 
-        mahjongGameData.leftCardCount = leftCards.size();
-
         // 设定宝娘
         // todome 设定宝娘
 
@@ -188,14 +178,6 @@ public class MahjongGameData {
         baoMahjongs.add(Mahjong.THREE_TIAO_4);
         data.setBaoMahjongs(baoMahjongs);
         data.getBaoMahjongMakeUpMahjongs();
-    }
-
-    public Integer getBankerUId() {
-        return bankerUId;
-    }
-
-    public void setBankerUId(Integer bankerUId) {
-        this.bankerUId = bankerUId;
     }
 
     public List<Mahjong> getBaoMahjongMakeUpMahjongs() {
@@ -257,14 +239,6 @@ public class MahjongGameData {
         this.dices = dices;
     }
 
-    public Integer getLeftCardCount() {
-        return leftCardCount;
-    }
-
-    public void setLeftCardCount(Integer leftCardCount) {
-        this.leftCardCount = leftCardCount;
-    }
-
     @Override
     public String toString() {
         return "{\"MahjongGameData\":{"
@@ -272,7 +246,6 @@ public class MahjongGameData {
                 + ", \"dices\":" + Arrays.toString(dices)
                 + ", \"personalCardInfos\":" + personalCardInfos
                 + ", \"leftCards\":" + leftCards
-                + ", \"leftCardCount\":\"" + leftCardCount + "\""
                 + ", \"outCards\":" + outCards
                 + ", \"version\":\"" + version + "\""
                 + "}}";

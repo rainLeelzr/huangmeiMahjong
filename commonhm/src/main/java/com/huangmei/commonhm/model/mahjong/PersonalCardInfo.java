@@ -1,6 +1,6 @@
 package com.huangmei.commonhm.model.mahjong;
 
-import com.huangmei.commonhm.manager.operate.BaseOperate;
+import com.huangmei.commonhm.manager.operate.Operate;
 import com.huangmei.commonhm.model.RoomMember;
 
 import java.util.List;
@@ -23,14 +23,9 @@ public class PersonalCardInfo {
 
 
     /**
-     * 手牌Id
-     */
-    private List<Integer> handCardIds;
-
-    /**
      * 客户端可以选择的操作，例如胡、碰、杠，不包含过
      */
-    private List<BaseOperate> baseOperates;
+    private List<Operate> operates;
 
     /**
      * 在剩下的牌中，摸一张牌
@@ -46,14 +41,6 @@ public class PersonalCardInfo {
      * 已经杠的牌
      */
     private List<Combo> gangs;
-
-    public List<Integer> getHandCardIds() {
-        return handCardIds;
-    }
-
-    public void setHandCardIds(List<Integer> handCardIds) {
-        this.handCardIds = handCardIds;
-    }
 
     public List<Combo> getPengs() {
         return pengs;
@@ -71,12 +58,12 @@ public class PersonalCardInfo {
         this.gangs = gangs;
     }
 
-    public List<BaseOperate> getBaseOperates() {
-        return baseOperates;
+    public List<Operate> getOperates() {
+        return operates;
     }
 
-    public void setBaseOperates(List<BaseOperate> baseOperates) {
-        this.baseOperates = baseOperates;
+    public void setOperates(List<Operate> operates) {
+        this.operates = operates;
     }
 
     public Mahjong getTouchMahjong() {

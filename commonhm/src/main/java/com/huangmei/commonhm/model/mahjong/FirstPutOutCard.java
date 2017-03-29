@@ -8,10 +8,10 @@ import java.util.List;
  */
 public class FirstPutOutCard {
 
-    // 需要接收本对象的玩家uId
+    // 需要接收本对象的玩家uId,先设置为userId，在api层转换为uId
     private Integer uId;
 
-    // 庄家的uId，从1开始
+    // 庄家的uId，先设置为userId，在api层转换为uId
     private Integer bankerUId;
 
     // 骰子

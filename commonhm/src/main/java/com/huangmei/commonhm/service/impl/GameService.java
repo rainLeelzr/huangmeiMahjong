@@ -8,9 +8,7 @@ import com.huangmei.commonhm.manager.operate.CanDoOperate;
 import com.huangmei.commonhm.model.Room;
 import com.huangmei.commonhm.model.RoomMember;
 import com.huangmei.commonhm.model.User;
-import com.huangmei.commonhm.model.mahjong.Mahjong;
-import com.huangmei.commonhm.model.mahjong.MahjongGameData;
-import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
+import com.huangmei.commonhm.model.mahjong.*;
 import com.huangmei.commonhm.redis.GameRedis;
 import com.huangmei.commonhm.redis.RoomRedis;
 import com.huangmei.commonhm.redis.VersionRedis;
@@ -26,8 +24,8 @@ import java.util.*;
 @Service
 public class GameService {
 
-    Logger log = LoggerFactory.getLogger(GameService.class);
-
+    public static final String FIRST_PUT_OUT_CARD_KEY = "firstPutOutCard";
+    private static final Logger log = LoggerFactory.getLogger(GameService.class);
     @Autowired
     private GameRedis gameRedis;
 
@@ -85,35 +83,38 @@ public class GameService {
             roomMemberDao.update(roomMember);
             roomRedis.editRoom(roomMember);
             roomRedis.joinRoom(roomMember);
-
-
         }
 
         // 添加roomMenber，拆分成4份手牌数据，传给客户端
-        List<MahjongGameData> singlePlayerGameDatas = new ArrayList<>(players);
+        List<FirstPutOutCard> firstPutOutCards = new ArrayList<>(players);
+        ClientTouchMahjong clientTouchMahjong = new ClientTouchMahjong();
         for (int i = 0; i < players; i++) {
-            MahjongGameData singlePlayerGameData = new MahjongGameData();
-            singlePlayerGameDatas.add(singlePlayerGameData);
-            singlePlayerGameData.setBaoMahjongs(mahjongGameData.getBaoMahjongs());
-            singlePlayerGameData.setBankerSite(mahjongGameData.getBankerSite());
-            singlePlayerGameData.setBankerUId(bankerUId);//先设置为userId，在api层转换为uId
-            singlePlayerGameData.setDices(mahjongGameData.getDices());
-            singlePlayerGameData.setLeftCardCount(mahjongGameData.getLeftCardCount());
-            singlePlayerGameData.setOutCards(mahjongGameData.getOutCards());
-            singlePlayerGameData.setVersion(version);
-
-            // 添加玩家信息RoomMember
-            List<PersonalCardInfo> personalCardInfos = new ArrayList<>(1);
             PersonalCardInfo personalCardInfo = mahjongGameData.getPersonalCardInfos().get(i);
+            // 添加玩家信息RoomMember
+            personalCardInfo.setRoomMember(roomMembers.get(i));
+
+            FirstPutOutCard fpc = new FirstPutOutCard();
+            fpc.setBankerUId(bankerUId);//先设置为userId，在api层转换为uId
+            fpc.setuId(personalCardInfo.getRoomMember().getUserId());//先设置为userId，在api层转换为uId
+            fpc.setDices(mahjongGameData.getDices());
+
             List<Integer> handCardIds = new ArrayList<>(personalCardInfo.getHandCards().size());
             for (Mahjong mahjong : personalCardInfo.getHandCards()) {
                 handCardIds.add(mahjong.getId());
             }
-            personalCardInfo.setHandCardIds(handCardIds);
-            personalCardInfo.setRoomMember(roomMembers.get(i));
-            personalCardInfos.add(personalCardInfo);
-            singlePlayerGameData.setPersonalCardInfos(personalCardInfos);
+            fpc.setHandCardIds(handCardIds);
 
+            fpc.setLeftCardCount(mahjongGameData.getLeftCards().size());
+
+            List<Integer> baoMahjongIds = new ArrayList<>(mahjongGameData.getBaoMahjongs().size());
+            for (Mahjong mahjong : mahjongGameData.getBaoMahjongs()) {
+                baoMahjongIds.add(mahjong.getId());
+            }
+            fpc.setBaoMahjongIds(baoMahjongIds);
+
+            fpc.setVersion(version);
+
+            firstPutOutCards.add(fpc);
         }
 
         // 扫描摸到牌的人可以的操作
@@ -131,28 +132,14 @@ public class GameService {
                                 .getUserId())
                 );
 
-        // 将可行操作列表添加到用户的可行列表中
-        //if (canOperates.size() != 0) {
-        //    singlePlayerGameDatas.get(bankerSite - 1)
-        //            .getPersonalCardInfos().get(0)
-        //            .setBaseOperates(canOperates.get(0).getOperates().);
-        //}
-
-
-        result.put("playerGameData", singlePlayerGameDatas);
+        result.put(FIRST_PUT_OUT_CARD_KEY, firstPutOutCards);
 
         log.debug("初始化一局麻将添加玩家信息RoomMember的数据:{}", JsonUtil.toJson(mahjongGameData));
 
         // 麻将数据存redis
         gameRedis.saveMahjongGameData(mahjongGameData);
 
-        // 删除具体的手牌，保留麻将id，传给客户端
-        for (MahjongGameData singlePlayerGameData : singlePlayerGameDatas) {
-            singlePlayerGameData.getPersonalCardInfos().get(0).setHandCards(null);
-        }
-
         return result;
-
     }
 
     /**
