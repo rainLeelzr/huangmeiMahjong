@@ -33,9 +33,7 @@
         <include refid="OrderbySQL"/>
         <include refid="LimitSQL"/>
     </select>
-    <select id="selectByRoomCode" parameterType="com.huangmei.commonhm.model.Room" resultMap="RoomResultMap">
-        SELECT * FROM TB_ROOM WHERE room_code=#{roomCode} and state != 3;
-    </select>
+
 
     <resultMap id="RoomResultMap" type="com.huangmei.commonhm.model.Room">
         <id property="id" column="ID"/>

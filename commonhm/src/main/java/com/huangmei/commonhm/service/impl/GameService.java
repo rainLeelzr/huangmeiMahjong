@@ -12,6 +12,7 @@ import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.MahjongGameData;
 import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
 import com.huangmei.commonhm.redis.GameRedis;
+import com.huangmei.commonhm.redis.RoomRedis;
 import com.huangmei.commonhm.redis.VersionRedis;
 import com.huangmei.commonhm.util.CommonError;
 import com.huangmei.commonhm.util.JsonUtil;
@@ -41,6 +42,9 @@ public class GameService {
 
     @Autowired
     private RoomMemberDao roomMemberDao;
+
+    @Autowired
+    private RoomRedis roomRedis;
 
     /***
      * 初始化数据包括：骰子的点数、每个人的手牌、剩余的牌等信息。
@@ -79,6 +83,10 @@ public class GameService {
         for (RoomMember roomMember : roomMembers) {
             roomMember.setState(RoomMember.state.PLAYING.getCode());
             roomMemberDao.update(roomMember);
+            roomRedis.editRoom(roomMember);
+            roomRedis.joinRoom(roomMember);
+
+
         }
 
         // 添加roomMenber，拆分成4份手牌数据，传给客户端

@@ -141,14 +141,14 @@ public class ActionRouter {
         Map<String, Object> myResult = new HashMap<>();
         Set<RoomMember> roomMembers = (Set<RoomMember>) result.get(("roomMembers"));
         for (RoomMember roomMember : roomMembers) {
-            if (roomMember.getUserId() == (Integer) result.get("userId")) {
+            if (roomMember.getUserId().equals((Integer) result.get("userId"))) {
                 myResult.put("roomMember", roomMember);
             }
 
         }
         List<User> users = (ArrayList<User>) result.get(("users"));
         for (User user : users) {
-            if (user.getId() == (Integer) result.get("userId")) {
+            if (user.getId().equals((Integer) result.get("userId"))) {
                 myResult.put("user", user);
             }
 
@@ -198,15 +198,6 @@ public class ActionRouter {
             throws Exception {
         Map<String, Object> result = roomService.ready(data);
         Integer type = (Integer) result.get("type");
-        result.remove("type");
-        JsonResultY jsonResultY = new JsonResultY.Builder()
-                .setPid(PidValue.READY.getPid())
-                .setError(CommonError.SYS_SUSSES)
-                .setData(result)
-                .build();
-        messageManager.sendMessageToRoomUsers(
-                (result.get("roomId")).toString(),
-                jsonResultY);
 
         if (type == 2) {
             List<MahjongGameData> singlePlayerGameDatas =
@@ -258,6 +249,15 @@ public class ActionRouter {
                         temp);
             }
         }
+        result.remove("type");
+        JsonResultY jsonResultY = new JsonResultY.Builder()
+                .setPid(PidValue.READY.getPid())
+                .setError(CommonError.SYS_SUSSES)
+                .setData(result)
+                .build();
+        messageManager.sendMessageToRoomUsers(
+                (result.get("roomId")).toString(),
+                jsonResultY);
 
         return null;
     }

@@ -34,8 +34,6 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
     @Autowired
     private RoomMemberDao roomMemberDao;
 
-    @Autowired
-    private RoomDao roomDao;
 
     @Autowired
     private RoomRedis roomRedis;
@@ -80,9 +78,9 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                 Integer roomCode = CommonUtil.createRoomCode();
                 Entity.RoomCriteria roomCriteria = new Entity.RoomCriteria();
                 roomCriteria.setState(Entity.Value.ne(Room.state.DISMISS.getCode()));
-                List<Room> rooms = roomDao.selectList(roomCriteria);
+                List<Room> rooms = dao.selectList(roomCriteria);
                 for (Room r : rooms) {
-                    if (r.getRoomCode() == roomCode) {
+                    if (r.getRoomCode().equals(roomCode)) {
                         roomCode = CommonUtil.createRoomCode();//假如创建房间的号码与未解散的房间相同,需要再次创建,确保不同
                     }
                 }
@@ -232,8 +230,8 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
             for (RoomMember member : roomMembers) {
                 Entity.UserCriteria uc = new Entity.UserCriteria();
                 uc.setId(Entity.Value.eq(member.getUserId()));
-                user = userDao.selectOne(uc);
-                users.add(user);
+                User u = userDao.selectOne(uc);
+                users.add(u);
             }
             result.put("users", users);
             result.put("userId", user.getId());
@@ -455,7 +453,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                 }
                 result.put("type", type);
                 result.put("result", isAgree);
-                result.put("room",room);
+                result.put("room", room);
                 return result;
             } else {
                 throw CommonError.ROOM_NOT_EXIST.newException();
@@ -491,21 +489,22 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
             roomMember = roomMemberDao.selectByUserIdForReady(roomMember);
             if (roomMember != null) {//需要在房间中并且之前的状态为待准备的玩家才能准备
                 roomMember.setState(RoomMember.state.READY.getCode());
+                roomMemberDao.update(roomMember);
 
                 //判断房间用户是否已经全部准备
                 List<RoomMember> roomMembers = roomMemberDao.selectForStart(roomMember);
                 if (roomMembers != null && roomMembers.size() == Room.playerLimit) {//所有玩家都已经准备,可以发牌
                     //调用开始发牌接口
-                    Room room = roomDao.selectOne(roomMember.getRoomId());
+                    Room room = dao.selectOne(roomMember.getRoomId());
                     room.setStart(Room.start.STARTED.getCode());
+                    room.setState(Room.state.PLAYING.getCode());
+                    dao.update(room);
                     Map<String, Object> mahjongGameData = gameService.firstPutOutCard(room, roomMembers);
                     result.putAll(mahjongGameData);
-                    roomMember.setState(RoomMember.state.PLAYING.getCode());
                     type = 2;
                 } else {
                     type = 1;
                 }
-                roomMemberDao.update(roomMember);
                 roomRedis.editRoom(roomMember);
                 roomRedis.joinRoom(roomMember);
                 result.put("type", type);
