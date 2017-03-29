@@ -2,6 +2,7 @@ package com.huangmei.commonhm.service.impl;
 
 import com.huangmei.commonhm.dao.RoomMemberDao;
 import com.huangmei.commonhm.manager.getACard.GetACardManager;
+import com.huangmei.commonhm.manager.operate.Operate;
 import com.huangmei.commonhm.manager.putOutCard.AfterPutOutCardManager;
 import com.huangmei.commonhm.manager.operate.CanDoOperate;
 import com.huangmei.commonhm.model.Room;
@@ -85,7 +86,7 @@ public class GameService {
         for (int i = 0; i < players; i++) {
             MahjongGameData singlePlayerGameData = new MahjongGameData();
             singlePlayerGameDatas.add(singlePlayerGameData);
-
+            singlePlayerGameData.setBaoMahjongs(mahjongGameData.getBaoMahjongs());
             singlePlayerGameData.setBankerSite(mahjongGameData.getBankerSite());
             singlePlayerGameData.setBankerUId(bankerUId);//先设置为userId，在api层转换为uId
             singlePlayerGameData.setDices(mahjongGameData.getDices());
@@ -121,6 +122,13 @@ public class GameService {
                                 .getRoomMember()
                                 .getUserId())
                 );
+
+        // 将可行操作列表添加到用户的可行列表中
+        //if (canOperates.size() != 0) {
+        //    singlePlayerGameDatas.get(bankerSite - 1)
+        //            .getPersonalCardInfos().get(0)
+        //            .setBaseOperates(canOperates.get(0).getOperates().);
+        //}
 
 
         result.put("playerGameData", singlePlayerGameDatas);

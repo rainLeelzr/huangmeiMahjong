@@ -160,6 +160,12 @@ public class MahjongGameData {
 
         // 设定宝牌
         // todome 设定宝牌
+        List<Mahjong> baoMahjongs = new ArrayList<>(4);
+        baoMahjongs.add(Mahjong.THREE_TIAO_1);
+        baoMahjongs.add(Mahjong.THREE_TIAO_2);
+        baoMahjongs.add(Mahjong.THREE_TIAO_3);
+        baoMahjongs.add(Mahjong.THREE_TIAO_4);
+        mahjongGameData.setBaoMahjongs(baoMahjongs);
 
         return mahjongGameData;
     }
