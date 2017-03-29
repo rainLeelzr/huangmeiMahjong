@@ -7,4 +7,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class RoomDaoImpl extends BaseDaoImpl<Integer, Room> implements RoomDao {
 
+    @Override
+    public Room selectByRoomCode(Room room) {
+        return sqlSessionTemplate.selectOne(statement("selectByRoomCode"),room);
+    }
 }

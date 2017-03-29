@@ -198,6 +198,16 @@ public class ActionRouter {
             throws Exception {
         Map<String, Object> result = roomService.ready(data);
         Integer type = (Integer) result.get("type");
+        result.remove("type");
+        JsonResultY jsonResultY = new JsonResultY.Builder()
+                .setPid(PidValue.READY.getPid())
+                .setError(CommonError.SYS_SUSSES)
+                .setData(result)
+                .build();
+        messageManager.sendMessageToRoomUsers(
+                (result.get("roomId")).toString(),
+                jsonResultY);
+
         if (type == 2) {
             List<MahjongGameData> singlePlayerGameDatas =
                     (List<MahjongGameData>) result.get("playerGameData");
@@ -235,8 +245,8 @@ public class ActionRouter {
                 singlePlayerGameData.setBankerUId(bankerUser.getUId());
 
                 myResult.put("playerGameData", singlePlayerGameData);
-                JsonResultY jsonResultY = new JsonResultY.Builder()
-                        .setPid(PidValue.READY.getPid())
+                JsonResultY temp = new JsonResultY.Builder()
+                        .setPid(PidValue.PUT_OUT_ALL_CARD.getPid())
                         .setError(CommonError.SYS_SUSSES)
                         .setData(myResult)
                         .build();
@@ -245,18 +255,8 @@ public class ActionRouter {
                                 .get(0)
                                 .getRoomMember()
                                 .getUserId(),
-                        jsonResultY);
+                        temp);
             }
-        } else {
-            result.remove("type");
-            JsonResultY jsonResultY = new JsonResultY.Builder()
-                    .setPid(PidValue.READY.getPid())
-                    .setError(CommonError.SYS_SUSSES)
-                    .setData(result)
-                    .build();
-            messageManager.sendMessageToRoomUsers(
-                    (result.get("roomId")).toString(),
-                    jsonResultY);
         }
 
         return null;
@@ -285,11 +285,15 @@ public class ActionRouter {
     public JsonResultY agreeDismiss(WebSocketSession session, JSONObject data)
             throws Exception {
         Map<String, Object> result = roomService.agreeDismiss(data);
-        return new JsonResultY.Builder()
+        JsonResultY jsonResultY = new JsonResultY.Builder()
                 .setPid(PidValue.AGREE_DISMISS.getPid())
                 .setError(CommonError.SYS_SUSSES)
                 .setData(result)
                 .build();
+        messageManager.sendMessageToRoomUsers(
+                ((Room)(result.get("room"))).getId().toString(),
+                jsonResultY);
+        return null;
     }
 
     @Pid(PidValue.TEST)

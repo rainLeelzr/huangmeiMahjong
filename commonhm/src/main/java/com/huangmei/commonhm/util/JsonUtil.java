@@ -1,11 +1,14 @@
 package com.huangmei.commonhm.util;
 
+import com.huangmei.commonhm.model.RoomMember;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import net.sf.json.JsonConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +39,18 @@ public class JsonUtil {
     public static <T> Object toBean(String json, Class<T> type, Map<String,
             Class> classMap) {
         JSONObject jsonObject = JSONObject.fromObject(json);
-        return JSONObject.toBean(jsonObject, type, classMap);
+        Object o = JSONObject.toBean(jsonObject, type, classMap);
+        if(o instanceof RoomMember){
+            SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            RoomMember rm = (RoomMember) o;
+            String joinTime = (String) jsonObject.get("joinTime");
+            try {
+                rm.setJoinTime(sf.parse(joinTime));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        return o;
     }
 
     public static int getInt(JSONObject data, String key) {
