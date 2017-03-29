@@ -62,6 +62,9 @@ public class GameService {
         int players = room.getPlayers();
         int bankerSite = 1;
 
+        //先设置为userId，在api层转换为uId
+        Integer bankerUId = roomMembers.get(bankerSite - 1).getUserId();
+
         // 初始化一局麻将的数据
         MahjongGameData mahjongGameData = MahjongGameData.initData(players, bankerSite);
         log.debug("初始化一局麻将的数据:{}", JsonUtil.toJson(mahjongGameData));
@@ -77,28 +80,14 @@ public class GameService {
             roomMemberDao.update(roomMember);
         }
 
-        // 扫描摸到牌的人可以的操作
-        ArrayList<CanDoOperate> canOperates =
-                getACardManager.scan(
-                        mahjongGameData,
-                        mahjongGameData
-                                .getPersonalCardInfos()
-                                .get(bankerSite)
-                                .getTouchMahjong(),
-                        new User(mahjongGameData
-                                .getPersonalCardInfos()
-                                .get(bankerSite)
-                                .getRoomMember()
-                                .getUserId())
-                );
-
-        // 拆分成4份手牌数据，传给客户端
+        // 添加roomMenber，拆分成4份手牌数据，传给客户端
         List<MahjongGameData> singlePlayerGameDatas = new ArrayList<>(players);
         for (int i = 0; i < players; i++) {
             MahjongGameData singlePlayerGameData = new MahjongGameData();
             singlePlayerGameDatas.add(singlePlayerGameData);
 
             singlePlayerGameData.setBankerSite(mahjongGameData.getBankerSite());
+            singlePlayerGameData.setBankerUId(bankerUId);//先设置为userId，在api层转换为uId
             singlePlayerGameData.setDices(mahjongGameData.getDices());
             singlePlayerGameData.setLeftCardCount(mahjongGameData.getLeftCardCount());
             singlePlayerGameData.setOutCards(mahjongGameData.getOutCards());
@@ -112,18 +101,39 @@ public class GameService {
                 handCardIds.add(mahjong.getId());
             }
             personalCardInfo.setHandCardIds(handCardIds);
-            personalCardInfo.setHandCards(null);
             personalCardInfo.setRoomMember(roomMembers.get(i));
             personalCardInfos.add(personalCardInfo);
             singlePlayerGameData.setPersonalCardInfos(personalCardInfos);
 
         }
+
+        // 扫描摸到牌的人可以的操作
+        ArrayList<CanDoOperate> canOperates =
+                getACardManager.scan(
+                        mahjongGameData,
+                        mahjongGameData
+                                .getPersonalCardInfos()
+                                .get(bankerSite - 1)
+                                .getTouchMahjong(),
+                        new User(mahjongGameData
+                                .getPersonalCardInfos()
+                                .get(bankerSite - 1)
+                                .getRoomMember()
+                                .getUserId())
+                );
+
+
         result.put("playerGameData", singlePlayerGameDatas);
 
         log.debug("初始化一局麻将添加玩家信息RoomMember的数据:{}", JsonUtil.toJson(mahjongGameData));
 
         // 麻将数据存redis
         gameRedis.saveMahjongGameData(mahjongGameData);
+
+        // 删除具体的手牌，保留麻将id，传给客户端
+        for (MahjongGameData singlePlayerGameData : singlePlayerGameDatas) {
+            singlePlayerGameData.getPersonalCardInfos().get(0).setHandCards(null);
+        }
 
         return result;
 

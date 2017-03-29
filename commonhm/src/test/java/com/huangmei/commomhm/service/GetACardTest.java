@@ -6,6 +6,7 @@ import com.huangmei.commonhm.manager.operate.CanDoOperate;
 import com.huangmei.commonhm.model.Room;
 import com.huangmei.commonhm.model.RoomMember;
 import com.huangmei.commonhm.model.User;
+import com.huangmei.commonhm.model.mahjong.Combo;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.MahjongGameData;
 import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
@@ -235,6 +236,11 @@ public class GetACardTest extends AbstractTestClass {
             PersonalCardInfo handCard = new PersonalCardInfo();
             Set<Mahjong> mahjongs = new TreeSet<>();
             handCard.setHandCards(mahjongs);
+            // 碰列表
+            handCard.setPengs(new ArrayList<Combo>(4));
+
+            // 杠列表
+            handCard.setGangs(new ArrayList<Combo>(4));
             handCards.add(handCard);
         }
 
@@ -312,6 +318,11 @@ public class GetACardTest extends AbstractTestClass {
             PersonalCardInfo handCard = new PersonalCardInfo();
             Set<Mahjong> mahjongs = new TreeSet<>();
             handCard.setHandCards(mahjongs);
+            // 碰列表
+            handCard.setPengs(new ArrayList<Combo>(4));
+
+            // 杠列表
+            handCard.setGangs(new ArrayList<Combo>(4));
             handCards.add(handCard);
         }
 
@@ -463,6 +474,11 @@ public class GetACardTest extends AbstractTestClass {
             PersonalCardInfo handCard = new PersonalCardInfo();
             Set<Mahjong> mahjongs = new TreeSet<>();
             handCard.setHandCards(mahjongs);
+            // 碰列表
+            handCard.setPengs(new ArrayList<Combo>(4));
+
+            // 杠列表
+            handCard.setGangs(new ArrayList<Combo>(4));
             handCards.add(handCard);
         }
 
@@ -615,6 +631,11 @@ public class GetACardTest extends AbstractTestClass {
             PersonalCardInfo handCard = new PersonalCardInfo();
             Set<Mahjong> mahjongs = new TreeSet<>();
             handCard.setHandCards(mahjongs);
+            // 碰列表
+            handCard.setPengs(new ArrayList<Combo>(4));
+
+            // 杠列表
+            handCard.setGangs(new ArrayList<Combo>(4));
             handCards.add(handCard);
         }
 
@@ -767,6 +788,11 @@ public class GetACardTest extends AbstractTestClass {
             PersonalCardInfo handCard = new PersonalCardInfo();
             Set<Mahjong> mahjongs = new TreeSet<>();
             handCard.setHandCards(mahjongs);
+            // 碰列表
+            handCard.setPengs(new ArrayList<Combo>(4));
+
+            // 杠列表
+            handCard.setGangs(new ArrayList<Combo>(4));
             handCards.add(handCard);
         }
 
@@ -918,6 +944,11 @@ public class GetACardTest extends AbstractTestClass {
             PersonalCardInfo handCard = new PersonalCardInfo();
             Set<Mahjong> mahjongs = new TreeSet<>();
             handCard.setHandCards(mahjongs);
+            // 碰列表
+            handCard.setPengs(new ArrayList<Combo>(4));
+
+            // 杠列表
+            handCard.setGangs(new ArrayList<Combo>(4));
             handCards.add(handCard);
         }
 
@@ -1069,6 +1100,11 @@ public class GetACardTest extends AbstractTestClass {
             PersonalCardInfo handCard = new PersonalCardInfo();
             Set<Mahjong> mahjongs = new TreeSet<>();
             handCard.setHandCards(mahjongs);
+            // 碰列表
+            handCard.setPengs(new ArrayList<Combo>(4));
+
+            // 杠列表
+            handCard.setGangs(new ArrayList<Combo>(4));
             handCards.add(handCard);
         }
 
@@ -1092,6 +1128,344 @@ public class GetACardTest extends AbstractTestClass {
         }
 
         mahjongGameData.setLeftCardCount(leftCards.size());
+
+        // 麻将数据存redis
+        gameRedis.saveMahjongGameData(mahjongGameData);
+
+        return mahjongGameData;
+    }
+
+    /**
+     * 硬加杠 {座位4,可以杠、}
+     */
+    @Test
+    public void TestYingJiaGang() throws IllegalAccessException, InstantiationException {
+        // 测试数据
+        Room room = new Room();
+        room.setId(222);
+        room.setPlayers(4);
+
+        RoomMember[] roomMembers = new RoomMember[room.getPlayers()];
+        for (int i = 0; i < room.getPlayers(); i++) {
+            roomMembers[i] = new RoomMember();
+            roomMembers[i].setId(i + 1);
+            roomMembers[i].setUserId(i + 1);
+            roomMembers[i].setJoinTime(new Date());
+            roomMembers[i].setRoomId(room.getId());
+            roomMembers[i].setSeat(i + 1);
+            roomMembers[i].setState(RoomMember.state.UNREADY.getCode());
+        }
+
+        // 第一次发牌
+        //gameService.firstPutOutCard(room, roomMembers);
+
+        // 第一个人出牌
+        //Long version = versionRedis.nextVersion(room.getId());
+
+
+        MahjongGameData temp = gameRedis.getMahjongGameData(room.getId());
+        //temp = gameRedis.getMahjongGameData(room.getId());
+
+        temp = mockYingJiaGangData(room, roomMembers);
+        Long version = versionRedis.nowVersion(room.getId());
+        //Long version = temp.getVersion();
+
+        Set<Mahjong> handCards = temp.getPersonalCardInfos().get(0).getHandCards();
+        Mahjong specifiedMahjong = null;
+
+        // 随机抽一张出牌
+        //int r = RandomUtils.nextInt(handCards.size());
+        int i = 0;
+        //for (Mahjong handCard : handCards) {
+        //    if (r == i) {
+        //        putOutCard = handCard;
+        //        break;
+        //    }
+        //    i++;
+        //}
+
+        // 随机摸到牌
+        for (Mahjong handCard : handCards) {
+            specifiedMahjong = Mahjong.THREE_TIAO_1;
+            break;
+        }
+
+        log.debug("打出/摸到麻将：{}", specifiedMahjong);
+
+        User user = new User();
+        user.setId(1);
+
+        // 扫描摸到牌的人可以的操作
+        ArrayList<CanDoOperate> canOperates =
+                getACardManager.scan(
+                        temp,
+                        specifiedMahjong,
+                        new User(temp
+                                .getPersonalCardInfos()
+                                .get(3)
+                                .getRoomMember()
+                                .getUserId())
+                );
+        log.debug("最终扫描结果：{}", canOperates);
+    }
+
+    /**
+     * 模拟出硬加杠GameData
+     */
+    public MahjongGameData mockYingJiaGangData(Room room, RoomMember[] roomMembers) {
+        //硬对对胡{座位4,可以胡、}
+        List<Mahjong> allMahjongs = MockComboMahjongList.getRuanDaMingGangMahjongs();
+
+        int players = 4;
+        int bankerSite = 1;
+
+        // 创建麻将游戏的数据结构
+        MahjongGameData mahjongGameData = new MahjongGameData();
+        mahjongGameData.setBankerSite(1);
+        List<PersonalCardInfo> handCards = new ArrayList<>(players);
+        List<Mahjong> leftCards = new ArrayList<>(
+                allMahjongs.size() - players * MahjongGameData
+                        .HAND_CARD_NUMBER);
+        mahjongGameData.setPersonalCardInfos(handCards);
+        mahjongGameData.setLeftCards(leftCards);
+
+        // 掷骰
+        mahjongGameData.setDices(MahjongGameData.rollDice());
+
+        // 宝牌
+        List<Mahjong> baoMahjongs = new ArrayList<>(4);
+        baoMahjongs.add(Mahjong.THREE_TIAO_1);
+        baoMahjongs.add(Mahjong.THREE_TIAO_2);
+        baoMahjongs.add(Mahjong.THREE_TIAO_3);
+        baoMahjongs.add(Mahjong.THREE_TIAO_4);
+        mahjongGameData.setBaoMahjongs(baoMahjongs);
+        log.debug("宝牌:{}", baoMahjongs);
+
+        // 获取新版本号
+        Long version = versionRedis.nextVersion(roomMembers[0].getRoomId());
+        mahjongGameData.setVersion(version);
+
+        // 打乱所有麻将牌顺序
+        //System.out.println("乱序后麻将：" + allMahjongs);
+
+        // allMahjongs的下标，一共120张牌，用于记录分到第几张牌
+        int index = 0;
+
+        // 创建每个玩家的手牌对象
+        for (int i = 0; i < players; i++) {
+            PersonalCardInfo handCard = new PersonalCardInfo();
+            Set<Mahjong> mahjongs = new TreeSet<>();
+            handCard.setHandCards(mahjongs);
+            // 碰列表
+            handCard.setPengs(new ArrayList<Combo>(4));
+
+            // 杠列表
+            handCard.setGangs(new ArrayList<Combo>(4));
+            handCards.add(handCard);
+        }
+
+        // 把牌分给玩家
+        Set<Mahjong> temp;
+        int j = 0;
+        for (PersonalCardInfo handCard : handCards) {
+            temp = handCard.getHandCards();
+            for (int i = 0; i < MahjongGameData.HAND_CARD_NUMBER; i++) {
+                temp.add(allMahjongs.get(index++));
+            }
+            handCard.setRoomMember(roomMembers[j++]);
+        }
+
+        // 庄家摸多一张牌
+        handCards.get(bankerSite - 1).setTouchMahjong(allMahjongs.get(index++));
+
+        // 剩下的牌放在leftCards
+        for (; index < allMahjongs.size(); index++) {
+            leftCards.add(allMahjongs.get(index));
+        }
+
+        mahjongGameData.setLeftCardCount(leftCards.size());
+
+        // 添加座位4的碰
+        PersonalCardInfo personalCardInfo = mahjongGameData.getPersonalCardInfos().get(3);
+        List<Combo> pengs = personalCardInfo.getPengs();
+        Combo pengCombo = new Combo();
+        pengCombo.setType(Combo.Type.AAA);
+        List<Mahjong> pengMahjongs = new ArrayList<>(3);
+        pengMahjongs.add(Mahjong.THREE_TIAO_1);
+        pengMahjongs.add(Mahjong.THREE_TIAO_1);
+        pengMahjongs.add(Mahjong.THREE_TIAO_1);
+        pengCombo.setMahjongs(pengMahjongs);
+        pengs.add(pengCombo);
+
+        // 麻将数据存redis
+        gameRedis.saveMahjongGameData(mahjongGameData);
+
+        return mahjongGameData;
+    }
+
+    /**
+     * 软加杠 {座位4,可以杠、}
+     */
+    @Test
+    public void TestRuanJiaGang() throws IllegalAccessException, InstantiationException {
+        // 测试数据
+        Room room = new Room();
+        room.setId(222);
+        room.setPlayers(4);
+
+        RoomMember[] roomMembers = new RoomMember[room.getPlayers()];
+        for (int i = 0; i < room.getPlayers(); i++) {
+            roomMembers[i] = new RoomMember();
+            roomMembers[i].setId(i + 1);
+            roomMembers[i].setUserId(i + 1);
+            roomMembers[i].setJoinTime(new Date());
+            roomMembers[i].setRoomId(room.getId());
+            roomMembers[i].setSeat(i + 1);
+            roomMembers[i].setState(RoomMember.state.UNREADY.getCode());
+        }
+
+        // 第一次发牌
+        //gameService.firstPutOutCard(room, roomMembers);
+
+        // 第一个人出牌
+        //Long version = versionRedis.nextVersion(room.getId());
+
+
+        MahjongGameData temp = gameRedis.getMahjongGameData(room.getId());
+        //temp = gameRedis.getMahjongGameData(room.getId());
+
+        temp = mockRuanJiaGangData(room, roomMembers);
+        Long version = versionRedis.nowVersion(room.getId());
+        //Long version = temp.getVersion();
+
+        Set<Mahjong> handCards = temp.getPersonalCardInfos().get(0).getHandCards();
+        Mahjong putOutCard = null;
+
+        // 随机抽一张出牌
+        //int r = RandomUtils.nextInt(handCards.size());
+        int i = 0;
+        //for (Mahjong handCard : handCards) {
+        //    if (r == i) {
+        //        putOutCard = handCard;
+        //        break;
+        //    }
+        //    i++;
+        //}
+
+        // 随机摸到牌
+        for (Mahjong handCard : handCards) {
+            putOutCard = handCard;
+            break;
+        }
+
+        log.debug("打出/摸到麻将：{}", putOutCard);
+
+        User user = new User();
+        user.setId(1);
+
+        // 扫描摸到牌的人可以的操作
+        ArrayList<CanDoOperate> canOperates =
+                getACardManager.scan(
+                        temp,
+                        putOutCard,
+                        new User(temp
+                                .getPersonalCardInfos()
+                                .get(3)
+                                .getRoomMember()
+                                .getUserId())
+                );
+        log.debug("最终扫描结果：{}", canOperates);
+    }
+
+    /**
+     * 模拟出软加杠GameData
+     */
+    public MahjongGameData mockRuanJiaGangData(Room room, RoomMember[] roomMembers) {
+        //硬对对胡{座位4,可以胡、}
+        List<Mahjong> allMahjongs = MockComboMahjongList.getRuanJiaGangMahjongs();
+
+        int players = 4;
+        int bankerSite = 1;
+
+        // 创建麻将游戏的数据结构
+        MahjongGameData mahjongGameData = new MahjongGameData();
+        mahjongGameData.setBankerSite(1);
+        List<PersonalCardInfo> handCards = new ArrayList<>(players);
+        List<Mahjong> leftCards = new ArrayList<>(
+                allMahjongs.size() - players * MahjongGameData
+                        .HAND_CARD_NUMBER);
+        mahjongGameData.setPersonalCardInfos(handCards);
+        mahjongGameData.setLeftCards(leftCards);
+
+        // 掷骰
+        mahjongGameData.setDices(MahjongGameData.rollDice());
+
+        // 宝牌
+        List<Mahjong> baoMahjongs = new ArrayList<>(4);
+        baoMahjongs.add(Mahjong.THREE_TIAO_1);
+        baoMahjongs.add(Mahjong.THREE_TIAO_2);
+        baoMahjongs.add(Mahjong.THREE_TIAO_3);
+        baoMahjongs.add(Mahjong.THREE_TIAO_4);
+        mahjongGameData.setBaoMahjongs(baoMahjongs);
+        log.debug("宝牌:{}", baoMahjongs);
+
+        // 获取新版本号
+        Long version = versionRedis.nextVersion(roomMembers[0].getRoomId());
+        mahjongGameData.setVersion(version);
+
+        // 打乱所有麻将牌顺序
+        //System.out.println("乱序后麻将：" + allMahjongs);
+
+        // allMahjongs的下标，一共120张牌，用于记录分到第几张牌
+        int index = 0;
+
+        // 创建每个玩家的手牌对象
+        for (int i = 0; i < players; i++) {
+            PersonalCardInfo handCard = new PersonalCardInfo();
+            Set<Mahjong> mahjongs = new TreeSet<>();
+            handCard.setHandCards(mahjongs);
+            // 碰列表
+            handCard.setPengs(new ArrayList<Combo>(4));
+
+            // 杠列表
+            handCard.setGangs(new ArrayList<Combo>(4));
+            handCards.add(handCard);
+        }
+
+        // 把牌分给玩家
+        Set<Mahjong> temp;
+        int j = 0;
+        for (PersonalCardInfo handCard : handCards) {
+            temp = handCard.getHandCards();
+            for (int i = 0; i < MahjongGameData.HAND_CARD_NUMBER; i++) {
+                temp.add(allMahjongs.get(index++));
+            }
+            handCard.setRoomMember(roomMembers[j++]);
+        }
+
+        // 庄家摸多一张牌
+        handCards.get(bankerSite - 1).setTouchMahjong(allMahjongs.get(index++));
+
+        // 剩下的牌放在leftCards
+        for (; index < allMahjongs.size(); index++) {
+            leftCards.add(allMahjongs.get(index));
+        }
+
+        mahjongGameData.setLeftCardCount(leftCards.size());
+
+        // 添加座位4的碰
+        PersonalCardInfo personalCardInfo = mahjongGameData.getPersonalCardInfos().get(3);
+        List<Combo> pengs = personalCardInfo.getPengs();
+        Combo pengCombo = new Combo();
+        pengCombo.setType(Combo.Type.AAA);
+        List<Mahjong> pengMahjongs = new ArrayList<>(3);
+        //pengMahjongs.add(Mahjong.ONE_WANG_1);
+        //pengMahjongs.add(Mahjong.ONE_WANG_2);
+        pengMahjongs.add(Mahjong.ONE_WANG_2);
+        pengMahjongs.add(Mahjong.THREE_TIAO_1);
+        pengMahjongs.add(Mahjong.THREE_TIAO_1);
+        pengCombo.setMahjongs(pengMahjongs);
+        pengs.add(pengCombo);
 
         // 麻将数据存redis
         gameRedis.saveMahjongGameData(mahjongGameData);

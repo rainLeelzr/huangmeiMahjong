@@ -26,7 +26,7 @@ public class ChiYingQiDuiHu extends AbstractHuScanTask {
         // todome 判断是否已经有杠，是则肯定不是七对
 
         List<Mahjong> handCards = new ArrayList<>(personalCardInfo.getHandCards());
-        handCards.add(putOutMahjong);
+        handCards.add(specifiedMahjong);
         return isQiDui(handCards);
     }
 

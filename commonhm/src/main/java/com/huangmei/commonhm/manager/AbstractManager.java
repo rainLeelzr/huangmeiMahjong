@@ -34,7 +34,7 @@ public abstract class AbstractManager {
         for (Class<? extends BaseScanTask> scanTask : scanTasks) {
             BaseScanTask task = scanTask.newInstance();
             task.setMahjongGameData(mahjongGameData);
-            task.setPutOutMahjong(putOutMahjong);
+            task.setSpecifiedMahjong(putOutMahjong);
             task.setUser(user);
             task.setCanOperates(canDoOperates);
             task.setPersonalCardInfoPicker(personalCardInfoPicker);

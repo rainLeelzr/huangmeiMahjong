@@ -2,8 +2,9 @@ package com.huangmei.commonhm.manager.scanTask.impl;
 
 import com.huangmei.commonhm.manager.operate.Operate;
 import com.huangmei.commonhm.manager.putOutCard.scanTask.AbstractGangScanTask;
+import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
-import com.huangmei.commonhm.model.mahjong.algorithm.Combo;
+import com.huangmei.commonhm.model.mahjong.Combo;
 
 import java.util.List;
 
@@ -27,14 +28,44 @@ public class YingJiaGang extends AbstractGangScanTask {
             return false;
         }
 
-        for (Combo peng : pengs) {
-            if (peng.getMahjongs().get(0).getNumber().equals(
-                    putOutMahjong.getNumber())) {
-                return true;
-            }
-        }
+        Integer baoMahjongNumber = mahjongGameData.getBaoMahjongs().get(0).getNumber();
 
-        return false;
+        // 考虑宝牌归位的情况
+        if (baoMahjongNumber.equals(specifiedMahjong.getNumber())) {
+            // 如果摸到的是宝牌，则已碰列表中是归位碰才能硬加杠
+            int pengBaoMahjongCount;
+            for (Combo peng : pengs) {
+                pengBaoMahjongCount = 0;
+                for (Mahjong mahjong : peng.getMahjongs()) {
+                    if (mahjong.getNumber().equals(baoMahjongNumber)) {
+                        pengBaoMahjongCount++;
+                    }
+                }
+                if (pengBaoMahjongCount == peng.getMahjongs().size()) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            // 如果有宝牌，或则不是摸到的麻将，则不是硬加杠
+            boolean match = true;// 某个Combo是否硬加杠
+            for (Combo peng : pengs) {
+                for (Mahjong mahjong : peng.getMahjongs()) {
+                    if (mahjong.getNumber().equals(baoMahjongNumber)) {
+                        match = false;
+                        break;
+                    } else if (!mahjong.getNumber().equals(specifiedMahjong.getNumber())) {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match) {
+                    return true;
+                }
+            }
+            // 循环pengs结束，都没有match=true，即没有硬加杠
+            return false;
+        }
     }
 
 }

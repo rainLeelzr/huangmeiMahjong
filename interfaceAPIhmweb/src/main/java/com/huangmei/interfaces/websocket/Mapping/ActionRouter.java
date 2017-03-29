@@ -141,15 +141,15 @@ public class ActionRouter {
         Map<String, Object> myResult = new HashMap<>();
         Set<RoomMember> roomMembers = (Set<RoomMember>) result.get(("roomMembers"));
         for (RoomMember roomMember : roomMembers) {
-            if (roomMember.getUserId()==(Integer) result.get("userId")){
-                myResult.put("roomMember",roomMember);
+            if (roomMember.getUserId() == (Integer) result.get("userId")) {
+                myResult.put("roomMember", roomMember);
             }
 
         }
         List<User> users = (ArrayList<User>) result.get(("users"));
         for (User user : users) {
-            if (user.getId()==(Integer) result.get("userId")){
-                myResult.put("user",user);
+            if (user.getId() == (Integer) result.get("userId")) {
+                myResult.put("user", user);
             }
 
         }
@@ -201,9 +201,39 @@ public class ActionRouter {
         if (type == 2) {
             List<MahjongGameData> singlePlayerGameDatas =
                     (List<MahjongGameData>) result.get("playerGameData");
+
+            // 获取庄家uId
+            Integer userId = singlePlayerGameDatas.get(0).getBankerUId();
+            WebSocketSession bankerSession = sessionManager.getByUserId(userId);
+            User bankerUser;
+            if (bankerSession == null) {
+                bankerUser = userService.selectOne(userId);
+            } else {
+                bankerUser = sessionManager.getUser(bankerSession.getId());
+            }
+
             for (MahjongGameData singlePlayerGameData : singlePlayerGameDatas) {
                 Map<String, Object> myResult = new HashMap<>();
                 //myResult.put("type", 2);
+
+                // 客户端要求设置uid
+                RoomMember roomMember = singlePlayerGameData.getPersonalCardInfos().get(0).getRoomMember();
+                User user;
+                if (roomMember.getUserId().equals(bankerUser.getUId())) {
+                    user = bankerUser;
+                } else {
+                    WebSocketSession tempSession = sessionManager.getByUserId(roomMember.getUserId());
+                    if (tempSession == null) {
+                        user = userService.selectOne(roomMember.getUserId());
+                    } else {
+                        user = sessionManager.getUser(tempSession.getId());
+                    }
+                }
+                roomMember.setuId(user.getUId());
+
+                // 客户端要求设置bankerSiteUid庄家的uid
+                singlePlayerGameData.setBankerUId(bankerUser.getUId());
+
                 myResult.put("playerGameData", singlePlayerGameData);
                 JsonResultY jsonResultY = new JsonResultY.Builder()
                         .setPid(PidValue.READY.getPid())
@@ -218,7 +248,7 @@ public class ActionRouter {
                         jsonResultY);
             }
         } else {
-            result.remove("type" );
+            result.remove("type");
             JsonResultY jsonResultY = new JsonResultY.Builder()
                     .setPid(PidValue.READY.getPid())
                     .setError(CommonError.SYS_SUSSES)
@@ -244,7 +274,7 @@ public class ActionRouter {
                 .setData(result)
                 .build();
         messageManager.sendMessageToRoomUsers(
-                ((Room)(result.get("room"))).getId().toString(),
+                ((Room) (result.get("room"))).getId().toString(),
                 jsonResultY);
 
         return null;

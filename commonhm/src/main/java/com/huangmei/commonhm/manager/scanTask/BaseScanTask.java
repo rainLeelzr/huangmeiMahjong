@@ -23,7 +23,7 @@ public abstract class BaseScanTask {
     /**
      * 用户打出的牌
      */
-    protected Mahjong putOutMahjong;
+    protected Mahjong specifiedMahjong;
     /**
      * 出牌的玩家
      */
@@ -93,12 +93,12 @@ public abstract class BaseScanTask {
         this.mahjongGameData = mahjongGameData;
     }
 
-    public Mahjong getPutOutMahjong() {
-        return putOutMahjong;
+    public Mahjong getSpecifiedMahjong() {
+        return specifiedMahjong;
     }
 
-    public void setPutOutMahjong(Mahjong putOutMahjong) {
-        this.putOutMahjong = putOutMahjong;
+    public void setSpecifiedMahjong(Mahjong specifiedMahjong) {
+        this.specifiedMahjong = specifiedMahjong;
     }
 
     public void scan() throws IllegalAccessException, InstantiationException {

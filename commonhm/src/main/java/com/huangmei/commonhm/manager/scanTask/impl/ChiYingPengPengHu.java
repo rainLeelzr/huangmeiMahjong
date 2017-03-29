@@ -26,7 +26,7 @@ public class ChiYingPengPengHu extends AbstractHuScanTask {
     @Override
     public boolean doScan(PersonalCardInfo personalCardInfo) throws InstantiationException, IllegalAccessException {
         List<Mahjong> handCards = new ArrayList<>(personalCardInfo.getHandCards());
-        handCards.add(putOutMahjong);
+        handCards.add(specifiedMahjong);
         return isPengPengHu(handCards);
     }
 }

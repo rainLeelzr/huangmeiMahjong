@@ -42,12 +42,12 @@ public class RuanPeng extends AbstractPengScanTask {
         // 把宝牌全部变成打出的牌，判断玩家手牌有没有两只与putOutMahjong相同的牌
         for (Mahjong myBaoMahjong : myBaoMahjongs) {
             handCards.remove(myBaoMahjong);
-            handCards.add(putOutMahjong);
+            handCards.add(specifiedMahjong);
         }
 
         int match = 0;
         for (Mahjong mahjong : handCards) {
-            if (mahjong.getNumber().equals(putOutMahjong.getNumber())) {
+            if (mahjong.getNumber().equals(specifiedMahjong.getNumber())) {
                 match++;
             }
             if (match == 2) {

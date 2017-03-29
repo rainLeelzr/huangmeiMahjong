@@ -3,7 +3,7 @@ package com.huangmei.commonhm.manager.putOutCard.scanTask;
 
 import com.huangmei.commonhm.manager.scanTask.BaseScanTask;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
-import com.huangmei.commonhm.model.mahjong.algorithm.Combo;
+import com.huangmei.commonhm.model.mahjong.Combo;
 
 import java.util.ArrayList;
 import java.util.Collections;

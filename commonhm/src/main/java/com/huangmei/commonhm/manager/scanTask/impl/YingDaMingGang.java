@@ -28,7 +28,7 @@ public class YingDaMingGang extends AbstractGangScanTask {
         // 判断玩家手牌有没有三只与putOutMahjong相同的牌
         int match = 0;
         for (Mahjong mahjong : personalCardInfo.getHandCards()) {
-            if (mahjong.getNumber().equals(putOutMahjong.getNumber())) {
+            if (mahjong.getNumber().equals(specifiedMahjong.getNumber())) {
                 match++;
             }
             if (match == 3) {

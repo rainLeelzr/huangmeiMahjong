@@ -33,6 +33,9 @@ public class MahjongGameData {
     // 庄家的座位号，从1开始
     private Integer bankerSite;
 
+    // 庄家的uId，从1开始
+    private Integer bankerUId;
+
     // 骰子
     private Integer[] dices;
 
@@ -123,6 +126,13 @@ public class MahjongGameData {
             PersonalCardInfo handCard = new PersonalCardInfo();
             Set<Mahjong> mahjongs = new TreeSet<>();
             handCard.setHandCards(mahjongs);
+
+            // 碰列表
+            handCard.setPengs(new ArrayList<Combo>(4));
+
+            // 杠列表
+            handCard.setGangs(new ArrayList<Combo>(4));
+
             handCards.add(handCard);
         }
 
@@ -172,6 +182,14 @@ public class MahjongGameData {
         baoMahjongs.add(Mahjong.THREE_TIAO_4);
         data.setBaoMahjongs(baoMahjongs);
         data.getBaoMahjongMakeUpMahjongs();
+    }
+
+    public Integer getBankerUId() {
+        return bankerUId;
+    }
+
+    public void setBankerUId(Integer bankerUId) {
+        this.bankerUId = bankerUId;
     }
 
     public List<Mahjong> getBaoMahjongMakeUpMahjongs() {

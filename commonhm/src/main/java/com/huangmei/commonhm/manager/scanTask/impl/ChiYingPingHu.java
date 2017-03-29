@@ -23,13 +23,13 @@ public class ChiYingPingHu extends AbstractHuScanTask {
     @Override
     public boolean doScan(PersonalCardInfo personalCardInfo) throws InstantiationException, IllegalAccessException {
         List<Mahjong> handCards = new ArrayList<>(personalCardInfo.getHandCards());
-        handCards.add(putOutMahjong);
+        handCards.add(specifiedMahjong);
         return isPinghu(handCards);
     }
 
     //public boolean isPingHu(PersonalCardInfo personalCardInfo) {
     //    Set<Mahjong> handCards = new HashSet<>(personalCardInfo.getHandCards());
-    //    handCards.add(putOutMahjong);
+    //    handCards.add(specifiedMahjong);
     //
     //    // 按麻将的字号分组
     //    Map<Integer, Set<Mahjong>> ziHaoMahjongs = groupByZiHao(handCards);

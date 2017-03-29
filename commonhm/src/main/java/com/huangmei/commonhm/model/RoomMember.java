@@ -3,55 +3,31 @@ package com.huangmei.commonhm.model;
 public class RoomMember implements Entity {
 
     private static final long serialVersionUID = 1L;
-
-    /**
-     * 玩家加入房间后的状态
-     */
-    public static enum state {
-        UNREADY(1, "待准备"),
-        READY(2, "已准备"),
-        PLAYING(3, "游戏中"),
-        OUT_ROOM(4, "退出房间"),;
-
-        private int code;
-
-        private String name;
-
-        public int getCode() {
-            return code;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        state(int code, String name) {
-            this.code = code;
-            this.name = name;
-        }
-    }
-
-
     /**  */
     protected Integer id;
-
     /**  */
     protected java.util.Date joinTime;
-
     /**  */
     protected java.util.Date leaveTime;
-
     /**  */
     protected Integer roomId;
-
-    /** 玩家的位置,取值1,2,3,4...,不大于房间允许的总人数 */
+    /**
+     * 玩家的位置,取值1,2,3,4...,不大于房间允许的总人数
+     */
     protected Integer seat;
-
     /**  */
     protected Integer state;
-
     /**  */
     protected Integer userId;
+    private Integer uId;//用户的uId
+
+    public Integer getuId() {
+        return uId;
+    }
+
+    public void setuId(Integer uId) {
+        this.uId = uId;
+    }
 
     public Integer getId() {
         return id;
@@ -150,6 +126,33 @@ public class RoomMember implements Entity {
             return false;
         }
         return true;
+    }
+
+    /**
+     * 玩家加入房间后的状态
+     */
+    public static enum state {
+        UNREADY(1, "待准备"),
+        READY(2, "已准备"),
+        PLAYING(3, "游戏中"),
+        OUT_ROOM(4, "退出房间"),;
+
+        private int code;
+
+        private String name;
+
+        state(int code, String name) {
+            this.code = code;
+            this.name = name;
+        }
+
+        public int getCode() {
+            return code;
+        }
+
+        public String getName() {
+            return name;
+        }
     }
 
 }

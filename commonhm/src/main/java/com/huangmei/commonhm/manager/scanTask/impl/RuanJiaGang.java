@@ -4,7 +4,7 @@ import com.huangmei.commonhm.manager.operate.Operate;
 import com.huangmei.commonhm.manager.putOutCard.scanTask.AbstractGangScanTask;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
-import com.huangmei.commonhm.model.mahjong.algorithm.Combo;
+import com.huangmei.commonhm.model.mahjong.Combo;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ public class RuanJiaGang extends AbstractGangScanTask {
 
     @Override
     public Operate getOperate() {
-        return Operate.YING_JIA_GANG;
+        return Operate.RUAN_JIA_GANG;
     }
 
     @Override
@@ -46,11 +46,12 @@ public class RuanJiaGang extends AbstractGangScanTask {
                 return false;
             }
 
-            if (peng.getMahjongs().get(0).getNumber().equals(
-                    putOutMahjong.getNumber())) {
-                return true;
+            // 如果有一只麻将与specifiedMahjong相同，则是软加杠
+            for (Mahjong mahjong : peng.getMahjongs()) {
+                if (mahjong.getNumber().equals(specifiedMahjong.getNumber())) {
+                    return true;
+                }
             }
-
         }
 
         return false;

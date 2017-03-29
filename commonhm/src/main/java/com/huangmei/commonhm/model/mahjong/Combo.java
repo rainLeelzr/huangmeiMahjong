@@ -1,6 +1,4 @@
-package com.huangmei.commonhm.model.mahjong.algorithm;
-
-import com.huangmei.commonhm.model.mahjong.Mahjong;
+package com.huangmei.commonhm.model.mahjong;
 
 import java.util.List;
 

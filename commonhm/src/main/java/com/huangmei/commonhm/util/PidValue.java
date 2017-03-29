@@ -57,7 +57,8 @@ public enum PidValue {
     /**
      * 消息推送
      */
-    JOIN_ROOM_MESSAGE(4000, "加入房间消息推送"),;
+    JOIN_ROOM_MESSAGE(4000, "加入房间消息推送"),
+    PUT_OUT_ALL_CARD(4001, "游戏开始发牌消息推送"),;
 
     private int pid;
 

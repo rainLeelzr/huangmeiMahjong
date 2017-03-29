@@ -28,7 +28,7 @@ public class ChiRuanPengPengHu extends AbstractHuScanTask {
     @Override
     public boolean doScan(PersonalCardInfo personalCardInfo) throws InstantiationException, IllegalAccessException {
         List<Mahjong> handCards = new ArrayList<>(personalCardInfo.getHandCards());
-        handCards.add(putOutMahjong);
+        handCards.add(specifiedMahjong);
 
         List<Mahjong> myBaoMahjongs = getMyBaoMahjongs(handCards);
 
