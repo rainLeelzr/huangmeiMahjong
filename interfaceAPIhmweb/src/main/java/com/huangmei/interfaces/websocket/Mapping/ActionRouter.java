@@ -357,30 +357,26 @@ public class ActionRouter {
                 .build();
     }
 
-    @Pid(PidValue.PUT_OUT_CARD)
-    //@LoginResource
-    public JsonResultY putOutCard(WebSocketSession session, JSONObject data)
+    @Pid(PidValue.PLAY_A_MAHJONG)
+    @LoginResource
+    public JsonResultY playACard(WebSocketSession session, JSONObject data)
             throws Exception {
 
         int mahjongId = JsonUtil.getInt(data, "mahjongId");
         long version = JsonUtil.getLong(data, "version");
 
-        Mahjong putOutCard = Mahjong.parse(mahjongId);
+        Mahjong playedMahjong = Mahjong.parse(mahjongId);
 
         User user = sessionManager.getUser(session.getId());
         Room room = sessionManager.getRoom(session.getId());
 
-        room = new Room();
-        room.setId(222);
-
-        user = new User();
-        user.setId(1);
-        gameService.putOutCard(putOutCard, room, user, version);
+        gameService.playAMahjong(room, user, playedMahjong, version);
+        //gameService.putOutCard(putOutCard, room, user, version);
 
         return new JsonResultY.Builder()
-                .setPid(PidValue.TEST)
+                .setPid(PidValue.PLAY_A_MAHJONG)
                 .setError(CommonError.SYS_SUSSES)
-                .setData(putOutCard)
+                .setData(null)
                 .build();
     }
 

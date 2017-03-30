@@ -81,7 +81,7 @@ public class GameService {
             roomRedis.joinRoom(roomMember);
         }
 
-        // 添加roomMenber，拆分成4份手牌数据，传给客户端
+        // 添加roomMeMber，拆分成4份手牌数据，传给客户端
         List<FirstPutOutCard> firstPutOutCards = new ArrayList<>(players);
         ClientTouchMahjong clientTouchMahjong = new ClientTouchMahjong();
         for (int i = 0; i < players; i++) {
@@ -125,6 +125,43 @@ public class GameService {
     }
 
     /**
+     * 打出一张麻将
+     */
+    public void playAMahjong(Room room, User user, Mahjong playedMahjong, long version) {
+        // 验证版本号
+        validateVersion(room, version);
+
+        // 删除redis的等待客户端操作对象waitingClientOperate
+        CanDoOperate waitingClientOperate = gameRedis.getWaitingClientOperate(room.getId());
+        if (!waitingClientOperate.getRoomMember().getUserId().equals(user.getId())) {
+            throw CommonError.NOT_YOUR_TURN.newException();
+        }
+        gameRedis.deleteWaitingClientOperate(room.getId());
+
+        // 取出麻将数据对象
+        MahjongGameData mahjongGameData = gameRedis.getMahjongGameData(room.getId());
+
+        // 出牌验证
+        if (!putOutCardValidate(playedMahjong, mahjongGameData, user)) {
+            throw CommonError.USER_NOT_HAVE_SPECIFIED_CARD.newException();
+        }
+
+        // 广播打出的牌
+
+    }
+
+    /**
+     * 玩家出牌时，验证其版本号
+     */
+    private void validateVersion(Room room, long version) {
+        Long nowVersion = versionRedis.nowVersion(room.getId());
+        if (!nowVersion.equals(version)) {
+            throw CommonError.SYS_VERSION_TIMEOUT.newException();
+        }
+    }
+
+
+    /**
      * 客户端打出一张牌的处理逻辑。
      * 遍历其他3个玩家，判断是否有碰，明杠，吃胡。
      * 如果有，则按优先级降序，存进redis的
@@ -134,26 +171,21 @@ public class GameService {
      * 如果待操作集合中有人选择了执行操作，则清空待操作集合，执行相应操作。
      *
      * @param putOutMahjong 打出的牌对象
-     * @param user          用户信息
      * @param room          用户所在的房间
      * @param version       消息版本号
      */
     public void putOutCard(Mahjong putOutMahjong, Room room, User user,
                            Long version)
             throws InstantiationException, IllegalAccessException {
-
-        Long nowVersion = versionRedis.nowVersion(room.getId());
-        //Long nowVersion = 10l;
-        if (!nowVersion.equals(version)) {
-            throw CommonError.SYS_VERSION_TIMEOUT.newException();
-        }
+        // 验证版本号
+        validateVersion(room, version);
 
         // 取出麻将数据
         MahjongGameData mahjongGameData = gameRedis.getMahjongGameData(
                 room.getId());
 
         // 出牌验证
-        if (!putOutCardValidate(putOutMahjong, mahjongGameData, user, room)) {
+        if (!putOutCardValidate(putOutMahjong, mahjongGameData, user)) {
             throw CommonError.USER_NOT_HAVE_SPECIFIED_CARD.newException();
         }
 
@@ -176,7 +208,7 @@ public class GameService {
      * 验证客户端出的牌是否合法，合法则在玩家的PersonalCardInfo手牌集合中移除该麻将牌
      */
     private boolean putOutCardValidate(Mahjong putOutCard, MahjongGameData
-            mahjongGameData, User user, Room room) {
+            mahjongGameData, User user) {
         // 获取玩家手牌信息
         PersonalCardInfo personalCardInfo = null;
         for (PersonalCardInfo gameData : mahjongGameData.getPersonalCardInfos()) {
@@ -196,18 +228,19 @@ public class GameService {
         }
 
         // 判断客户端打出的牌是不是其拥有的手牌
-        log.debug("验证前座位{}的手牌：{}", personalCardInfo.getRoomMember().getSeat(),
-                personalCardInfo.getHandCards());
+        boolean isHandCard = false;
         Iterator<Mahjong> iterator = personalCardInfo.getHandCards().iterator();
         while (iterator.hasNext()) {
             Mahjong mahjong = iterator.next();
             if (mahjong == putOutCard) {
                 iterator.remove();
-                return true;
+                isHandCard = true;
             }
         }
-
-        return false;
+        if (isHandCard) {
+            personalCardInfo.getHandCards().add(putOutCard);
+        }
+        return isHandCard;
 
     }
 

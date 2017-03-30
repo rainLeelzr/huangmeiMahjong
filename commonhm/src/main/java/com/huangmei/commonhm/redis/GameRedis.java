@@ -39,7 +39,7 @@ public class GameRedis {
                 MAHJONG_GAME_DATA_FIELD_KEY,
                 MahjongGameData.class,
                 MahjongGameData.classMap);
-        if (temp != null || temp.getPersonalCardInfos() != null || temp
+        if (temp != null && temp.getPersonalCardInfos() != null && temp
                 .getPersonalCardInfos().size() != 0) {
             for (PersonalCardInfo personalCardInfo : temp
                     .getPersonalCardInfos()) {
@@ -52,11 +52,16 @@ public class GameRedis {
     }
 
     public CanDoOperate getWaitingClientOperate(Integer roomId) {
-        CanDoOperate temp = (CanDoOperate)  redis.hash.get(
+        CanDoOperate temp = (CanDoOperate) redis.hash.get(
                 String.format(RoomRedis.ROOM_KEY, roomId),
                 WAITING_CLIENT_OPERATE_FIELD_KEY,
                 CanDoOperate.class,
                 CanDoOperate.classMap);
         return temp;
+    }
+
+    public void deleteWaitingClientOperate(Integer roomId) {
+        redis.hash.delete(String.format(RoomRedis.ROOM_KEY, roomId),
+                WAITING_CLIENT_OPERATE_FIELD_KEY);
     }
 }

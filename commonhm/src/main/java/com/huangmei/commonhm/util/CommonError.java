@@ -43,7 +43,9 @@ public enum CommonError {
             RedisGameDataException.class),
 
     USER_NOT_HAVE_SPECIFIED_CARD(400002, "玩家没有拥有指定的牌",
-            UesrNotHaveCardException.class);
+            UesrNotHaveCardException.class),
+    NOT_YOUR_TURN(400003, "没有轮到该用户操作",
+            NotYourTurnException.class);
 
     public static Map<String, CommonError> exceptions = new HashMap<String, CommonError>();
     private static Logger log = LoggerFactory.getLogger(CommonError.class);
