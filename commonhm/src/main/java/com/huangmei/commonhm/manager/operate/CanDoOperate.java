@@ -2,6 +2,8 @@ package com.huangmei.commonhm.manager.operate;
 
 import com.huangmei.commonhm.model.RoomMember;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -9,6 +11,15 @@ import java.util.Set;
  * 如胡、杠、碰
  */
 public class CanDoOperate implements Comparable {
+
+    // json转对象时用到的复杂对象转换字段关系映射
+    public static Map<String, Class> classMap;
+
+    static {
+        classMap = new HashMap<>();
+        classMap.put("roomMember", RoomMember.class);
+        classMap.put("operates", Operate.class);
+    }
 
     private RoomMember roomMember;
 

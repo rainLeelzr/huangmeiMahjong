@@ -1,5 +1,6 @@
 package com.huangmei.commonhm.redis;
 
+import com.huangmei.commonhm.manager.operate.CanDoOperate;
 import com.huangmei.commonhm.model.mahjong.MahjongGameData;
 import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
 import com.huangmei.commonhm.redis.base.Redis;
@@ -13,8 +14,17 @@ public class GameRedis {
 
     private static String MAHJONG_GAME_DATA_FIELD_KEY = "mahjongGameData";
 
+    private static String WAITING_CLIENT_OPERATE_FIELD_KEY = "waitingClientOperate";
+
     @Autowired
     private Redis redis;
+
+    public void saveWaitingClientOperate(CanDoOperate canDoOperate) {
+        redis.hash.put(
+                String.format(RoomRedis.ROOM_KEY, canDoOperate.getRoomMember().getRoomId()),
+                WAITING_CLIENT_OPERATE_FIELD_KEY,
+                canDoOperate);
+    }
 
     public void saveMahjongGameData(MahjongGameData mahjongGameData) {
         redis.hash.put(
@@ -38,6 +48,15 @@ public class GameRedis {
                 );
             }
         }
+        return temp;
+    }
+
+    public CanDoOperate getWaitingClientOperate(Integer roomId) {
+        CanDoOperate temp = (CanDoOperate)  redis.hash.get(
+                String.format(RoomRedis.ROOM_KEY, roomId),
+                WAITING_CLIENT_OPERATE_FIELD_KEY,
+                CanDoOperate.class,
+                CanDoOperate.classMap);
         return temp;
     }
 }

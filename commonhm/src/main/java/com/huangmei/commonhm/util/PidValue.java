@@ -54,6 +54,8 @@ public enum PidValue {
 
     GUO(3200, "过"),
 
+    PLAY_A_MAHJONG(3300,"打出一张牌"),
+
     /**
      * 消息推送
      */

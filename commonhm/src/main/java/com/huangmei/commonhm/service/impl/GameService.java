@@ -2,9 +2,8 @@ package com.huangmei.commonhm.service.impl;
 
 import com.huangmei.commonhm.dao.RoomMemberDao;
 import com.huangmei.commonhm.manager.getACard.GetACardManager;
-import com.huangmei.commonhm.manager.operate.Operate;
-import com.huangmei.commonhm.manager.putOutCard.AfterPutOutCardManager;
 import com.huangmei.commonhm.manager.operate.CanDoOperate;
+import com.huangmei.commonhm.manager.putOutCard.AfterPutOutCardManager;
 import com.huangmei.commonhm.model.Room;
 import com.huangmei.commonhm.model.RoomMember;
 import com.huangmei.commonhm.model.User;
@@ -34,9 +33,6 @@ public class GameService {
 
     @Autowired
     private AfterPutOutCardManager afterPutOutCardManager;
-
-    @Autowired
-    private GetACardManager getACardManager;
 
     @Autowired
     private RoomMemberDao roomMemberDao;
@@ -105,32 +101,18 @@ public class GameService {
             fpc.setHandCardIds(handCardIds);
 
             fpc.setLeftCardCount(mahjongGameData.getLeftCards().size());
+            fpc.setBaoMotherId(mahjongGameData.getBaoMother().getId());
 
             List<Integer> baoMahjongIds = new ArrayList<>(mahjongGameData.getBaoMahjongs().size());
             for (Mahjong mahjong : mahjongGameData.getBaoMahjongs()) {
                 baoMahjongIds.add(mahjong.getId());
             }
-            fpc.setBaoMahjongIds(baoMahjongIds);
+            fpc.setBaoMahjongs(baoMahjongIds);
 
             fpc.setVersion(version);
 
             firstPutOutCards.add(fpc);
         }
-
-        // 扫描摸到牌的人可以的操作
-        ArrayList<CanDoOperate> canOperates =
-                getACardManager.scan(
-                        mahjongGameData,
-                        mahjongGameData
-                                .getPersonalCardInfos()
-                                .get(bankerSite - 1)
-                                .getTouchMahjong(),
-                        new User(mahjongGameData
-                                .getPersonalCardInfos()
-                                .get(bankerSite - 1)
-                                .getRoomMember()
-                                .getUserId())
-                );
 
         result.put(FIRST_PUT_OUT_CARD_KEY, firstPutOutCards);
 
@@ -138,7 +120,7 @@ public class GameService {
 
         // 麻将数据存redis
         gameRedis.saveMahjongGameData(mahjongGameData);
-
+        result.put(MahjongGameData.class.getSimpleName(), mahjongGameData);
         return result;
     }
 

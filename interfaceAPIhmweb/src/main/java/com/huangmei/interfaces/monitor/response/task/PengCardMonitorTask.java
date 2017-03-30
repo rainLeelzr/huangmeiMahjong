@@ -39,13 +39,11 @@ public class PengCardMonitorTask extends AbstractResponseTimeoutMonitorTask {
             pengResponseHelper = new PengResponseHelper();
             failCallback = new NoPengResponseRunnable();
 
-            task = new PengCardMonitorTask
-                    .Builder()
-                    .setTaskName(taskName)
-                    .setResponseTimes(responseTimes)
-                    .setResponseHelper(pengResponseHelper)
-                    .setFailCallback(failCallback)
-                    .build();
+            task = new PengCardMonitorTask();
+            task.taskName = taskName;
+            task.responseTimes = responseTimes;
+            task.responseHelper = pengResponseHelper;
+            task.failCallback = failCallback;
         }
 
         public Builder setTaskName(String taskName) {

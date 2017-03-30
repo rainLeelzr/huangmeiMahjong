@@ -1,16 +1,20 @@
 package com.huangmei.interfaces.websocket.Mapping;
 
+import com.huangmei.commonhm.manager.getACard.GetACardManager;
 import com.huangmei.commonhm.model.Room;
 import com.huangmei.commonhm.model.RoomMember;
 import com.huangmei.commonhm.model.User;
 import com.huangmei.commonhm.model.mahjong.FirstPutOutCard;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
+import com.huangmei.commonhm.model.mahjong.MahjongGameData;
+import com.huangmei.commonhm.redis.GameRedis;
 import com.huangmei.commonhm.redis.base.Redis;
 import com.huangmei.commonhm.service.RoomService;
 import com.huangmei.commonhm.service.UserService;
 import com.huangmei.commonhm.service.impl.GameService;
 import com.huangmei.commonhm.util.*;
 import com.huangmei.interfaces.monitor.MonitorManager;
+import com.huangmei.interfaces.monitor.clientTouchMahjong.task.ClientTouchMahjongTask;
 import com.huangmei.interfaces.websocket.MessageManager;
 import com.huangmei.interfaces.websocket.SessionManager;
 import net.sf.json.JSONObject;
@@ -50,6 +54,12 @@ public class ActionRouter {
 
     @Autowired
     private MessageManager messageManager;
+
+    @Autowired
+    private GetACardManager getACardManager;
+
+    @Autowired
+    private GameRedis gameRedis;
 
     @Pid(PidValue.LOGIN)
     public JsonResultY login(WebSocketSession session, JSONObject data)
@@ -203,6 +213,10 @@ public class ActionRouter {
             List<FirstPutOutCard> firstPutOutCards =
                     (List<FirstPutOutCard>) result.get(GameService.FIRST_PUT_OUT_CARD_KEY);
 
+            MahjongGameData mahjongGameData = (MahjongGameData) result.get(
+                    MahjongGameData.class.getSimpleName());
+            result.remove(MahjongGameData.class.getSimpleName());
+
             // 获取庄家uId
             Integer bankerUserId = firstPutOutCards.get(0).getBankerUId();
             WebSocketSession bankerSession = sessionManager.getByUserId(bankerUserId);
@@ -212,6 +226,9 @@ public class ActionRouter {
             } else {
                 bankerUser = sessionManager.getUser(bankerSession.getId());
             }
+
+            // 4个玩家，按座位号升序
+            List<User> users = new ArrayList<>(firstPutOutCards.size());
 
             // 广播给4个用户第一次发牌
             for (FirstPutOutCard firstPutOutCard : firstPutOutCards) {
@@ -236,6 +253,8 @@ public class ActionRouter {
                 }
                 firstPutOutCard.setuId(acceptBroadcastUser.getUId());
 
+                users.add(acceptBroadcastUser);
+
                 myResult.put(GameService.FIRST_PUT_OUT_CARD_KEY, firstPutOutCard);
                 JsonResultY temp = new JsonResultY.Builder()
                         .setPid(PidValue.FIRST_PUT_OUT_ALL_CARD.getPid())
@@ -244,6 +263,17 @@ public class ActionRouter {
                         .build();
                 messageManager.sendMessageByUserId(acceptBroadcastUserId, temp);
             }
+
+            monitorManager.watch(new ClientTouchMahjongTask
+                    .Builder()
+                    .setGetACardManager(getACardManager)
+                    .setMessageManager(messageManager)
+                    .setMahjongGameData(mahjongGameData)
+                    .setUser(bankerUser)
+                    .setUsers(users)
+                    .setGameRedis(gameRedis)
+                    .build());
+
         }
         result.remove("type");
         result.remove(GameService.FIRST_PUT_OUT_CARD_KEY);
