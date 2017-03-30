@@ -1,5 +1,7 @@
 package com.huangmei.commonhm.util;
 
+import com.huangmei.commonhm.manager.operate.CanDoOperate;
+import com.huangmei.commonhm.manager.operate.Operate;
 import com.huangmei.commonhm.model.RoomMember;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
@@ -9,8 +11,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class JsonUtil {
@@ -40,7 +41,7 @@ public class JsonUtil {
             Class> classMap) {
         JSONObject jsonObject = JSONObject.fromObject(json);
         Object o = JSONObject.toBean(jsonObject, type, classMap);
-        if(o instanceof RoomMember){
+        if (o instanceof RoomMember) {
             SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             RoomMember rm = (RoomMember) o;
             String joinTime = (String) jsonObject.get("joinTime");
@@ -48,6 +49,28 @@ public class JsonUtil {
                 rm.setJoinTime(sf.parse(joinTime));
             } catch (ParseException e) {
                 e.printStackTrace();
+            }
+        } else if (o instanceof CanDoOperate) {
+            CanDoOperate canDoOperate = (CanDoOperate) o;
+            if (canDoOperate.getOperates() != null && canDoOperate.getOperates().size() != 0) {
+                Iterator<Operate> iterator = canDoOperate.getOperates().iterator();
+                boolean isString = false;
+                while (iterator.hasNext()) {
+                    Object next = iterator.next();
+                    if (next instanceof String) {
+                        isString = true;
+                    }
+                    break;
+                }
+                if (isString) {
+                    Set<Operate> newOperates = new TreeSet<>();
+                    Iterator it = canDoOperate.getOperates().iterator();
+                    while (it.hasNext()) {
+                        Object next = it.next();
+                        newOperates.add(Operate.valueOf(next.toString()));
+                    }
+                    canDoOperate.setOperates(newOperates);
+                }
             }
         }
         return o;
