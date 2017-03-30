@@ -15,9 +15,10 @@ public enum PidValue {
      * 用户
      */
     LOGIN(1000, "用户登录"),
+    LOGOUT(1001,"注销登录"),
+    FREE_COINS(1002,"免费领取金币"),
     GET_USER(1006, "用户信息"),
     GET_STANDINGS(1008, "获取战绩"),
-    LONOUT(1001,"注销登录"),
 
     /**
      * 房间
