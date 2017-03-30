@@ -3,10 +3,7 @@ package com.huangmei.commonhm.service.impl;
 import com.huangmei.commonhm.dao.RoomDao;
 import com.huangmei.commonhm.dao.RoomMemberDao;
 import com.huangmei.commonhm.dao.UserDao;
-import com.huangmei.commonhm.model.Entity;
-import com.huangmei.commonhm.model.Room;
-import com.huangmei.commonhm.model.RoomMember;
-import com.huangmei.commonhm.model.User;
+import com.huangmei.commonhm.model.*;
 import com.huangmei.commonhm.redis.GameRedis;
 import com.huangmei.commonhm.redis.RoomRedis;
 import com.huangmei.commonhm.service.RoomService;
@@ -354,6 +351,23 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
 
     /**
      * 解散房间
+     */
+    private void dismissRoom(RoomMember roomMember){
+        Entity.UserCriteria userCriteria = new Entity.UserCriteria();
+        userCriteria.setId(Entity.Value.eq(roomMember.getUserId()));
+        User user = userDao.selectOne(userCriteria);
+
+        Entity.RoomCriteria roomCriteria = new Entity.RoomCriteria();
+        roomCriteria.setId(Entity.Value.eq(roomMember.getRoomId()));
+        Room room = dao.selectOne(roomCriteria);
+
+        JSONObject data=new JSONObject();
+        data.put("uId",user.getUId().toString());
+        data.put("roomCode",room.getRoomCode());
+        outRoom(data);
+    }
+    /**
+     * 申请解散房间
      * 未发牌前解散房间是可以直接解散
      * 发牌后解散需要发起解散房间申请,需其他玩家同意
      *
@@ -361,7 +375,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
      * @return
      */
     @Override
-    public Map<String, Object> dismissRoom(JSONObject data) {
+    public Map<String, Object> dismissRoom(final JSONObject data) {
         Map<String, Object> result = new HashMap<>(3);
         Integer type;
         boolean r;
@@ -373,17 +387,22 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
         roomCriteria.setState(Entity.Value.ne(Room.state.DISMISS.getCode()));
         Room room = dao.selectOne(roomCriteria);
 
+
+
         if (room != null) {
+            Vote vote = new Vote();
+            final Set<RoomMember> roomMembers = roomRedis.getRoomMembers(room.getId().toString());
             if (room.getStart() == Room.start.UNSTART.getCode()) {//未开始游戏,可以直接解散房间
-                Set<RoomMember> roomMembers = roomRedis.getRoomMembers(room.getId().toString());
-                for (int i = 0; i < roomMembers.size(); i++) {
-                    outRoom(data);
+                for (RoomMember roomMember : roomMembers) {
+                    dismissRoom(roomMember);
                 }
                 type = 1;
                 r = true;
             } else {//已开始游戏,需要申请解散,其他玩家同意才可以解散
                 type = 2;
                 r = false;
+                //2分钟计时无响应默认同意
+
             }
             result.put("room", room);
             result.put("type", type);
@@ -425,18 +444,13 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
             if (room != null) {
 
                 Set<RoomMember> roomMembers = roomRedis.getRoomMembers(room.getId().toString());
-
                 if (isAgree) {//有玩家同意解散,将该玩家的状态临时改成退出状态
                     roomMember.setState(RoomMember.state.OUT_ROOM.getCode());
                     roomMemberDao.update(roomMember);
                     List<RoomMember> rms = roomMemberDao.selectForDismiss(roomMember);
                     if (rms.size() == Room.playerLimit - 1) {//统计房间中为退出状态玩家的数量,假如数量=3,说明所有玩家都同意解散房间
                         for (RoomMember rm : roomMembers) {
-                            Entity.UserCriteria uc = new Entity.UserCriteria();
-                            uc.setId(Entity.Value.eq(rm.getUserId()));
-                            user = userDao.selectOne(uc);
-                            data.put("uId", user.getUId().toString());
-                            outRoom(data);
+                            dismissRoom(rm);
                         }
                         type = 1;//所有玩家同意解散房间,已经解散房间
                     } else {

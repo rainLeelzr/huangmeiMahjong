@@ -82,7 +82,7 @@ public class ActionRouter {
                 .build();
     }
 
-    @Pid(PidValue.LONOUT)
+    @Pid(PidValue.LOGOUT)
     public JsonResultY logout(WebSocketSession session, JSONObject data)
             throws Exception {
 
@@ -90,7 +90,7 @@ public class ActionRouter {
         sessionManager.userLogout(user, session);
 
         return new JsonResultY.Builder()
-                .setPid(PidValue.LONOUT.getPid())
+                .setPid(PidValue.LOGOUT.getPid())
                 .setError(CommonError.SYS_SUSSES)
                 .setData(null)
                 .build();
