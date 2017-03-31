@@ -1,12 +1,7 @@
 package com.huangmei.commonhm.model;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public interface Entity extends Serializable {
 
@@ -98,39 +93,41 @@ public interface Entity extends Serializable {
 
         protected Limit limit;
 
-        protected Set<OrderBy> orderbies = new LinkedHashSet<OrderBy>();
+        protected Set<OrderBy> orderbies = new LinkedHashSet<>();
 
-        protected Set<Criterion> criterions = new LinkedHashSet<Criterion>();
+        protected Set<Criterion> criterions = new LinkedHashSet<>();
 
-
+        @Override
         public boolean isOrderly() {
             return orderbies.size() > 0;
         }
 
-
+        @Override
         public boolean isNotEmpty() {
             return criterions.size() > 0;
         }
 
+        @Override
         public boolean isPagination() {
             return limit != null;
         }
 
+        @Override
         public Limit getLimit() {
             return limit;
         }
 
-
+        @Override
         public Set<OrderBy> getOrderbies() {
             return orderbies;
         }
 
-
+        @Override
         public Set<Criterion> getCriterions() {
             return criterions;
         }
 
-
+        @Override
         public Criteria addCriterion(Criterion criterion) {
             if (criterion instanceof Limit) {
                 limit = (Limit) criterion;
@@ -142,9 +139,9 @@ public interface Entity extends Serializable {
             return this;
         }
 
-
+        @Override
         public Map<String, Object> toMapParameter() {
-            Map<String, Object> param = new HashMap<String, Object>();
+            Map<String, Object> param = new HashMap<>();
             param.put("criteria", this);
             return param;
         }
@@ -482,6 +479,11 @@ public interface Entity extends Serializable {
                 if (entity != null) {
                     primaryKey.value = ((Notice) entity).getId();
                 }
+            } else if (entityClass == Record.class) {
+                primaryKey.name = "id";
+                if (entity != null) {
+                    primaryKey.value = ((Record) entity).getId();
+                }
             } else if (entityClass == Room.class) {
                 primaryKey.name = "id";
                 if (entity != null) {
@@ -507,6 +509,11 @@ public interface Entity extends Serializable {
                 if (entity != null) {
                     primaryKey.value = ((User) entity).getId();
                 }
+            } else if (entityClass == Vote.class) {
+                primaryKey.name = "id";
+                if (entity != null) {
+                    primaryKey.value = ((Vote) entity).getId();
+                }
             }
             return primaryKey;
         }
@@ -522,6 +529,8 @@ public interface Entity extends Serializable {
                 ((AdminUser) obj).setId((Integer) value);
             } else if (entityClass == Notice.class) {
                 ((Notice) obj).setId((Integer) value);
+            } else if (entityClass == Record.class) {
+                ((Record) obj).setId((Integer) value);
             } else if (entityClass == Room.class) {
                 ((Room) obj).setId((Integer) value);
             } else if (entityClass == RoomMember.class) {
@@ -532,6 +541,8 @@ public interface Entity extends Serializable {
                 ((TranRecord) obj).setId((Integer) value);
             } else if (entityClass == User.class) {
                 ((User) obj).setId((Integer) value);
+            } else if (entityClass == Vote.class) {
+                ((Vote) obj).setId((Integer) value);
             }
         }
 
@@ -775,6 +786,62 @@ public interface Entity extends Serializable {
 
     }
 
+    public static class RecordCriteria extends SimpleCriteria {
+
+        public void setId(Criterion criterion) {
+            this.addCriterion(criterion.setField("id"));
+        }
+
+        public void setAnGangTimes(Criterion criterion) {
+            this.addCriterion(criterion.setField("an_gang_times"));
+        }
+
+        public void setCoin(Criterion criterion) {
+            this.addCriterion(criterion.setField("coin"));
+        }
+
+        public void setDianPaoTimes(Criterion criterion) {
+            this.addCriterion(criterion.setField("dian_pao_times"));
+        }
+
+        public void setIsZiMo(Criterion criterion) {
+            this.addCriterion(criterion.setField("is_zi_mo"));
+        }
+
+        public void setJiePaoTimes(Criterion criterion) {
+            this.addCriterion(criterion.setField("jie_pao_times"));
+        }
+
+        public void setMingGangTimes(Criterion criterion) {
+            this.addCriterion(criterion.setField("ming_gang_times"));
+        }
+
+        public void setRoomId(Criterion criterion) {
+            this.addCriterion(criterion.setField("room_id"));
+        }
+
+        public void setScore(Criterion criterion) {
+            this.addCriterion(criterion.setField("score"));
+        }
+
+        public void setTimes(Criterion criterion) {
+            this.addCriterion(criterion.setField("times"));
+        }
+
+        public void setType(Criterion criterion) {
+            this.addCriterion(criterion.setField("type"));
+        }
+
+        public void setUserId(Criterion criterion) {
+            this.addCriterion(criterion.setField("user_id"));
+        }
+
+        public void setWinType(Criterion criterion) {
+            this.addCriterion(criterion.setField("win_type"));
+        }
+
+    }
+
     public static class RoomCriteria extends SimpleCriteria {
 
         public void setId(Criterion criterion) {
@@ -1003,6 +1070,38 @@ public interface Entity extends Serializable {
 
         public void setUId(Criterion criterion) {
             this.addCriterion(criterion.setField("u_id"));
+        }
+
+    }
+
+    public static class VoteCriteria extends SimpleCriteria {
+
+        public void setId(Criterion criterion) {
+            this.addCriterion(criterion.setField("id"));
+        }
+
+        public void setOrganizerUserId(Criterion criterion) {
+            this.addCriterion(criterion.setField("organizer_user_id"));
+        }
+
+        public void setRoomId(Criterion criterion) {
+            this.addCriterion(criterion.setField("room_id"));
+        }
+
+        public void setState(Criterion criterion) {
+            this.addCriterion(criterion.setField("state"));
+        }
+
+        public void setType(Criterion criterion) {
+            this.addCriterion(criterion.setField("type"));
+        }
+
+        public void setVoterUserId(Criterion criterion) {
+            this.addCriterion(criterion.setField("voter_user_id"));
+        }
+
+        public void setStatus(Criterion criterion) {
+            this.addCriterion(criterion.setField("status"));
         }
 
     }

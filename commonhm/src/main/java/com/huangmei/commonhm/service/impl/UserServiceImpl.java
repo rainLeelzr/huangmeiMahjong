@@ -1,5 +1,6 @@
 package com.huangmei.commonhm.service.impl;
 
+import com.huangmei.commonhm.dao.RecordDao;
 import com.huangmei.commonhm.dao.RoomMemberDao;
 import com.huangmei.commonhm.dao.UserDao;
 import com.huangmei.commonhm.model.Entity;
@@ -26,6 +27,8 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
     private UserDao dao;
     @Autowired
     private RoomMemberDao roomMemberDao;
+    @Autowired
+    private RecordDao recordDao;
 
     @Autowired
     private RoomService roomService;
@@ -106,6 +109,30 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         User user = dao.selectOne(userCriteria);
         if (user != null) {
             return user;
+        } else {
+            throw CommonError.USER_NOT_EXIST.newException();
+        }
+
+    }
+
+    @Override
+    public Map<String, Object> getUser(JSONObject data) {
+        Map<String, Object> result = new HashMap<String, Object>(3);
+        String uId = (String) data.get("uId");
+        Entity.UserCriteria userCriteria = new Entity.UserCriteria();
+        userCriteria.setUId(Entity.Value.eq(uId));
+        User user = dao.selectOne(userCriteria);
+        if (user != null) {
+            result.put("user", user);
+            Entity.RecordCriteria recordCriteria = new Entity.RecordCriteria();
+            recordCriteria.setUserId(Entity.Value.eq(user.getId()));
+            long count = recordDao.selectCount(recordCriteria);//总局数
+            recordCriteria.setWinType(Entity.Value.ne(0));
+            long win_count = recordDao.selectCount(recordCriteria);//胜利局数
+            result.put("win",win_count);
+            result.put("lose",count-win_count);
+            return result;
+
         } else {
             throw CommonError.USER_NOT_EXIST.newException();
         }

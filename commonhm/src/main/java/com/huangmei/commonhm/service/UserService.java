@@ -16,4 +16,6 @@ public interface UserService extends BaseService<Integer, User> {
 	public TextMessage TestConnection() ;
 
 	User logout(JSONObject data);
+
+	Map<String,Object> getUser(JSONObject data);
 }

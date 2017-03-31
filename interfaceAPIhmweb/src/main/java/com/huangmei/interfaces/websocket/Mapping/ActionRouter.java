@@ -120,12 +120,13 @@ public class ActionRouter {
     public JsonResultY getUserInfo(WebSocketSession session, JSONObject data)
             throws Exception {
 
+        Map<String, Object> result = userService.getUser(data);
         //String userId = (String) data.get("userId");
         //User user = userService.selectOne(Integer.parseInt(userId));
         //if (user == null) {
         //    throw  CommonError.USER_NOT_EXIST.newException();
         //}
-        User user = sessionManager.getUser(session.getId());
+        //User user = sessionManager.getUser(session.getId());
         //String roomId = "11";
         //String version = "1111";
         //monitorManager.watch(new PengCardMonitorTask
@@ -137,7 +138,7 @@ public class ActionRouter {
         return new JsonResultY.Builder()
                 .setPid(PidValue.GET_USER.getPid())
                 .setError(CommonError.SYS_SUSSES)
-                .setData(user)
+                .setData(result)
                 .build();
     }
 
@@ -257,7 +258,7 @@ public class ActionRouter {
             // 广播给4个用户第一次发牌
             for (FirstPutOutCard firstPutOutCard : firstPutOutCards) {
                 Map<String, Object> myResult = new HashMap<>();
-                //myResult.put("type", 2);
+                myResult.put("type", 2);
 
                 // 获取庄家uId
                 firstPutOutCard.setBankerUId(bankerUser.getUId());
@@ -304,7 +305,6 @@ public class ActionRouter {
                     .build());
 
         }
-        result.remove("type");
         result.remove(GameService.FIRST_PUT_OUT_CARD_KEY);
         JsonResultY jsonResultY = new JsonResultY.Builder()
                 .setPid(PidValue.READY.getPid())
