@@ -229,7 +229,12 @@ public class ActionRouter {
         Map<String, Object> result = roomService.ready(data);
         Integer type = (Integer) result.get("type");
 
+        boolean isFirstPutOutCard = false;
+        List<Object[]> firstPutOutCardBroadcasts = new ArrayList<>(4);
+
         if (type == 2) {
+            isFirstPutOutCard = true;
+
             List<FirstPutOutCard> firstPutOutCards =
                     (List<FirstPutOutCard>) result.get(GameService.FIRST_PUT_OUT_CARD_KEY);
 
@@ -276,12 +281,17 @@ public class ActionRouter {
                 users.add(acceptBroadcastUser);
 
                 myResult.put(GameService.FIRST_PUT_OUT_CARD_KEY, firstPutOutCard);
+
                 JsonResultY temp = new JsonResultY.Builder()
                         .setPid(PidValue.FIRST_PUT_OUT_ALL_CARD.getPid())
                         .setError(CommonError.SYS_SUSSES)
                         .setData(myResult)
                         .build();
-                messageManager.sendMessageByUserId(acceptBroadcastUserId, temp);
+
+                Object[] broadcast = new Object[]{
+                        acceptBroadcastUserId, temp
+                };
+                firstPutOutCardBroadcasts.add(broadcast);
             }
 
             monitorManager.watch(new ClientTouchMahjongTask
@@ -304,6 +314,15 @@ public class ActionRouter {
         messageManager.sendMessageToRoomUsers(
                 (result.get("roomId")).toString(),
                 jsonResultY);
+
+        // 如果是第一次发牌，则广播給客户端他们各自的牌
+        if (isFirstPutOutCard) {
+            for (Object[] firstPutOutCardBroadcast : firstPutOutCardBroadcasts) {
+                messageManager.sendMessageByUserId(
+                        (Integer) firstPutOutCardBroadcast[0],
+                        (JsonResultY) firstPutOutCardBroadcast[1]);
+            }
+        }
 
         return null;
     }
