@@ -27,6 +27,16 @@ public class ClientTouchMahjong {
     private List<Integer> handCardIds;
 
     /**
+     * 碰了的牌
+     */
+    private List<List<Integer>> pengMahjongIs;
+
+    /**
+     * 杠了的牌
+     */
+    private List<List<Integer>> gangMahjongIs;
+
+    /**
      * 摸到的麻将
      */
     private Integer touchMahjongId;
@@ -40,6 +50,22 @@ public class ClientTouchMahjong {
      * 消息版本号
      */
     private Long version;
+
+    public List<List<Integer>> getPengMahjongIs() {
+        return pengMahjongIs;
+    }
+
+    public void setPengMahjongIs(List<List<Integer>> pengMahjongIs) {
+        this.pengMahjongIs = pengMahjongIs;
+    }
+
+    public List<List<Integer>> getGangMahjongIs() {
+        return gangMahjongIs;
+    }
+
+    public void setGangMahjongIs(List<List<Integer>> gangMahjongIs) {
+        this.gangMahjongIs = gangMahjongIs;
+    }
 
     public Integer getTouchMahjongUId() {
         return touchMahjongUId;

@@ -9,7 +9,7 @@ public class PlayedMahjong {
     private Integer playedMahjongId;// 打出的麻将id
     private Integer playedUId;  // 打牌的玩家uid
     private Integer uId; //需要接受广播消息的玩家uid
-    private Integer version;
+    private Long version;
 
     public Integer getLeftCardCount() {
         return leftCardCount;
@@ -43,11 +43,11 @@ public class PlayedMahjong {
         this.uId = uId;
     }
 
-    public Integer getVersion() {
+    public Long getVersion() {
         return version;
     }
 
-    public void setVersion(Integer version) {
+    public void setVersion(Long version) {
         this.version = version;
     }
 }

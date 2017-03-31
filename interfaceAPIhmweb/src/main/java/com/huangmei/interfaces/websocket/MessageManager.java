@@ -177,7 +177,7 @@ public class MessageManager {
 
         private void log() {
             int pid = jsonResultY.getPid();
-            log.info("给客户端[sessionId:{}]发送消息：pid={}", session.getId(), pid);
+            log.info("给客户端[sessionId:{}]发送消息：pid={}||{}", session.getId(), pid, jsonResultY.toString());
         }
     }
 
