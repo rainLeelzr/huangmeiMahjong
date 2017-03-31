@@ -260,6 +260,22 @@ public enum Mahjong implements Comparable<Mahjong> {
         return mahjongIds;
     }
 
+    /**
+     * 把碰列表转为碰列表
+     */
+    public static List<List<Integer>> parseCombosToMahjongIds(Collection<Combo> Combos) {
+        if (Combos.size() == 0) {
+            return Collections.emptyList();
+        }
+
+        List<List<Integer>> comboIntegers = new ArrayList<>(Combos.size());
+        for (Combo combo : Combos) {
+            List<Integer> temp = parseToIds(combo.mahjongs);
+            comboIntegers.add(temp);
+        }
+        return comboIntegers;
+    }
+
     @Override
     public String toString() {
         //return "{\"id\":\"" + id + "\""

@@ -1,6 +1,7 @@
 package com.huangmei.commonhm.model.mahjong;
 
 
+import com.huangmei.commonhm.manager.operate.Operate;
 import com.huangmei.commonhm.model.RoomMember;
 import org.apache.commons.lang.math.RandomUtils;
 
@@ -21,14 +22,22 @@ public class MahjongGameData {
     static {
         classMap = new HashMap<>();
         classMap.put("personalCardInfos", PersonalCardInfo.class);
-        classMap.put("outCards", OutCard.class);
-        classMap.put("roomMember", RoomMember.class);
         classMap.put("roomMember", RoomMember.class);
         classMap.put("handCards", Mahjong.class);
+        classMap.put("operates", Operate.class);
+        classMap.put("touchMahjong", Mahjong.class);
+        classMap.put("pengs", Combo.class);
+        classMap.put("gangs", Combo.class);
+
+        classMap.put("bankerSite", Integer.class);
+        classMap.put("dices", Integer.class);
         classMap.put("leftCards", Mahjong.class);
+        classMap.put("outCards", OutCard.class);
+        classMap.put("mahjong", Mahjong.class);
+
+        classMap.put("baoMother", Mahjong.class);
         classMap.put("baoMahjongs", Mahjong.class);
         classMap.put("baoMahjongMakeUpMahjongs", Mahjong.class);
-        classMap.put("baoMother", Mahjong.class);
     }
 
     // 庄家的座位号，从1开始
@@ -129,7 +138,28 @@ public class MahjongGameData {
             handCard.setPengs(new ArrayList<Combo>(4));
 
             // 杠列表
-            handCard.setGangs(new ArrayList<Combo>(4));
+            ArrayList<Combo> combos = new ArrayList<>(1);
+            // 模拟已杠
+            //Combo gang = new Combo();
+            //gang.setType(Combo.Type.AAA);
+            //ArrayList<Mahjong> ms = new ArrayList<>(4);
+            //ms.add(Mahjong.BAI_BAN_1);
+            //ms.add(Mahjong.BAI_BAN_2);
+            //ms.add(Mahjong.BAI_BAN_3);
+            //ms.add(Mahjong.BAI_BAN_4);
+            //gang.setMahjongs(ms);
+            //combos.add(gang);
+            //Combo gang2 = new Combo();
+            //gang2.setType(Combo.Type.AAA);
+            //ArrayList<Mahjong> ms2 = new ArrayList<>(4);
+            //ms2.add(Mahjong.BAI_BAN_1);
+            //ms2.add(Mahjong.BAI_BAN_2);
+            //ms2.add(Mahjong.BAI_BAN_3);
+            //ms2.add(Mahjong.BAI_BAN_4);
+            //gang2.setMahjongs(ms);
+            //combos.add(gang2);
+
+            handCard.setGangs(combos);
 
             handCards.add(handCard);
         }
@@ -144,7 +174,7 @@ public class MahjongGameData {
         }
 
         // 庄家摸多一张牌
-        handCards.get(bankerSite - 1).setTouchMahjong(allMahjongs.get(index++));
+        //handCards.get(bankerSite - 1).setTouchMahjong(allMahjongs.get(index++));
 
         // 剩下的牌放在leftCards
         for (; index < allMahjongs.size(); index++) {

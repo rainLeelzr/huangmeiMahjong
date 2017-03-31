@@ -105,10 +105,17 @@ public class ClientTouchMahjongTask implements MonitorTask {
                     clientTouchMahjong.setHandCardIds(Mahjong.parseToIds(personalCardInfo.getHandCards()));
                     clientTouchMahjong.setTouchMahjongId(isToucher ? touchMahjong.getId() : null);
                     clientTouchMahjong.setTouchMahjongUId(user.getUId());
+
+                    clientTouchMahjong.setPengMahjongIs(Mahjong.parseCombosToMahjongIds(personalCardInfo.getPengs()));
+                    clientTouchMahjong.setGangMahjongIs(Mahjong.parseCombosToMahjongIds(personalCardInfo.getGangs()));
                     if (isToucher && canOperates.size() != 0) {
                         clientTouchMahjong.setOperatePids(Operate.parseToPids(canOperates.get(0).getOperates()));
                     } else {
                         clientTouchMahjong.setOperatePids(Collections.<Integer>emptyList());
+                    }
+
+                    if (isToucher) {
+                        personalCardInfo.setTouchMahjong(touchMahjong);
                     }
 
                     clientTouchMahjongs.add(clientTouchMahjong);

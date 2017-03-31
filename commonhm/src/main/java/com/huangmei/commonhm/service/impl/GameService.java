@@ -152,7 +152,7 @@ public class GameService {
         List<PlayedMahjong> playedMahjongs = playedMahjongBroadcast(mahjongGameData, user, playedMahjong);
 
         Map<String, Object> result = new HashedMap(2);
-        result.put(PlayedMahjong.class.getSimpleName(), playedMahjong);
+        result.put(PlayedMahjong.class.getSimpleName(), playedMahjongs);
         return result;
     }
 
@@ -165,6 +165,7 @@ public class GameService {
             temp.setLeftCardCount(mahjongGameData.getLeftCards().size());
             temp.setPlayedMahjongId(playedMahjong.getId());
             temp.setPlayedUId(user.getUId());
+            temp.setVersion(mahjongGameData.getVersion());
             playedMahjongs.add(temp);
         }
         return playedMahjongs;
