@@ -1,12 +1,8 @@
 package com.huangmei.commonhm.service;
 
-import net.sf.json.JSONObject;
-
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
-
 import com.huangmei.commonhm.model.User;
-import com.huangmei.commonhm.util.JsonResult;
+import net.sf.json.JSONObject;
+import org.springframework.web.socket.TextMessage;
 
 import java.util.Map;
 
@@ -17,5 +13,7 @@ public interface UserService extends BaseService<Integer, User> {
 
 	User logout(JSONObject data);
 
-	Map<String,Object> getUser(JSONObject data);
+	Map<String,Object> getUser(JSONObject data,User user);
+
+    Map<String,Object> prizeDraw(JSONObject data,User user);
 }

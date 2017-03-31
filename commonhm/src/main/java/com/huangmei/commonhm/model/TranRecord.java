@@ -3,7 +3,52 @@ package com.huangmei.commonhm.model;
 public class TranRecord implements Entity {
 	
 	private static final long serialVersionUID = 1L;
-	
+
+	public static enum way {
+		DRAW_BY_FREE(1, "免费抽奖"),
+		DRAW_BY_COINS(2, "金币抽奖");
+
+
+		private int code;
+
+		private String name;
+
+		public int getCode() {
+			return code;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		way(int code, String name) {
+			this.code = code;
+			this.name = name;
+		}
+	}
+	public static enum itemType {
+		COIN(1, "金币"),
+		DIAMOND(2, "钻石"),
+		HORN(3, "喇叭");
+
+
+		private int code;
+
+		private String name;
+
+		public int getCode() {
+			return code;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		itemType(int code, String name) {
+			this.code = code;
+			this.name = name;
+		}
+	}
 	/**  */
 	protected Integer id;
 	
@@ -11,7 +56,7 @@ public class TranRecord implements Entity {
 	protected Integer itemType;
 	
 	/**  */
-	protected java.math.BigDecimal quantity;
+	protected Integer quantity;
 	
 	/**  */
 	protected java.util.Date tranTimes;
@@ -38,11 +83,11 @@ public class TranRecord implements Entity {
 		this.itemType = itemType;
 	}
 	
-	public java.math.BigDecimal getQuantity() {
+	public Integer getQuantity() {
 		return quantity;
 	}
 	
-	public void setQuantity(java.math.BigDecimal quantity) {
+	public void setQuantity(Integer quantity) {
 		this.quantity = quantity;
 	}
 	

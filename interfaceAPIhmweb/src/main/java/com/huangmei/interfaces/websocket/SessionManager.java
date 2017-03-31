@@ -34,7 +34,7 @@ public class SessionManager {
     /**
      * 所有已登录用户的webSocket
      * key: userId
-     * value: session
+     * value: sessionTent
      */
     private static final Map<String, WebSocketSession> userIdSessions =
             new ConcurrentHashMap<String, WebSocketSession>(100);
