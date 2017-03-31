@@ -5,9 +5,9 @@
 
 	<insert id="save" useGeneratedKeys="true" keyProperty="id" parameterType="com.huangmei.commonhm.model.Vote">
 		INSERT INTO TB_VOTE (
-			ID, ORGANIZER_USER_ID, ROOM_ID, STATE, TYPE, VOTER_USER_ID
+			ID, ORGANIZER_USER_ID, ROOM_ID, STATE, TYPE, VOTER_USER_ID,STATUS
 		) VALUES (
-			#{id}, #{organizerUserId}, #{roomId}, #{state}, #{type}, #{voterUserId}
+			#{id}, #{organizerUserId}, #{roomId}, #{state}, #{type}, #{voterUserId}, #{status}
 		)
 	</insert>
 
@@ -34,6 +34,7 @@
 		<result property="state" column="STATE" />
 		<result property="type" column="TYPE" />
 		<result property="voterUserId" column="VOTER_USER_ID" />
+		<result property="status" column="STATUS" />
 	</resultMap>
 
 	<sql id="SetSQL">
@@ -43,6 +44,7 @@
 			<if test="entity.state != null">STATE = #{entity.state},</if>
 			<if test="entity.type != null">TYPE = #{entity.type},</if>
 			<if test="entity.voterUserId != null">VOTER_USER_ID = #{entity.voterUserId},</if>
+			<if test="entity.status != null">STATUS = #{entity.status},</if>
 		</set>
 	</sql>
 

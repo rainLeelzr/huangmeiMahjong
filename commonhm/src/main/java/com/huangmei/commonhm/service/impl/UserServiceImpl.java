@@ -1,5 +1,6 @@
 package com.huangmei.commonhm.service.impl;
 
+import com.huangmei.commonhm.dao.RecordDao;
 import com.huangmei.commonhm.dao.RoomMemberDao;
 import com.huangmei.commonhm.dao.UserDao;
 import com.huangmei.commonhm.model.Entity;
@@ -27,6 +28,8 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
     private UserDao dao;
     @Autowired
     private RoomMemberDao roomMemberDao;
+    @Autowired
+    private RecordDao recordDao;
 
     public Map<String, Object> login(JSONObject data, String ip) throws Exception {
 
@@ -57,8 +60,8 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
             Integer uId = CommonUtil.createUserCode();
             List<User> users = dao.selectAll();
             for (User u : users) {
-                if (u.getUId()==uId){
-                    uId= CommonUtil.createUserCode();//确保用户uId的不同
+                if (u.getUId() == uId) {
+                    uId = CommonUtil.createUserCode();//确保用户uId的不同
                 }
             }
 
@@ -76,8 +79,8 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
 
             RoomMember roomMember = new RoomMember();
             roomMember.setUserId(user.getId());
-            roomMember= roomMemberDao.selectByUserIdForCheck(roomMember);
-            if (roomMember!=null) {
+            roomMember = roomMemberDao.selectByUserIdForCheck(roomMember);
+            if (roomMember != null) {
                 login_type = 2;
             } else {
                 login_type = 1;
@@ -97,12 +100,36 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
     @Override
     public User logout(JSONObject data) {
         String uId = (String) data.get("uId");
-        Entity.UserCriteria userCriteria=new Entity.UserCriteria();
+        Entity.UserCriteria userCriteria = new Entity.UserCriteria();
         userCriteria.setUId(Entity.Value.eq(uId));
         User user = dao.selectOne(userCriteria);
-        if (user!=null){
+        if (user != null) {
             return user;
-        }else {
+        } else {
+            throw CommonError.USER_NOT_EXIST.newException();
+        }
+
+    }
+
+    @Override
+    public Map<String, Object> getUser(JSONObject data) {
+        Map<String, Object> result = new HashMap<String, Object>(3);
+        String uId = (String) data.get("uId");
+        Entity.UserCriteria userCriteria = new Entity.UserCriteria();
+        userCriteria.setUId(Entity.Value.eq(uId));
+        User user = dao.selectOne(userCriteria);
+        if (user != null) {
+            result.put("user", user);
+            Entity.RecordCriteria recordCriteria = new Entity.RecordCriteria();
+            recordCriteria.setUserId(Entity.Value.eq(user.getId()));
+            long count = recordDao.selectCount(recordCriteria);//总局数
+            recordCriteria.setWinType(Entity.Value.ne(0));
+            long win_count = recordDao.selectCount(recordCriteria);//胜利局数
+            result.put("win",win_count);
+            result.put("lose",count-win_count);
+            return result;
+
+        } else {
             throw CommonError.USER_NOT_EXIST.newException();
         }
 
