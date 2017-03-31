@@ -33,7 +33,7 @@ public enum PidValue {
     /**
      * 游戏过程
      */
-    PUT_OUT_CARD(3000, "出牌"),
+    PLAY_A_MAHJONG(3000, "打出一张牌"),
 
     YING_ZI_MO(3101, "硬自摸"),
     RUAN_ZI_MO(3102, "软自摸"),
@@ -60,7 +60,8 @@ public enum PidValue {
      */
     JOIN_ROOM_MESSAGE(4000, "加入房间消息推送"),
     FIRST_PUT_OUT_ALL_CARD(4001, "游戏开始发牌消息推送"),
-    CLIENT_TOUCH_MAHJONG(4002, "发一张牌给客户端消息推送"),;
+    CLIENT_TOUCH_MAHJONG(4002, "发一张牌给客户端消息推送"),
+    OTHER_USER_PLAY_A_MAHJONG(4003, "玩家打牌广播"),;
 
     private int pid;
 

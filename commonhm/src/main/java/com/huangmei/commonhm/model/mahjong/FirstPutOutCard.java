@@ -28,12 +28,12 @@ public class FirstPutOutCard {
     /**
      * 宝娘
      */
-    private List<Integer> baoMotherId;
+    private Integer baoMotherId;
 
     /**
      * 宝牌
      */
-    private List<Integer> baoMahjongIds;
+    private List<Integer> baoMahjongs;
 
     /**
      * 消息版本号
@@ -80,20 +80,20 @@ public class FirstPutOutCard {
         this.leftCardCount = leftCardCount;
     }
 
-    public List<Integer> getBaoMotherId() {
+    public Integer getBaoMotherId() {
         return baoMotherId;
     }
 
-    public void setBaoMotherId(List<Integer> baoMotherIds) {
-        this.baoMotherId = baoMotherIds;
+    public void setBaoMotherId(Integer baoMotherId) {
+        this.baoMotherId = baoMotherId;
     }
 
-    public List<Integer> getBaoMahjongIds() {
-        return baoMahjongIds;
+    public List<Integer> getBaoMahjongs() {
+        return baoMahjongs;
     }
 
-    public void setBaoMahjongIds(List<Integer> baoMahjongIds) {
-        this.baoMahjongIds = baoMahjongIds;
+    public void setBaoMahjongs(List<Integer> baoMahjongs) {
+        this.baoMahjongs = baoMahjongs;
     }
 
     public Long getVersion() {

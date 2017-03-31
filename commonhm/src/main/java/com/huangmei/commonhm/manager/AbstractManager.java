@@ -6,6 +6,8 @@ import com.huangmei.commonhm.manager.scanTask.BaseScanTask;
 import com.huangmei.commonhm.model.User;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.MahjongGameData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +19,8 @@ import java.util.List;
  * * 依次扫描scanTasks中的具体任务，得出所有玩家可以有的操作列表
  */
 public abstract class AbstractManager {
+
+    protected static final Logger log = LoggerFactory.getLogger(AbstractManager.class);
 
     /**
      * 已注册的扫描任务
@@ -48,6 +52,7 @@ public abstract class AbstractManager {
             }
         }
         Collections.sort(canDoOperates);
+        log.debug("最终扫描结果：{}", canDoOperates);
         return canDoOperates;
     }
 

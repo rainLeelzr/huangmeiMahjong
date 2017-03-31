@@ -1,16 +1,21 @@
 package com.huangmei.interfaces.websocket.Mapping;
 
+import com.huangmei.commonhm.manager.getACard.GetACardManager;
 import com.huangmei.commonhm.model.Room;
 import com.huangmei.commonhm.model.RoomMember;
 import com.huangmei.commonhm.model.User;
 import com.huangmei.commonhm.model.mahjong.FirstPutOutCard;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
+import com.huangmei.commonhm.model.mahjong.MahjongGameData;
+import com.huangmei.commonhm.model.mahjong.PlayedMahjong;
+import com.huangmei.commonhm.redis.GameRedis;
 import com.huangmei.commonhm.redis.base.Redis;
 import com.huangmei.commonhm.service.RoomService;
 import com.huangmei.commonhm.service.UserService;
 import com.huangmei.commonhm.service.impl.GameService;
 import com.huangmei.commonhm.util.*;
 import com.huangmei.interfaces.monitor.MonitorManager;
+import com.huangmei.interfaces.monitor.clientTouchMahjong.task.ClientTouchMahjongTask;
 import com.huangmei.interfaces.websocket.MessageManager;
 import com.huangmei.interfaces.websocket.SessionManager;
 import net.sf.json.JSONObject;
@@ -51,6 +56,23 @@ public class ActionRouter {
     @Autowired
     private MessageManager messageManager;
 
+    @Autowired
+    private GetACardManager getACardManager;
+
+    @Autowired
+    private GameRedis gameRedis;
+
+    private User getUserByUserId(Integer userId) {
+        WebSocketSession session = sessionManager.getByUserId(userId);
+        User user;
+        if (session == null) {
+            user = userService.selectOne(userId);
+        } else {
+            user = sessionManager.getUser(session.getId());
+        }
+        return user;
+    }
+
     @Pid(PidValue.LOGIN)
     public JsonResultY login(WebSocketSession session, JSONObject data)
             throws Exception {
@@ -63,7 +85,14 @@ public class ActionRouter {
         //登录成功时，将此user对应的session缓存起来
         if (result != null) {
             sessionManager.userLogin((User) result.get("user"), session);
+
+            Integer loginType = (Integer) result.get("login_type");
+            if (loginType == 2) {
+                sessionManager.userJoinRoom((Room) result.get(("room")), session);
+                result.remove("room");
+            }
         }
+
 
         return new JsonResultY.Builder()
                 .setPid(PidValue.LOGIN.getPid())
@@ -204,6 +233,10 @@ public class ActionRouter {
             List<FirstPutOutCard> firstPutOutCards =
                     (List<FirstPutOutCard>) result.get(GameService.FIRST_PUT_OUT_CARD_KEY);
 
+            MahjongGameData mahjongGameData = (MahjongGameData) result.get(
+                    MahjongGameData.class.getSimpleName());
+            result.remove(MahjongGameData.class.getSimpleName());
+
             // 获取庄家uId
             Integer bankerUserId = firstPutOutCards.get(0).getBankerUId();
             WebSocketSession bankerSession = sessionManager.getByUserId(bankerUserId);
@@ -213,6 +246,9 @@ public class ActionRouter {
             } else {
                 bankerUser = sessionManager.getUser(bankerSession.getId());
             }
+
+            // 4个玩家，按座位号升序
+            List<User> users = new ArrayList<>(firstPutOutCards.size());
 
             // 广播给4个用户第一次发牌
             for (FirstPutOutCard firstPutOutCard : firstPutOutCards) {
@@ -237,6 +273,8 @@ public class ActionRouter {
                 }
                 firstPutOutCard.setuId(acceptBroadcastUser.getUId());
 
+                users.add(acceptBroadcastUser);
+
                 myResult.put(GameService.FIRST_PUT_OUT_CARD_KEY, firstPutOutCard);
                 JsonResultY temp = new JsonResultY.Builder()
                         .setPid(PidValue.FIRST_PUT_OUT_ALL_CARD.getPid())
@@ -245,6 +283,17 @@ public class ActionRouter {
                         .build();
                 messageManager.sendMessageByUserId(acceptBroadcastUserId, temp);
             }
+
+            monitorManager.watch(new ClientTouchMahjongTask
+                    .Builder()
+                    .setGetACardManager(getACardManager)
+                    .setMessageManager(messageManager)
+                    .setMahjongGameData(mahjongGameData)
+                    .setUser(bankerUser)
+                    .setUsers(users)
+                    .setGameRedis(gameRedis)
+                    .build());
+
         }
         result.remove(GameService.FIRST_PUT_OUT_CARD_KEY);
         JsonResultY jsonResultY = new JsonResultY.Builder()
@@ -327,30 +376,40 @@ public class ActionRouter {
                 .build();
     }
 
-    @Pid(PidValue.PUT_OUT_CARD)
-    //@LoginResource
-    public JsonResultY putOutCard(WebSocketSession session, JSONObject data)
+    @Pid(PidValue.PLAY_A_MAHJONG)
+    @LoginResource
+    @SuppressWarnings("unchecked")
+    public JsonResultY playACard(WebSocketSession session, JSONObject data)
             throws Exception {
 
         int mahjongId = JsonUtil.getInt(data, "mahjongId");
         long version = JsonUtil.getLong(data, "version");
 
-        Mahjong putOutCard = Mahjong.parse(mahjongId);
+        Mahjong playedMahjong = Mahjong.parse(mahjongId);
 
         User user = sessionManager.getUser(session.getId());
         Room room = sessionManager.getRoom(session.getId());
 
-        room = new Room();
-        room.setId(222);
+        Map<String, Object> result = gameService.playAMahjong(room, user, playedMahjong, version);
 
-        user = new User();
-        user.setId(1);
-        gameService.putOutCard(putOutCard, room, user, version);
+        // 玩家打牌广播
+        List<PlayedMahjong> playedMahjongs = (List<PlayedMahjong>) result.get(PlayedMahjong.class.getSimpleName());
+        for (PlayedMahjong mahjong : playedMahjongs) {
+            int acceptUserId = mahjong.getuId();
+            mahjong.setuId(getUserByUserId(acceptUserId).getUId());
+
+            messageManager.sendMessageByUserId(acceptUserId, new JsonResultY.Builder()
+                    .setPid(PidValue.OTHER_USER_PLAY_A_MAHJONG)
+                    .setError(CommonError.SYS_SUSSES)
+                    .setData(mahjong)
+                    .build());
+        }
+        //gameService.putOutCard(putOutCard, room, user, version);
 
         return new JsonResultY.Builder()
-                .setPid(PidValue.TEST)
+                .setPid(PidValue.PLAY_A_MAHJONG)
                 .setError(CommonError.SYS_SUSSES)
-                .setData(putOutCard)
+                .setData(null)
                 .build();
     }
 

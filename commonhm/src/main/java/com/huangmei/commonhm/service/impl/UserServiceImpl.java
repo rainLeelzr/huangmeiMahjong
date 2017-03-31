@@ -4,15 +4,14 @@ import com.huangmei.commonhm.dao.RecordDao;
 import com.huangmei.commonhm.dao.RoomMemberDao;
 import com.huangmei.commonhm.dao.UserDao;
 import com.huangmei.commonhm.model.Entity;
+import com.huangmei.commonhm.model.Room;
 import com.huangmei.commonhm.model.RoomMember;
 import com.huangmei.commonhm.model.User;
+import com.huangmei.commonhm.service.RoomService;
 import com.huangmei.commonhm.service.UserService;
-
-
 import com.huangmei.commonhm.util.CommonError;
 import com.huangmei.commonhm.util.CommonUtil;
 import net.sf.json.JSONObject;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
@@ -31,10 +30,13 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
     @Autowired
     private RecordDao recordDao;
 
+    @Autowired
+    private RoomService roomService;
+
     public Map<String, Object> login(JSONObject data, String ip) throws Exception {
 
         Map<String, Object> result = new HashMap<String, Object>(2);
-        int login_type;//1正常登陆,2游戏中断线重连,3结算后未显示结算页面
+        Integer loginType;//1正常登陆,2游戏中断线重连,3结算后未显示结算页面
 
         String openId = (String) data.get("openId");
         String nickName = (String) data.get("nickName");
@@ -67,7 +69,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
 
             user.setUId(uId);
             dao.save(user);
-            login_type = 1;
+            loginType = 1;
         } else {
             if (!image.equals(user.getImage())) {//头像发生变化
                 user.setImage(image);
@@ -81,13 +83,15 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
             roomMember.setUserId(user.getId());
             roomMember = roomMemberDao.selectByUserIdForCheck(roomMember);
             if (roomMember != null) {
-                login_type = 2;
+                loginType = 2;
+                Room room = roomService.selectOne(roomMember.getRoomId());
+                result.put("room", room);
             } else {
-                login_type = 1;
+                loginType = 1;
             }
         }
         result.put("user", user);
-        result.put("login_type", login_type);
+        result.put("login_type", loginType);
         return result;
     }
 

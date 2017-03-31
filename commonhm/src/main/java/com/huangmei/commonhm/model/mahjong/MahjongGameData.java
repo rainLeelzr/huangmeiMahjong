@@ -28,6 +28,7 @@ public class MahjongGameData {
         classMap.put("leftCards", Mahjong.class);
         classMap.put("baoMahjongs", Mahjong.class);
         classMap.put("baoMahjongMakeUpMahjongs", Mahjong.class);
+        classMap.put("baoMother", Mahjong.class);
     }
 
     // 庄家的座位号，从1开始
@@ -48,6 +49,11 @@ public class MahjongGameData {
      * 玩家打出的牌
      */
     private List<OutCard> outCards;
+
+    /**
+     * 宝娘
+     */
+    private Mahjong baoMother;
 
     /**
      * 宝牌
@@ -147,6 +153,7 @@ public class MahjongGameData {
 
         // 设定宝娘
         // todome 设定宝娘
+        mahjongGameData.setBaoMother(leftCards.get(1));
 
         // 设定宝牌
         // todome 设定宝牌
@@ -178,6 +185,14 @@ public class MahjongGameData {
         baoMahjongs.add(Mahjong.THREE_TIAO_4);
         data.setBaoMahjongs(baoMahjongs);
         data.getBaoMahjongMakeUpMahjongs();
+    }
+
+    public Mahjong getBaoMother() {
+        return baoMother;
+    }
+
+    public void setBaoMother(Mahjong baoMother) {
+        this.baoMother = baoMother;
     }
 
     public List<Mahjong> getBaoMahjongMakeUpMahjongs() {

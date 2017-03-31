@@ -1,6 +1,8 @@
 package com.huangmei.commonhm.model.mahjong;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -241,6 +243,21 @@ public enum Mahjong implements Comparable<Mahjong> {
         for (int i = 0; i < 999; i++) {
             System.out.println(i + ":" + i % 10);
         }
+    }
+
+    /**
+     * 把麻将枚举对象列表转换为麻将id列表
+     */
+    public static List<Integer> parseToIds(Collection<Mahjong> mahjongs) {
+        if (mahjongs.size() == 0) {
+            return Collections.emptyList();
+        }
+
+        List<Integer> mahjongIds = new ArrayList<>(mahjongs.size());
+        for (Mahjong mahjong : mahjongs) {
+            mahjongIds.add(mahjong.getId());
+        }
+        return mahjongIds;
     }
 
     @Override

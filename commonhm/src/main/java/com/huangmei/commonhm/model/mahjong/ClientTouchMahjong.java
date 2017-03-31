@@ -19,17 +19,43 @@ public class ClientTouchMahjong {
     /**
      * 摸牌后可以的操作，如胡、杠、碰，不包含过
      */
-    private List<Integer> operates;
+    private List<Integer> operatePids;
+
+    /**
+     * 个人的手牌id
+     */
+    private List<Integer> handCardIds;
 
     /**
      * 摸到的麻将
      */
-    private Integer touchMahjong;
+    private Integer touchMahjongId;
+
+    /**
+     * 摸到麻将的人的uid
+     */
+    private Integer touchMahjongUId;
 
     /**
      * 消息版本号
      */
     private Long version;
+
+    public Integer getTouchMahjongUId() {
+        return touchMahjongUId;
+    }
+
+    public void setTouchMahjongUId(Integer touchMahjongUId) {
+        this.touchMahjongUId = touchMahjongUId;
+    }
+
+    public List<Integer> getHandCardIds() {
+        return handCardIds;
+    }
+
+    public void setHandCardIds(List<Integer> handCardIds) {
+        this.handCardIds = handCardIds;
+    }
 
     public Integer getuId() {
         return uId;
@@ -47,20 +73,20 @@ public class ClientTouchMahjong {
         this.leftCardCount = leftCardCount;
     }
 
-    public List<Integer> getOperates() {
-        return operates;
+    public List<Integer> getOperatePids() {
+        return operatePids;
     }
 
-    public void setOperates(List<Integer> operates) {
-        this.operates = operates;
+    public void setOperatePids(List<Integer> operatePids) {
+        this.operatePids = operatePids;
     }
 
-    public Integer getTouchMahjong() {
-        return touchMahjong;
+    public Integer getTouchMahjongId() {
+        return touchMahjongId;
     }
 
-    public void setTouchMahjong(Integer touchMahjong) {
-        this.touchMahjong = touchMahjong;
+    public void setTouchMahjongId(Integer touchMahjongId) {
+        this.touchMahjongId = touchMahjongId;
     }
 
     public Long getVersion() {

@@ -9,7 +9,9 @@ public enum BaseOperate {
 
     GANG("杠"),
 
-    PENG("碰");
+    PENG("碰"),
+
+    PLAY_A_MAHJONG("打出一张牌");
 
     private String name;
 

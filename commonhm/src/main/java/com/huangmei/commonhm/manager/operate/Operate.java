@@ -2,6 +2,11 @@ package com.huangmei.commonhm.manager.operate;
 
 import com.huangmei.commonhm.util.PidValue;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * 别人出牌后其他玩家可以的操作
  * 如吃胡、大明杠、碰
@@ -36,7 +41,9 @@ public enum Operate {
     RUAN_JIA_GANG(PidValue.RUAN_JIA_GANG, BaseOperate.GANG, "软加杠"),
 
     YING_PENG(PidValue.YING_PENG, BaseOperate.PENG, "硬碰"),
-    RUAN_PENG(PidValue.RUAN_PENG, BaseOperate.PENG, "软碰"),;
+    RUAN_PENG(PidValue.RUAN_PENG, BaseOperate.PENG, "软碰"),
+
+    PLAY_A_MAHJONG(PidValue.PLAY_A_MAHJONG, BaseOperate.PLAY_A_MAHJONG, "打出一张牌");
 
     /**
      * 操作唯一id
@@ -56,6 +63,21 @@ public enum Operate {
         this.pidValue = pidValue;
         this.baseOperate = baseOperate;
         this.name = name;
+    }
+
+    /**
+     * 将operate枚举对象列表转换为pid列表
+     */
+    public static List<Integer> parseToPids(Collection<Operate> operates) {
+        if (operates.size() == 0) {
+            return Collections.emptyList();
+        }
+
+        List<Integer> pids = new ArrayList<>(operates.size());
+        for (Operate operate : operates) {
+            pids.add(operate.getPidValue().getPid());
+        }
+        return pids;
     }
 
     public PidValue getPidValue() {
