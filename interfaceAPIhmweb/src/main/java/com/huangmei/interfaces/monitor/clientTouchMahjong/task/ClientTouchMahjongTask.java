@@ -118,7 +118,7 @@ public class ClientTouchMahjongTask implements MonitorTask {
                     canOperate = canOperates.get(0);
                 }
                 // 添加可以打牌操作
-                canOperate.getOperates().add(Operate.PLAY_A_MAHJONG);
+               canOperate.getOperates().add(Operate.PLAY_A_MAHJONG);
                 // 保存可操作列表到redis，记录正在等待哪个玩家的什么操作
                 gameRedis.saveWaitingClientOperate(canOperate);
 

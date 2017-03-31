@@ -7,6 +7,7 @@ import com.huangmei.commonhm.model.User;
 import com.huangmei.commonhm.model.mahjong.FirstPutOutCard;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.MahjongGameData;
+import com.huangmei.commonhm.model.mahjong.PlayedMahjong;
 import com.huangmei.commonhm.redis.GameRedis;
 import com.huangmei.commonhm.redis.base.Redis;
 import com.huangmei.commonhm.service.RoomService;
@@ -61,6 +62,17 @@ public class ActionRouter {
     @Autowired
     private GameRedis gameRedis;
 
+    private User getUserByUserId(Integer userId) {
+        WebSocketSession session = sessionManager.getByUserId(userId);
+        User user;
+        if (session == null) {
+            user = userService.selectOne(userId);
+        } else {
+            user = sessionManager.getUser(session.getId());
+        }
+        return user;
+    }
+
     @Pid(PidValue.LOGIN)
     public JsonResultY login(WebSocketSession session, JSONObject data)
             throws Exception {
@@ -73,7 +85,14 @@ public class ActionRouter {
         //登录成功时，将此user对应的session缓存起来
         if (result != null) {
             sessionManager.userLogin((User) result.get("user"), session);
+
+            Integer loginType = (Integer) result.get("login_type");
+            if (loginType == 2) {
+                sessionManager.userJoinRoom((Room) result.get(("room")), session);
+                result.remove("room");
+            }
         }
+
 
         return new JsonResultY.Builder()
                 .setPid(PidValue.LOGIN.getPid())
@@ -359,6 +378,7 @@ public class ActionRouter {
 
     @Pid(PidValue.PLAY_A_MAHJONG)
     @LoginResource
+    @SuppressWarnings("unchecked")
     public JsonResultY playACard(WebSocketSession session, JSONObject data)
             throws Exception {
 
@@ -370,7 +390,20 @@ public class ActionRouter {
         User user = sessionManager.getUser(session.getId());
         Room room = sessionManager.getRoom(session.getId());
 
-        gameService.playAMahjong(room, user, playedMahjong, version);
+        Map<String, Object> result = gameService.playAMahjong(room, user, playedMahjong, version);
+
+        // 玩家打牌广播
+        List<PlayedMahjong> playedMahjongs = (List<PlayedMahjong>) result.get(PlayedMahjong.class.getSimpleName());
+        for (PlayedMahjong mahjong : playedMahjongs) {
+            int acceptUserId = mahjong.getuId();
+            mahjong.setuId(getUserByUserId(acceptUserId).getUId());
+
+            messageManager.sendMessageByUserId(acceptUserId, new JsonResultY.Builder()
+                    .setPid(PidValue.OTHER_USER_PLAY_A_MAHJONG)
+                    .setError(CommonError.SYS_SUSSES)
+                    .setData(mahjong)
+                    .build());
+        }
         //gameService.putOutCard(putOutCard, room, user, version);
 
         return new JsonResultY.Builder()

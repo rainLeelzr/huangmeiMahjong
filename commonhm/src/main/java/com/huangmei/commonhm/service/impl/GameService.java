@@ -13,6 +13,7 @@ import com.huangmei.commonhm.redis.RoomRedis;
 import com.huangmei.commonhm.redis.VersionRedis;
 import com.huangmei.commonhm.util.CommonError;
 import com.huangmei.commonhm.util.JsonUtil;
+import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,7 +128,7 @@ public class GameService {
     /**
      * 打出一张麻将
      */
-    public void playAMahjong(Room room, User user, Mahjong playedMahjong, long version) {
+    public Map<String, Object> playAMahjong(Room room, User user, Mahjong playedMahjong, long version) {
         // 验证版本号
         validateVersion(room, version);
 
@@ -147,7 +148,25 @@ public class GameService {
         }
 
         // 广播打出的牌
+        List<PlayedMahjong> playedMahjongs = playedMahjongBroadcast(mahjongGameData, user, playedMahjong);
 
+        Map<String, Object> result = new HashedMap(2);
+        result.put(PlayedMahjong.class.getSimpleName(), playedMahjong);
+        return result;
+    }
+
+
+    private List<PlayedMahjong> playedMahjongBroadcast(MahjongGameData mahjongGameData, User user, Mahjong playedMahjong) {
+        List<PlayedMahjong> playedMahjongs = new ArrayList<>(mahjongGameData.getPersonalCardInfos().size());
+        for (PersonalCardInfo personalCardInfo : mahjongGameData.getPersonalCardInfos()) {
+            PlayedMahjong temp = new PlayedMahjong();
+            temp.setuId(personalCardInfo.getRoomMember().getUserId());//先设置为userid，在api转uid
+            temp.setLeftCardCount(mahjongGameData.getLeftCards().size());
+            temp.setPlayedMahjongId(playedMahjong.getId());
+            temp.setPlayedUId(user.getUId());
+            playedMahjongs.add(temp);
+        }
+        return playedMahjongs;
     }
 
     /**
