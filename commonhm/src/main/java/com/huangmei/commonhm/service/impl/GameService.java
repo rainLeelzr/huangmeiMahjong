@@ -137,7 +137,6 @@ public class GameService {
         if (!waitingClientOperate.getRoomMember().getUserId().equals(user.getId())) {
             throw CommonError.NOT_YOUR_TURN.newException();
         }
-        gameRedis.deleteWaitingClientOperate(room.getId());
 
         // 取出麻将数据对象
         MahjongGameData mahjongGameData = gameRedis.getMahjongGameData(room.getId());
@@ -146,6 +145,8 @@ public class GameService {
         if (!putOutCardValidate(playedMahjong, mahjongGameData, user)) {
             throw CommonError.USER_NOT_HAVE_SPECIFIED_CARD.newException();
         }
+
+        gameRedis.deleteWaitingClientOperate(room.getId());
 
         // 广播打出的牌
         List<PlayedMahjong> playedMahjongs = playedMahjongBroadcast(mahjongGameData, user, playedMahjong);

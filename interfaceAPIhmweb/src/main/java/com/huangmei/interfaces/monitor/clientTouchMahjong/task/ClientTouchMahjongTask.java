@@ -71,18 +71,27 @@ public class ClientTouchMahjongTask implements MonitorTask {
                         user
                 );
 
-                // 获取摸牌的人的roomMember
+                // 摸牌的人的roomMember
                 RoomMember touchMahjongRoomMember = null;
 
                 // 封装4个ClientTouchMahjong对象，分别发给对应的客户端
                 clientTouchMahjongs = new ArrayList<>(mahjongGameData.getPersonalCardInfos().size());
                 for (PersonalCardInfo personalCardInfo : mahjongGameData.getPersonalCardInfos()) {
-                    // 获取此手牌的user
                     User personalCardInfoUser = null;
                     for (User tempUser : users) {
-                        if (tempUser.getId().equals(personalCardInfo.getRoomMember().getUserId())) {
+                        // 获取此手牌的user
+                        if (personalCardInfoUser == null &&
+                                tempUser.getId().equals(personalCardInfo.getRoomMember().getUserId())) {
                             personalCardInfoUser = tempUser;
+                        }
+
+                        // 获取摸牌的人的roomMember
+                        if (touchMahjongRoomMember == null &&
+                                user.getId().equals(personalCardInfo.getRoomMember().getUserId())) {
                             touchMahjongRoomMember = personalCardInfo.getRoomMember();
+                        }
+
+                        if (personalCardInfoUser != null && touchMahjongRoomMember != null) {
                             break;
                         }
                     }
@@ -118,7 +127,7 @@ public class ClientTouchMahjongTask implements MonitorTask {
                     canOperate = canOperates.get(0);
                 }
                 // 添加可以打牌操作
-               canOperate.getOperates().add(Operate.PLAY_A_MAHJONG);
+                canOperate.getOperates().add(Operate.PLAY_A_MAHJONG);
                 // 保存可操作列表到redis，记录正在等待哪个玩家的什么操作
                 gameRedis.saveWaitingClientOperate(canOperate);
 
