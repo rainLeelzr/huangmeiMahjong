@@ -9,10 +9,15 @@
     <br/>
     <button onclick="send()">发送消息</button>
     <button onclick="debug()">调试1</button>
-    <button onclick="putOutCard()">打牌3000</button>
-    <button onclick="login()">登录</button>
+    <button onclick="login1()">登录1</button>
+    <button onclick="login2()">登录2</button>
+    <button onclick="login3()">登录3</button>
+    <button onclick="login4()">登录4</button>
     <button onclick="createRoom()">创建好友房</button>
-    <button onclick="ready()">准备</button>
+    <button onclick="joinRoom4()">加入房间4</button>
+    <button onclick="ready4()">准备4</button>
+    <button onclick="playerCard4()">打牌4</button>
+    <button onclick="clear1()">清空响应消息</button>
     <hr/>
     <button onclick="closeWebSocket()">关闭WebSocket连接</button>
     <hr/>
@@ -58,8 +63,15 @@
 
     //将消息显示在网页上
     function setMessageInnerHTML(innerHTML) {
-        document.getElementById('message').innerHTML += innerHTML + '<br/>';
+        document.getElementById('message').innerHTML += innerHTML + '<br/><br/>';
     }
+
+
+    function clear1() {
+        document.getElementById('message').innerHTML ='';
+    }
+
+
 
     //关闭WebSocket连接
     function closeWebSocket() {
@@ -82,8 +94,23 @@
         websocket.send(message);
     }
 
-    function login() {
+    function login1() {
         var message = '{"pid":1000,"data":{"openId":"13791","nickName":"13791","sex":1,"image":"2222"}}';
+        websocket.send(message);
+    }
+
+    function login2() {
+        var message = '{"pid":1000,"data":{"openId":"13792","nickName":"13792","sex":1,"image":"2222"}}';
+        websocket.send(message);
+    }
+
+    function login3() {
+        var message = '{"pid":1000,"data":{"openId":"13793","nickName":"13793","sex":1,"image":"2222"}}';
+        websocket.send(message);
+    }
+
+    function login4() {
+        var message = '{"pid":1000,"data":{"openId":"13794","nickName":"13794","sex":1,"image":"2222"}}';
         websocket.send(message);
     }
 
@@ -92,8 +119,18 @@
         websocket.send(message);
     }
 
-    function ready() {
+    function joinRoom4() {
+        var message = '{"pid":2001,"data":{"uId":"741695","roomCode":7378}}';
+        websocket.send(message);
+    }
+
+    function ready4() {
         var message = '{"pid":2005,"data":{"uId":"741695"}}';
+        websocket.send(message);
+    }
+
+    function playerCard4() {
+        var message = '{"pid":3000,"data":{"mahjongId":392,"version":51}}';
         websocket.send(message);
     }
 

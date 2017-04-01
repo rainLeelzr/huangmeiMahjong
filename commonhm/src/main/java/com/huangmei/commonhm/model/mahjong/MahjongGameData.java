@@ -3,6 +3,7 @@ package com.huangmei.commonhm.model.mahjong;
 
 import com.huangmei.commonhm.manager.operate.Operate;
 import com.huangmei.commonhm.model.RoomMember;
+import com.huangmei.commonhm.util.mock.MockComboMahjongList;
 import org.apache.commons.lang.math.RandomUtils;
 
 import java.util.*;
@@ -89,7 +90,9 @@ public class MahjongGameData {
      */
     public static MahjongGameData initData(int players, int bankerSite) {
         // 获取所有麻将牌
-        List<Mahjong> allMahjongs = Mahjong.getAllMahjongs();
+        //List<Mahjong> allMahjongs = Mahjong.getAllMahjongs();
+        // DEBUGING 生成指定麻将列表
+        List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1YingAnGangMahjongs();
 
         // 参数验证
         if (bankerSite > players || bankerSite < 0 || players == 0) {
@@ -121,8 +124,9 @@ public class MahjongGameData {
         // 掷骰
         mahjongGameData.dices = rollDice();
 
+        // DEBUGING 打乱所有麻将牌顺序
         // 打乱所有麻将牌顺序
-        Collections.shuffle(allMahjongs);
+        //Collections.shuffle(allMahjongs);
         //System.out.println("乱序后麻将：" + allMahjongs);
 
         // allMahjongs的下标，一共120张牌，用于记录分到第几张牌
@@ -183,7 +187,7 @@ public class MahjongGameData {
 
         // 设定宝娘
         // todome 设定宝娘
-        mahjongGameData.setBaoMother(leftCards.get(1));
+        mahjongGameData.setBaoMother(leftCards.get(0));
 
         // 设定宝牌
         // todome 设定宝牌

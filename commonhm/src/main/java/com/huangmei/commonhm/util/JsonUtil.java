@@ -97,6 +97,23 @@ public class JsonUtil {
         }
     }
 
+    public static List<Integer> getIntegerList(JSONObject data, String key) {
+        try {
+            JSONArray jsonArray = data.getJSONArray(key);
+            List<Integer> ints = new ArrayList<>(jsonArray.size());
+            for (Object o : jsonArray) {
+                if (o instanceof Integer) {
+                    ints.add((Integer) o);
+                } else {
+                    ints.add(Integer.valueOf((int) o));
+                }
+            }
+            return ints;
+        } catch (JSONException e) {
+            throw new RuntimeException(String.format("缺少参数：%s", key));
+        }
+    }
+
 
     public static long getLong(JSONObject data, String key) {
         try {

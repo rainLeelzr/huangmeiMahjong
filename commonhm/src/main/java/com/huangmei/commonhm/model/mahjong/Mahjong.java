@@ -261,6 +261,21 @@ public enum Mahjong implements Comparable<Mahjong> {
     }
 
     /**
+     * 把麻将id列表转为枚举对象列表
+     */
+    public static List<Mahjong> parseFromIds(Collection<Integer> mahjongIds) {
+        if (mahjongIds.size() == 0) {
+            return Collections.emptyList();
+        }
+
+        List<Mahjong> mahjongs = new ArrayList<>(mahjongIds.size());
+        for (Integer mahjongId : mahjongIds) {
+            mahjongs.add(parse(mahjongId));
+        }
+        return mahjongs;
+    }
+
+    /**
      * 把碰列表转为碰列表
      */
     public static List<List<Integer>> parseCombosToMahjongIds(Collection<Combo> Combos) {

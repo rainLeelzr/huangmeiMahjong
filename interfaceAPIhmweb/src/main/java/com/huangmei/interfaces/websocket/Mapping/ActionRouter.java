@@ -478,6 +478,26 @@ public class ActionRouter {
         return null;
     }
 
+    @Pid(PidValue.YING_AN_GANG)
+    @LoginResource
+    @SuppressWarnings("unchecked")
+    public JsonResultY yingAnGang(WebSocketSession session, JSONObject data)
+            throws Exception {
+
+        User user = sessionManager.getUser(session.getId());
+        Room room = sessionManager.getRoom(session.getId());
+
+        List<Integer> toBeGangMahjongIds = JsonUtil.getIntegerList(data, "mahjongIds");
+        long version = JsonUtil.getLong(data, "version");
+
+        List<Mahjong> mahjongs = Mahjong.parseFromIds(toBeGangMahjongIds);
+
+        gameService.yingAnGang(version, user, room, toBeGangMahjongIds);
+
+
+        return null;
+    }
+
     private List<User> getRoomUsers(List<PersonalCardInfo> personalCardInfos) {
         List<User> users = new ArrayList<>(personalCardInfos.size());
         for (PersonalCardInfo personalCardInfo : personalCardInfos) {

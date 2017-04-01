@@ -174,7 +174,7 @@ public class GameService {
     }
 
     /**
-     * 玩家出牌时，验证其版本号
+     * 玩家操作时，验证其版本号
      */
     private void validateVersion(Room room, long version) {
         Long nowVersion = versionRedis.nowVersion(room.getId());
@@ -269,5 +269,21 @@ public class GameService {
 
     }
 
+    /**
+     * 处理硬暗杠的请求逻辑
+     */
+    public void yingAnGang(long version, User user, Room room, List<Integer> toBeGangMahjongIds) {
+        // 验证版本号
+        validateVersion(room,version);
 
+        // 取出等待客户端操作对象waitingClientOperate
+        CanDoOperate waitingClientOperate = gameRedis.getWaitingClientOperate(room.getId());
+        if (!waitingClientOperate.getRoomMember().getUserId().equals(user.getId())) {
+            throw CommonError.NOT_YOUR_TURN.newException();
+        }
+
+        // 取出麻将数据对象
+        MahjongGameData mahjongGameData = gameRedis.getMahjongGameData(room.getId());
+
+    }
 }
