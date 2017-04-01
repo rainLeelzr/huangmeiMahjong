@@ -3,6 +3,8 @@ package com.huangmei.commonhm.util;
 import com.huangmei.commonhm.manager.operate.CanDoOperate;
 import com.huangmei.commonhm.manager.operate.Operate;
 import com.huangmei.commonhm.model.RoomMember;
+import com.huangmei.commonhm.model.mahjong.Mahjong;
+import com.huangmei.commonhm.model.mahjong.MahjongGameData;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
@@ -71,6 +73,17 @@ public class JsonUtil {
                     }
                     canDoOperate.setOperates(newOperates);
                 }
+            }
+        } else if (o instanceof MahjongGameData) {
+            MahjongGameData mahjongGameData = (MahjongGameData) o;
+            List baoMahjongs = mahjongGameData.getBaoMahjongs();
+
+            if (baoMahjongs.size() > 0 && baoMahjongs.get(0) instanceof String) {
+                List<Mahjong> baoMs = new ArrayList<>(baoMahjongs.size());
+                for (int i = 0; i < baoMahjongs.size(); i++) {
+                    baoMs.add(Mahjong.valueOf(baoMahjongs.get(i).toString()));
+                }
+                mahjongGameData.setBaoMahjongs(baoMs);
             }
         }
         return o;
