@@ -26,6 +26,7 @@ public enum CommonError {
     USER_LACK_COINS(200003, "金币不足", UserLackCoinsException.class),
     USER_LACK_DIAMONDS(200004, "钻石不足", UserLackDiamondsException.class),
     ALREADY_DRAW_COINS(200005, "今日金币抽奖次数已用完", AlreadyDrawCoinsException.class),
+    ALREADY_GET_COINS(200006, "今日免费领取金币次数已用完", AlreadyDrawCoinsException.class),
 
     /**
      * 房间

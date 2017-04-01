@@ -6,7 +6,8 @@ public class TranRecord implements Entity {
 
 	public static enum way {
 		DRAW_BY_FREE(1, "免费抽奖"),
-		DRAW_BY_COINS(2, "金币抽奖");
+		DRAW_BY_COINS(2, "金币抽奖"),
+		FREE_COIN(3, "每日免费领取金币");
 
 
 		private int code;
