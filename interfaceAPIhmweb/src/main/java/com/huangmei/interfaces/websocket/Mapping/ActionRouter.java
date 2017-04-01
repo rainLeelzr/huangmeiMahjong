@@ -4,11 +4,9 @@ import com.huangmei.commonhm.manager.getACard.GetACardManager;
 import com.huangmei.commonhm.model.Room;
 import com.huangmei.commonhm.model.RoomMember;
 import com.huangmei.commonhm.model.User;
-import com.huangmei.commonhm.model.mahjong.FirstPutOutCard;
-import com.huangmei.commonhm.model.mahjong.Mahjong;
-import com.huangmei.commonhm.model.mahjong.MahjongGameData;
-import com.huangmei.commonhm.model.mahjong.PlayedMahjong;
+import com.huangmei.commonhm.model.mahjong.*;
 import com.huangmei.commonhm.redis.GameRedis;
+import com.huangmei.commonhm.redis.VersionRedis;
 import com.huangmei.commonhm.redis.base.Redis;
 import com.huangmei.commonhm.service.RoomService;
 import com.huangmei.commonhm.service.UserService;
@@ -61,6 +59,9 @@ public class ActionRouter {
 
     @Autowired
     private GameRedis gameRedis;
+
+    @Autowired
+    private VersionRedis versionRedis;
 
     private User getUserByUserId(Integer userId) {
         WebSocketSession session = sessionManager.getByUserId(userId);
@@ -121,7 +122,7 @@ public class ActionRouter {
             throws Exception {
 
         User user = sessionManager.getUser(session.getId());
-        Map<String, Object> result = userService.getUser(data,user);
+        Map<String, Object> result = userService.getUser(data, user);
         //String userId = (String) data.get("userId");
         //User user = userService.selectOne(Integer.parseInt(userId));
         //if (user == null) {
@@ -168,7 +169,7 @@ public class ActionRouter {
             throws Exception {
         User user = sessionManager.getUser(session.getId());
 
-        Map<String, Object> result = roomService.joinRoom(data,user);
+        Map<String, Object> result = roomService.joinRoom(data, user);
         if (result != null) {
             sessionManager.userJoinRoom((Room) result.get(("room")), session);
         }
@@ -211,7 +212,7 @@ public class ActionRouter {
     public JsonResultY outRoom(WebSocketSession session, JSONObject data)
             throws Exception {
         User user = sessionManager.getUser(session.getId());
-        Map<String, Object> result = roomService.outRoom(data,user);
+        Map<String, Object> result = roomService.outRoom(data, user);
         if (result != null) {
             JsonResultY jsonResultY = new JsonResultY.Builder()
                     .setPid(PidValue.OUT_ROOM.getPid())
@@ -231,7 +232,7 @@ public class ActionRouter {
     public JsonResultY ready(WebSocketSession session, JSONObject data)
             throws Exception {
         User user = sessionManager.getUser(session.getId());
-        Map<String, Object> result = roomService.ready(data,user);
+        Map<String, Object> result = roomService.ready(data, user);
         Integer type = (Integer) result.get("type");
 
         boolean isFirstPutOutCard = false;
@@ -299,6 +300,7 @@ public class ActionRouter {
                 firstPutOutCardBroadcasts.add(broadcast);
             }
 
+            // 庄家摸一张牌
             monitorManager.watch(new ClientTouchMahjongTask
                     .Builder()
                     .setGetACardManager(getACardManager)
@@ -307,6 +309,7 @@ public class ActionRouter {
                     .setUser(bankerUser)
                     .setUsers(users)
                     .setGameRedis(gameRedis)
+                    .setVersionRedis(versionRedis)
                     .build());
 
         }
@@ -337,7 +340,7 @@ public class ActionRouter {
     public JsonResultY dismissRoom(WebSocketSession session, JSONObject data)
             throws Exception {
         User user = sessionManager.getUser(session.getId());
-        Map<String, Object> result = roomService.dismissRoom(data,user);
+        Map<String, Object> result = roomService.dismissRoom(data, user);
 
         JsonResultY jsonResultY = new JsonResultY.Builder()
                 .setPid(PidValue.DISMISS_ROOM.getPid())
@@ -356,7 +359,7 @@ public class ActionRouter {
     public JsonResultY agreeDismiss(WebSocketSession session, JSONObject data)
             throws Exception {
         User user = sessionManager.getUser(session.getId());
-        Map<String, Object> result = roomService.agreeDismiss(data,user);
+        Map<String, Object> result = roomService.agreeDismiss(data, user);
         JsonResultY jsonResultY = new JsonResultY.Builder()
                 .setPid(PidValue.AGREE_DISMISS.getPid())
                 .setError(CommonError.SYS_SUSSES)
@@ -367,13 +370,14 @@ public class ActionRouter {
                 jsonResultY);
         return null;
     }
+
     @Pid(PidValue.PRIZE_DRAW)
     @LoginResource
     public JsonResultY prizeDraw(WebSocketSession session, JSONObject data)
             throws Exception {
         User user = sessionManager.getUser(session.getId());
 
-        Map<String, Object> result = userService.prizeDraw(data,user);
+        Map<String, Object> result = userService.prizeDraw(data, user);
 
         sessionManager.userUpdate((User)result.get("user"),session);
 
@@ -448,6 +452,13 @@ public class ActionRouter {
 
         Map<String, Object> result = gameService.playAMahjong(room, user, playedMahjong, version);
 
+        // 响应用户已经打出牌
+        messageManager.send(session, new JsonResultY.Builder()
+                .setPid(PidValue.PLAY_A_MAHJONG)
+                .setError(CommonError.SYS_SUSSES)
+                .setData(null)
+                .build());
+
         // 玩家打牌广播
         List<PlayedMahjong> playedMahjongs = (List<PlayedMahjong>) result.get(PlayedMahjong.class.getSimpleName());
         for (PlayedMahjong mahjong : playedMahjongs) {
@@ -462,11 +473,68 @@ public class ActionRouter {
         }
         //gameService.putOutCard(putOutCard, room, user, version);
 
-        return new JsonResultY.Builder()
-                .setPid(PidValue.PLAY_A_MAHJONG)
-                .setError(CommonError.SYS_SUSSES)
-                .setData(null)
-                .build();
+        MahjongGameData mahjongGameData = (MahjongGameData) result.get(MahjongGameData.class.getSimpleName());
+        // 4个玩家，按座位号升序
+        List<User> users = getRoomUsers(mahjongGameData.getPersonalCardInfos());
+
+        // 一个玩家出牌后，轮到下一个玩家摸牌
+        User nextUser = getNextTouchMahjongUser(mahjongGameData, user);
+
+        // 下一个玩家摸一张牌
+        monitorManager.watch(new ClientTouchMahjongTask
+                .Builder()
+                .setGetACardManager(getACardManager)
+                .setMessageManager(messageManager)
+                .setMahjongGameData(mahjongGameData)
+                .setUser(nextUser)
+                .setUsers(users)
+                .setGameRedis(gameRedis)
+                .setVersionRedis(versionRedis)
+                .build());
+
+        return null;
+    }
+
+    private List<User> getRoomUsers(List<PersonalCardInfo> personalCardInfos) {
+        List<User> users = new ArrayList<>(personalCardInfos.size());
+        for (PersonalCardInfo personalCardInfo : personalCardInfos) {
+            Integer userId = personalCardInfo.getRoomMember().getUserId();
+            users.add(getUserByUserId(userId));
+        }
+        return users;
+    }
+
+    /**
+     * 本轮玩家已经出牌，获取下一个出牌的玩家
+     *
+     * @param user 本轮已经出牌的玩家
+     */
+    private User getNextTouchMahjongUser(MahjongGameData mahjongGameData, User user) {
+        // 本轮已经出牌的座位号
+        Integer userSeat = null;
+        for (PersonalCardInfo personalCardInfo : mahjongGameData.getPersonalCardInfos()) {
+            if (personalCardInfo.getRoomMember().getUserId().equals(user.getId())) {
+                userSeat = personalCardInfo.getRoomMember().getSeat();
+                break;
+            }
+        }
+
+        // 获取下一个座位号
+        Integer next = userSeat + 1;
+        // 如果座位号next大于玩家人数，则座位号改为1，从头开始
+        if (next > mahjongGameData.getPersonalCardInfos().size()) {
+            next = 1;
+        }
+
+        Integer nextUserId = null;
+        for (PersonalCardInfo personalCardInfo : mahjongGameData.getPersonalCardInfos()) {
+            if (personalCardInfo.getRoomMember().getSeat().equals(next)) {
+                nextUserId = personalCardInfo.getRoomMember().getUserId();
+            }
+        }
+
+        User nextUser = getUserByUserId(nextUserId);
+        return nextUser;
     }
 
 

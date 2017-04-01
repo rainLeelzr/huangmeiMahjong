@@ -132,7 +132,7 @@ public class GameService {
         // 验证版本号
         validateVersion(room, version);
 
-        // 删除redis的等待客户端操作对象waitingClientOperate
+        // 取出等待客户端操作对象waitingClientOperate
         CanDoOperate waitingClientOperate = gameRedis.getWaitingClientOperate(room.getId());
         if (!waitingClientOperate.getRoomMember().getUserId().equals(user.getId())) {
             throw CommonError.NOT_YOUR_TURN.newException();
@@ -146,6 +146,7 @@ public class GameService {
             throw CommonError.USER_NOT_HAVE_SPECIFIED_CARD.newException();
         }
 
+        // 删除redis的等待客户端操作对象waitingClientOperate
         gameRedis.deleteWaitingClientOperate(room.getId());
 
         // 广播打出的牌
@@ -153,6 +154,7 @@ public class GameService {
 
         Map<String, Object> result = new HashedMap(2);
         result.put(PlayedMahjong.class.getSimpleName(), playedMahjongs);
+        result.put(MahjongGameData.class.getSimpleName(), mahjongGameData);
         return result;
     }
 
@@ -256,10 +258,12 @@ public class GameService {
             if (mahjong == putOutCard) {
                 iterator.remove();
                 isHandCard = true;
+                break;
             }
         }
         if (isHandCard) {
-            personalCardInfo.getHandCards().add(putOutCard);
+            // 把摸到的麻将放到手牌列表
+            personalCardInfo.getHandCards().add(personalCardInfo.getTouchMahjong());
         }
         return isHandCard;
 

@@ -10,6 +10,7 @@ import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.MahjongGameData;
 import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
 import com.huangmei.commonhm.redis.GameRedis;
+import com.huangmei.commonhm.redis.VersionRedis;
 import com.huangmei.interfaces.monitor.MonitorTask;
 import com.huangmei.interfaces.monitor.clientTouchMahjong.task.callback.success.TouchMahjongSender;
 import com.huangmei.interfaces.websocket.MessageManager;
@@ -52,6 +53,7 @@ public class ClientTouchMahjongTask implements MonitorTask {
     private List<ClientTouchMahjong> clientTouchMahjongs;
     private MessageManager messageManager;
     private GameRedis gameRedis;
+    private VersionRedis versionRedis;
 
     @Override
     public String getTaskName() {
@@ -70,6 +72,9 @@ public class ClientTouchMahjongTask implements MonitorTask {
                         touchMahjong,
                         user
                 );
+
+                Long nextVersion = versionRedis.nextVersion(mahjongGameData.getRoomId());
+                mahjongGameData.setVersion(nextVersion);
 
                 // 摸牌的人的roomMember
                 RoomMember touchMahjongRoomMember = null;
@@ -249,6 +254,11 @@ public class ClientTouchMahjongTask implements MonitorTask {
 
         public Builder setGameRedis(GameRedis gameRedis) {
             task.gameRedis = gameRedis;
+            return this;
+        }
+
+        public Builder setVersionRedis(VersionRedis versionRedis) {
+            task.versionRedis = versionRedis;
             return this;
         }
 
