@@ -1,12 +1,14 @@
 package com.huangmei.interfaces.websocket;
 
 import com.huangmei.commonhm.model.Room;
-import com.huangmei.commonhm.model.RoomMember;
 import com.huangmei.commonhm.model.User;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -127,9 +129,9 @@ public class SessionManager {
     /**
      * 用户退出房间
      */
-    public void userExitRoom(RoomMember roomMember, WebSocketSession session) {
+    public void userExitRoom(String roomId, WebSocketSession session) {
         //删除userId所在的房间
-        List<WebSocketSession> webSocketSessions = roomSessions.get(roomMember.getRoomId().toString());
+        List<WebSocketSession> webSocketSessions = roomSessions.get(roomId);
         if (webSocketSessions != null) {
             webSocketSessions.remove(session);
         }

@@ -214,13 +214,15 @@ public class ActionRouter {
         User user = sessionManager.getUser(session.getId());
         Map<String, Object> result = roomService.outRoom(data, user);
         if (result != null) {
+            Integer roomId = (Integer) result.get("roomId");
+            result.remove("roomId");
             JsonResultY jsonResultY = new JsonResultY.Builder()
                     .setPid(PidValue.OUT_ROOM.getPid())
                     .setError(CommonError.SYS_SUSSES)
                     .setData(result)
                     .build();
-            messageManager.sendMessageToRoomUsers(((Room) result.get(("room"))).getId().toString(), jsonResultY);
-            sessionManager.userExitRoom((RoomMember) result.get("roomMember"), session);
+            messageManager.sendMessageToRoomUsers(roomId.toString(), jsonResultY);
+            sessionManager.userExitRoom(roomId.toString(), session);
         }
 
         return null;
@@ -341,14 +343,15 @@ public class ActionRouter {
             throws Exception {
         User user = sessionManager.getUser(session.getId());
         Map<String, Object> result = roomService.dismissRoom(data, user);
-
+        Integer roomId = (Integer) result.get("roomId");
+        result.remove("roomId");
         JsonResultY jsonResultY = new JsonResultY.Builder()
                 .setPid(PidValue.DISMISS_ROOM.getPid())
                 .setError(CommonError.SYS_SUSSES)
                 .setData(result)
                 .build();
         messageManager.sendMessageToRoomUsers(
-                ((Room) (result.get("room"))).getId().toString(),
+                roomId.toString(),
                 jsonResultY);
 
         return null;
@@ -360,13 +363,15 @@ public class ActionRouter {
             throws Exception {
         User user = sessionManager.getUser(session.getId());
         Map<String, Object> result = roomService.agreeDismiss(data, user);
+        Integer roomId = (Integer) result.get("roomId");
+        result.remove("roomId");
         JsonResultY jsonResultY = new JsonResultY.Builder()
                 .setPid(PidValue.AGREE_DISMISS.getPid())
                 .setError(CommonError.SYS_SUSSES)
                 .setData(result)
                 .build();
         messageManager.sendMessageToRoomUsers(
-                ((Room) (result.get("room"))).getId().toString(),
+                roomId.toString(),
                 jsonResultY);
         return null;
     }
@@ -379,7 +384,7 @@ public class ActionRouter {
 
         Map<String, Object> result = userService.prizeDraw(data, user);
 
-        sessionManager.userUpdate((User)result.get("user"),session);
+        sessionManager.userUpdate((User) result.get("user"), session);
 
         return new JsonResultY.Builder()
                 .setPid(PidValue.PRIZE_DRAW.getPid())
@@ -387,16 +392,19 @@ public class ActionRouter {
                 .setData(result)
                 .build();
     }
+
     @Pid(PidValue.FREE_COINS)
     @LoginResource
     public JsonResultY freeCoins(WebSocketSession session, JSONObject data)
             throws Exception {
         User user = sessionManager.getUser(session.getId());
 
-        Map<String, Object> result = userService.freeCoins(data,user);
+        Map<String, Object> result = userService.freeCoins(data, user);
+
+        sessionManager.userUpdate((User) result.get("user"), session);
 
         return new JsonResultY.Builder()
-                .setPid(PidValue.PRIZE_DRAW.getPid())
+                .setPid(PidValue.FREE_COINS.getPid())
                 .setError(CommonError.SYS_SUSSES)
                 .setData(result)
                 .build();

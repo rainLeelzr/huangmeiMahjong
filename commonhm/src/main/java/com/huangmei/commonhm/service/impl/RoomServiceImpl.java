@@ -316,9 +316,8 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                 roomMember.setLeaveTime(new Date());
                 roomMemberDao.update(roomMember);
 
-                result.put("roomMember", roomMember);
-                result.put("room", room);
-
+                result.put("roomId", room.getId());
+                result.put("result",true);
                 return result;
             } else {
                 throw CommonError.ROOM_USER_NOT_IN_ROOM.newException();
@@ -353,7 +352,6 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
     @Override
     public Map<String, Object> dismissRoom(JSONObject data,User user) {
         Map<String, Object> result = new HashMap<>(3);
-        Integer type;
         boolean r;
         Integer roomCode = (Integer) data.get("roomCode");
 
@@ -366,10 +364,8 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                 for (RoomMember roomMember : roomMembers) {
                     dismissRoom(roomMember);
                 }
-                type = 1;
                 r = true;
             } else {//已开始游戏,需要申请解散,其他玩家同意才可以解散
-                type = 2;
                 r = false;
 
                 for (RoomMember roomMember : roomMembers) {
@@ -390,8 +386,9 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                 //2分钟计时无响应默认同意
 
             }
-            result.put("room", room);
-            result.put("type", type);
+            result.put("roomId", room.getId());
+            result.put("uId",user.getUId());
+            result.put("nickName",user.getNickName());
             result.put("result", r);
             return result;
         } else {
@@ -434,7 +431,6 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                         vc.setState(Entity.Value.eq(Vote.state.AGREE.getCode()));
                         long count = voteDao.selectCount(vc);
 
-
                         if (count==1){//全部人投票同意解散房间
                             Set<RoomMember> roomMembers = roomRedis.getRoomMembers(room.getId().toString());
                             for (RoomMember member : roomMembers) {
@@ -449,7 +445,9 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                     vote.setStatus(Vote.status.FINISH.getCode());
                     voteDao.update(vote);
                     result.put("result", isAgree);
-                    result.put("room", room);
+                    result.put("roomId", room.getId());
+                    result.put("uId",user.getUId());
+                    result.put("nickName",user.getNickName());
                     return result;
                 } else {
                     throw CommonError.ROOM_NOT_EXIST.newException();
