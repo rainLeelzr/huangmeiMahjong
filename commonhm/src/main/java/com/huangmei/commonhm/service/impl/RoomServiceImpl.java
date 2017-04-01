@@ -45,14 +45,20 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
      * @param data
      * @return
      */
-    public Map<String, Object> createRoom(JSONObject data,User user) {
+    public Map<String, Object> createRoom(JSONObject data) {
 
         Map<String, Object> result = new HashMap<String, Object>(3);
         String times = (String) data.get("times");
+        String uId = (String) data.get("uId");
         Integer multiple = (Integer) data.get("multiple");
         Integer payType = (Integer) data.get("payType");
         Integer type = data.getInt("type");
         Integer diamond = (Integer) data.get("diamond");
+
+        Entity.UserCriteria userCriteria = new Entity.UserCriteria();
+        userCriteria.setUId(Entity.Value.eq(uId));
+        User user = userDao.selectOne(userCriteria);
+
 
         if (user!=null) {
             RoomMember roomMember = checkInRoom(user.getId());
@@ -189,7 +195,8 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                     if (user.getCoin() >= multiple) {
                         result = joinCoinRoom(multiple, user, result);
                         if (result == null) {//所有房间都已经满人,系统自动创建金币房间
-                            result = createRoom(data,user);
+                            data.put("uId",user.getUId());
+                            result = createRoom(data);
                         }
                     } else {
                         throw CommonError.USER_LACK_COINS.newException();
@@ -206,7 +213,8 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                     result = joinCoinRoom(multiple, user, result);
                     if (result == null) {//所有房间都已经满人或没有对应的金币场房间,系统自动创建金币房间
                         data.put("multiple", multiple);
-                        result = createRoom(data,user);
+                        data.put("uId",user.getUId());
+                        result = createRoom(data);
                     }
                 }
             }

@@ -7,7 +7,8 @@ import net.sf.json.JSONObject;
 import java.util.Map;
 
 public interface RoomService extends BaseService<Integer, Room> {
-    public Map<String,Object> createRoom(JSONObject data,User user);
+    //public Map<String,Object> createRoom(JSONObject data,User user);
+    public Map<String,Object> createRoom(JSONObject data);
 
     Map<String,Object> joinRoom(JSONObject data,User user);
 

@@ -149,7 +149,8 @@ public class ActionRouter {
             throws Exception {
 
         User user = sessionManager.getUser(session.getId());
-        Map<String, Object> result = roomService.createRoom(data,user);
+        //Map<String, Object> result = roomService.createRoom(data,user);
+        Map<String, Object> result = roomService.createRoom(data);
         if (result != null) {
             sessionManager.userJoinRoom((Room) result.get(("room")), session);
         }
@@ -373,6 +374,22 @@ public class ActionRouter {
         User user = sessionManager.getUser(session.getId());
 
         Map<String, Object> result = userService.prizeDraw(data,user);
+
+        sessionManager.userUpdate((User)result.get("user"),session);
+
+        return new JsonResultY.Builder()
+                .setPid(PidValue.PRIZE_DRAW.getPid())
+                .setError(CommonError.SYS_SUSSES)
+                .setData(result)
+                .build();
+    }
+    @Pid(PidValue.FREE_COINS)
+    @LoginResource
+    public JsonResultY freeCoins(WebSocketSession session, JSONObject data)
+            throws Exception {
+        User user = sessionManager.getUser(session.getId());
+
+        Map<String, Object> result = userService.freeCoins(data,user);
 
         return new JsonResultY.Builder()
                 .setPid(PidValue.PRIZE_DRAW.getPid())

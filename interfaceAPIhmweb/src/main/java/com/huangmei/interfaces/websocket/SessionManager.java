@@ -86,6 +86,13 @@ public class SessionManager {
         userIdSessions.put(user.getId().toString(), session);
         sessionIdUsers.put(session.getId(), user);
     }
+    /**
+     * 更新session中的user信息
+     */
+    public void userUpdate(User user, WebSocketSession session) {
+
+        sessionIdUsers.put(session.getId(), user);
+    }
 
     /**
      * 用户登出

@@ -163,41 +163,49 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
     public Map<String, Object> prizeDraw(JSONObject data, User user) {
         Map<String, Object> result = new HashMap<String, Object>(3);
         Integer way = TranRecord.way.DRAW_BY_FREE.getCode();
-        if (user != null) {
+        boolean  judge = data.getBoolean("judge");
+
             TranRecord tr = new TranRecord();
             tr.setWay(way);
             tr.setUserId(user.getId());
             Long count = tranRecordDao.countForPrizeDraw(tr);
 
-            List<Prize> prizes = packPrize();
-            if (count < 1) {//说明当日还没有进行免费抽奖
-                result = PrizeRandom(user, result, way);
-            } else {
-                way = TranRecord.way.DRAW_BY_COINS.getCode();
-                tr.setWay(way);
-                count = tranRecordDao.countForPrizeDraw(tr);
-                if (count < 3) {//说明当日还可以用金币进行抽奖
-                    if (user.getCoin() >= 10000) {
-                        user.setCoin(user.getCoin() - 10000);
-                        result = PrizeRandom(user, result, way);
-
-                    } else {
-                        throw CommonError.USER_LACK_COINS.newException();
-                    }
-                } else {
-                    throw CommonError.ALREADY_DRAW_COINS.newException();
+            if (judge){
+                if (count<1){
+                    result.put("free",true);
+                }else {
+                    result.put("free",false);
                 }
+            }else {
+                if (count < 1) {//说明当日还没有进行免费抽奖
+                    result = PrizeRandom(user, result, way);
+                } else {
+                    way = TranRecord.way.DRAW_BY_COINS.getCode();
+                    tr.setWay(way);
+                    count = tranRecordDao.countForPrizeDraw(tr);
+                    if (count < 3) {//说明当日还可以用金币进行抽奖
+                        if (user.getCoin() >= 10000) {
+                            user.setCoin(user.getCoin() - 10000);
+                            result = PrizeRandom(user, result, way);
+
+                        } else {
+                            throw CommonError.USER_LACK_COINS.newException();
+                        }
+                    } else {
+                        throw CommonError.ALREADY_DRAW_COINS.newException();
+                    }
+                }
+                result.put("way", way);
             }
-            result.put("way", way);
+
             return result;
-        } else {
-            throw CommonError.USER_NOT_EXIST.newException();
-        }
+
 
     }
 
+
     /**
-     * 抽奖
+     * 抽奖实现
      * @param user
      * @param result
      * @param way
@@ -207,6 +215,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         DecimalFormat df = new DecimalFormat("######0.00");
         int random = -1;
         List<Prize> prizes = packPrize();
+
 
         try {
             //计算总权重
@@ -313,7 +322,48 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         return prizes;
     }
 
+    /**
+     * 免费领取金币
+     * @param data
+     * @param user
+     * @return
+     */
+    @Override
+    public Map<String, Object> freeCoins(JSONObject data, User user) {
+        Map<String, Object> result = new HashMap<String, Object>(3);
+        Integer way = TranRecord.way.DRAW_BY_FREE.getCode();
 
+        TranRecord tr = new TranRecord();
+        tr.setWay(way);
+        tr.setUserId(user.getId());
+        Long count = tranRecordDao.countForPrizeDraw(tr);
+
+
+            if (count < 1) {//说明当日还没有进行免费抽奖
+                result = PrizeRandom(user, result, way);
+            } else {
+                way = TranRecord.way.DRAW_BY_COINS.getCode();
+                tr.setWay(way);
+                count = tranRecordDao.countForPrizeDraw(tr);
+                if (count < 3) {//说明当日还可以用金币进行抽奖
+                    if (user.getCoin() >= 10000) {
+                        user.setCoin(user.getCoin() - 10000);
+                        result = PrizeRandom(user, result, way);
+
+                    } else {
+                        throw CommonError.USER_LACK_COINS.newException();
+                    }
+                } else {
+                    throw CommonError.ALREADY_DRAW_COINS.newException();
+                }
+
+            result.put("way", way);
+        }
+
+        return result;
+
+
+    }
 
 //	public TextMessage TestConnection() {
 //		JsonResult jsonResult=new JsonResult();
