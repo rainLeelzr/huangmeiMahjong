@@ -301,6 +301,7 @@ public class GameService {
         // 玩家的个人卡信息中添加杠列表
         Combo gang = new Combo();
         gang.setType(Combo.Type.AAAA);
+        gang.setYingRuan(YingRuan.YING);
         gang.setMahjongs(toBeGangMahjongs);
         personalCardInfo.getGangs().add(gang);
 
@@ -343,6 +344,7 @@ public class GameService {
         // 玩家的个人卡信息中添加杠列表
         Combo gang = new Combo();
         gang.setType(Combo.Type.AAAA);
+        gang.setYingRuan(YingRuan.RUAN);
         gang.setMahjongs(toBeGangMahjongs);
         personalCardInfo.getGangs().add(gang);
 
@@ -395,5 +397,64 @@ public class GameService {
 
         return true;
 
+    }
+
+    /**
+     * 验证玩家提交的硬加杠请求是否正确
+     */
+    public Object[] yingJiaGang(User user, Room room, Mahjong mahjong) {
+        // 取出等待客户端操作对象waitingClientOperate
+        CanDoOperate waitingClientOperate = gameRedis.getWaitingClientOperate(room.getId());
+        if (!waitingClientOperate.getRoomMember().getUserId().equals(user.getId())) {
+            throw CommonError.NOT_YOUR_TURN.newException();
+        }
+
+        // 取出麻将数据对象
+        MahjongGameData mahjongGameData = gameRedis.getMahjongGameData(room.getId());
+
+        // 玩家个人卡信息
+        PersonalCardInfo personalCardInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), user);
+
+        // 判断玩家是否含有碰
+        List<Combo> pengs = personalCardInfo.getPengs();
+        if (pengs.size() == 0) {
+            throw CommonError.SYS_PARAM_ERROR.newException();
+        }
+
+        // 找到需要加杠的碰
+        Combo toBeJiaBangCombo = null;
+        for (Combo peng : pengs) {
+            if (peng.getYingRuan() == YingRuan.YING) {
+                List<Mahjong> mahjongs = peng.getMahjongs();
+                if (mahjong.getNumber().equals(mahjongs.get(0).getNumber())) {
+                    toBeJiaBangCombo = peng;
+                    break;
+                }
+            }
+        }
+        if (toBeJiaBangCombo == null) {
+            throw CommonError.SYS_PARAM_ERROR.newException();
+        }
+
+        // 添加杠combo
+        Combo jiaGangCombo = new Combo();
+        jiaGangCombo.setType(Combo.Type.AAAA);
+        jiaGangCombo.setYingRuan(YingRuan.YING);
+        List<Mahjong> jiaGangMahjongs = new ArrayList<>(toBeJiaBangCombo.getMahjongs());
+        jiaGangMahjongs.add(mahjong);
+        Collections.sort(jiaGangMahjongs);
+        jiaGangCombo.setMahjongs(jiaGangMahjongs);
+        personalCardInfo.getGangs().add(jiaGangCombo);
+
+        // 删除碰combo
+        pengs.remove(toBeJiaBangCombo);
+
+        // 玩家的个人卡信息的手牌中移除已杠的麻将
+        personalCardInfo.getHandCards().add(personalCardInfo.getTouchMahjong());
+        personalCardInfo.setTouchMahjong(null);
+        personalCardInfo.getHandCards().remove(mahjong);
+
+        gameRedis.saveMahjongGameData(mahjongGameData);
+        return new Object[]{mahjongGameData, jiaGangCombo};
     }
 }

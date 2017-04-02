@@ -63,7 +63,7 @@ public enum PidValue {
     FIRST_PUT_OUT_ALL_CARD(4001, "游戏开始发牌消息推送"),
     CLIENT_TOUCH_MAHJONG(4002, "发一张牌给客户端消息推送"),
     OTHER_USER_PLAY_A_MAHJONG(4003, "玩家打牌广播"),
-    AN_GANG_BROADCAST(4004, "玩家暗杠广播"),;
+    GANG_BROADCAST(4004, "玩家杠广播"),;
 
     private int pid;
 

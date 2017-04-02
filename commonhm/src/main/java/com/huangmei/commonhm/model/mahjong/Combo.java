@@ -6,7 +6,17 @@ public class Combo {
 
     public Type type;
 
+    public YingRuan yingRuan;
+
     public List<Mahjong> mahjongs;
+
+    public YingRuan getYingRuan() {
+        return yingRuan;
+    }
+
+    public void setYingRuan(YingRuan yingRuan) {
+        this.yingRuan = yingRuan;
+    }
 
     public Type getType() {
         return type;

@@ -17,6 +17,7 @@
     <button onclick="joinRoom4()">加入房间4</button>
     <button onclick="ready4()">准备4</button>
     <button onclick="playerCard4()">打牌4</button>
+    <button onclick="anGang1()">暗杠1</button>
     <button onclick="clear1()">清空响应消息</button>
     <hr/>
     <button onclick="closeWebSocket()">关闭WebSocket连接</button>
@@ -131,6 +132,11 @@
 
     function playerCard4() {
         var message = '{"pid":3000,"data":{"mahjongId":392,"version":51}}';
+        websocket.send(message);
+    }
+
+    function anGang1() {
+        var message = '{"pid":3105,"data":{"mahjongIds":[111,112,113,114],"version":51}}';
         websocket.send(message);
     }
 

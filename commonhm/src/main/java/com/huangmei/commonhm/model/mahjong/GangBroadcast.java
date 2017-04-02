@@ -5,27 +5,27 @@ import java.util.List;
 /**
  * 用于玩家打牌广播
  */
-public class AnGangBroadcast {
+public class GangBroadcast {
 
     private List<Integer> mahjongIds;// 暗杠的麻将id
-    private Integer anGangPlayerUId;  // 暗杠玩家uid
+    private Integer gangPlayerUId;  // 暗杠玩家uid
     private Integer uId; //需要接受广播消息的玩家uid
 
-    public AnGangBroadcast() {
+    public GangBroadcast() {
     }
 
-    public AnGangBroadcast(List<Integer> mahjongIds, Integer anGangPlayerUId, Integer uId) {
+    public GangBroadcast(List<Integer> mahjongIds, Integer gangPlayerUId, Integer uId) {
         this.mahjongIds = mahjongIds;
-        this.anGangPlayerUId = anGangPlayerUId;
+        this.gangPlayerUId = gangPlayerUId;
         this.uId = uId;
     }
 
-    public Integer getAnGangPlayerUId() {
-        return anGangPlayerUId;
+    public Integer getGangPlayerUId() {
+        return gangPlayerUId;
     }
 
-    public void setAnGangPlayerUId(Integer anGangPlayerUId) {
-        this.anGangPlayerUId = anGangPlayerUId;
+    public void setGangPlayerUId(Integer gangPlayerUId) {
+        this.gangPlayerUId = gangPlayerUId;
     }
 
     public Integer getuId() {
