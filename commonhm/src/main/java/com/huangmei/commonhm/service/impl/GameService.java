@@ -11,6 +11,7 @@ import com.huangmei.commonhm.model.mahjong.*;
 import com.huangmei.commonhm.redis.GameRedis;
 import com.huangmei.commonhm.redis.RoomRedis;
 import com.huangmei.commonhm.redis.VersionRedis;
+import com.huangmei.commonhm.redis.base.Redis;
 import com.huangmei.commonhm.util.CommonError;
 import com.huangmei.commonhm.util.JsonUtil;
 import org.apache.commons.collections.map.HashedMap;
@@ -130,7 +131,8 @@ public class GameService {
      */
     public Map<String, Object> playAMahjong(Room room, User user, Mahjong playedMahjong, long version) {
         // 验证版本号
-        validateVersion(room, version);
+        //
+        // validateVersion(room, version);
 
         // 取出等待客户端操作对象waitingClientOperate
         CanDoOperate waitingClientOperate = gameRedis.getWaitingClientOperate(room.getId());
@@ -272,9 +274,9 @@ public class GameService {
     /**
      * 处理硬暗杠的请求逻辑
      */
-    public void yingAnGang(long version, User user, Room room, List<Integer> toBeGangMahjongIds) {
+    public MahjongGameData yingAnGang(long version, User user, Room room, List<Mahjong> toBeGangMahjongs) {
         // 验证版本号
-        validateVersion(room,version);
+        //validateVersion(room, version);
 
         // 取出等待客户端操作对象waitingClientOperate
         CanDoOperate waitingClientOperate = gameRedis.getWaitingClientOperate(room.getId());
@@ -285,5 +287,27 @@ public class GameService {
         // 取出麻将数据对象
         MahjongGameData mahjongGameData = gameRedis.getMahjongGameData(room.getId());
 
+        // 玩家个人卡信息
+        PersonalCardInfo personalCardInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), user);
+
+        // 判断玩家是否含有暗杠的牌
+        boolean isAnGang = PersonalCardInfo.hasMahjongsWithTouchMahjong(personalCardInfo, toBeGangMahjongs);
+        if (!isAnGang) {
+            throw CommonError.USER_NOT_HAVE_SPECIFIED_CARD.newException();
+        }
+
+        // 玩家的个人卡信息中添加杠列表
+        Combo gang = new Combo();
+        gang.setType(Combo.Type.AAAA);
+        gang.setMahjongs(toBeGangMahjongs);
+        personalCardInfo.getGangs().add(gang);
+
+        // 玩家的个人卡信息的手牌中移除已杠的麻将
+        personalCardInfo.getHandCards().add(personalCardInfo.getTouchMahjong());
+        personalCardInfo.setTouchMahjong(null);
+        personalCardInfo.getHandCards().removeAll(toBeGangMahjongs);
+
+        gameRedis.saveMahjongGameData(mahjongGameData);
+        return mahjongGameData;
     }
 }

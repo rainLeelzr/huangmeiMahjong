@@ -2,7 +2,10 @@ package com.huangmei.commonhm.model.mahjong;
 
 import com.huangmei.commonhm.manager.operate.Operate;
 import com.huangmei.commonhm.model.RoomMember;
+import com.huangmei.commonhm.model.User;
+import com.huangmei.commonhm.util.CommonError;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -41,6 +44,32 @@ public class PersonalCardInfo {
      * 已经杠的牌
      */
     private List<Combo> gangs;
+
+    /**
+     * 获取指定user的PersonalCardInfo
+     */
+    public static PersonalCardInfo getPersonalCardInfo(List<PersonalCardInfo> personalCardInfos, User user) {
+        for (PersonalCardInfo personalCardInfo : personalCardInfos) {
+            if (user.getId().equals(personalCardInfo.getRoomMember().getUserId())) {
+                return personalCardInfo;
+            }
+        }
+        throw CommonError.REDIS_GAME_DATA_ERROR.newException();
+    }
+
+    /**
+     * 判断玩家有没有指定的麻将,包括刚摸上的麻将
+     *
+     * @param personalCardInfo 玩家个人卡信息
+     * @param toBeGangMahjongs 判断是否含有此麻将
+     */
+    public static boolean hasMahjongsWithTouchMahjong(PersonalCardInfo personalCardInfo, List<Mahjong> toBeGangMahjongs) {
+        Set<Mahjong> handCards = new HashSet<>(personalCardInfo.getHandCards());
+        if (personalCardInfo.getTouchMahjong() != null) {
+            handCards.add(personalCardInfo.getTouchMahjong());
+        }
+        return handCards.containsAll(toBeGangMahjongs);
+    }
 
     public List<Combo> getPengs() {
         return pengs;

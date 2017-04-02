@@ -14,6 +14,8 @@ import com.huangmei.commonhm.service.impl.GameService;
 import com.huangmei.commonhm.util.*;
 import com.huangmei.interfaces.monitor.MonitorManager;
 import com.huangmei.interfaces.monitor.clientTouchMahjong.task.ClientTouchMahjongTask;
+import com.huangmei.interfaces.monitor.clientTouchMahjong.toucher.CommonToucher;
+import com.huangmei.interfaces.monitor.clientTouchMahjong.toucher.GangToucher;
 import com.huangmei.interfaces.websocket.MessageManager;
 import com.huangmei.interfaces.websocket.SessionManager;
 import net.sf.json.JSONObject;
@@ -305,6 +307,7 @@ public class ActionRouter {
             // 庄家摸一张牌
             monitorManager.watch(new ClientTouchMahjongTask
                     .Builder()
+                    .setToucher(new CommonToucher())
                     .setGetACardManager(getACardManager)
                     .setMessageManager(messageManager)
                     .setMahjongGameData(mahjongGameData)
@@ -491,6 +494,7 @@ public class ActionRouter {
         // 下一个玩家摸一张牌
         monitorManager.watch(new ClientTouchMahjongTask
                 .Builder()
+                .setToucher(new CommonToucher())
                 .setGetACardManager(getACardManager)
                 .setMessageManager(messageManager)
                 .setMahjongGameData(mahjongGameData)
@@ -516,9 +520,46 @@ public class ActionRouter {
         long version = JsonUtil.getLong(data, "version");
 
         List<Mahjong> mahjongs = Mahjong.parseFromIds(toBeGangMahjongIds);
+        if (mahjongs.size() != 4) {
+            throw CommonError.SYS_PARAM_ERROR.newException();
+        }
 
-        gameService.yingAnGang(version, user, room, toBeGangMahjongIds);
+        MahjongGameData mahjongGameData = gameService.yingAnGang(version, user, room, mahjongs);
 
+        // 广播玩家执行暗杠
+        for (PersonalCardInfo personalCardInfo : mahjongGameData.getPersonalCardInfos()) {
+            AnGangBroadcast anGangBroadcast =
+                    new AnGangBroadcast(
+                            toBeGangMahjongIds,
+                            user.getUId(),
+                            getUserByUserId(
+                                    personalCardInfo.getRoomMember().getUserId()
+                            ).getUId()
+                    );
+            messageManager.sendMessageByUserId(
+                    personalCardInfo.getRoomMember().getUserId(),
+                    new JsonResultY.Builder()
+                            .setPid(PidValue.AN_GANG_BROADCAST)
+                            .setError(CommonError.SYS_SUSSES)
+                            .setData(anGangBroadcast)
+                            .build());
+        }
+
+        // 4个玩家，按座位号升序
+        List<User> users = getRoomUsers(mahjongGameData.getPersonalCardInfos());
+
+        // 玩家在leftCards的开头摸一张牌，并广播
+        monitorManager.watch(new ClientTouchMahjongTask
+                .Builder()
+                .setToucher(new GangToucher())
+                .setGetACardManager(getACardManager)
+                .setMessageManager(messageManager)
+                .setMahjongGameData(mahjongGameData)
+                .setUser(user)
+                .setUsers(users)
+                .setGameRedis(gameRedis)
+                .setVersionRedis(versionRedis)
+                .build());
 
         return null;
     }

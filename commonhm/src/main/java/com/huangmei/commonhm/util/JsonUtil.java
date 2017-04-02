@@ -78,12 +78,23 @@ public class JsonUtil {
             MahjongGameData mahjongGameData = (MahjongGameData) o;
             List baoMahjongs = mahjongGameData.getBaoMahjongs();
 
+            // 修正baoMahjongs成员变量
             if (baoMahjongs.size() > 0 && baoMahjongs.get(0) instanceof String) {
                 List<Mahjong> baoMs = new ArrayList<>(baoMahjongs.size());
                 for (int i = 0; i < baoMahjongs.size(); i++) {
                     baoMs.add(Mahjong.valueOf(baoMahjongs.get(i).toString()));
                 }
                 mahjongGameData.setBaoMahjongs(baoMs);
+            }
+
+            // 修正baoMahjongMakeUpMahjongs成员变量
+            List baoMahjongMakeUpMahjongs = mahjongGameData.getBaoMahjongMakeUpMahjongs();
+            if (baoMahjongMakeUpMahjongs.size() > 0 && baoMahjongMakeUpMahjongs.get(0) instanceof String) {
+                List<Mahjong> realMahjong = new ArrayList<>(baoMahjongMakeUpMahjongs.size());
+                for (int i = 0; i < baoMahjongMakeUpMahjongs.size(); i++) {
+                    realMahjong.add(Mahjong.valueOf(baoMahjongMakeUpMahjongs.get(i).toString()));
+                }
+                mahjongGameData.setBaoMahjongMakeUpMahjongs(realMahjong);
             }
         }
         return o;

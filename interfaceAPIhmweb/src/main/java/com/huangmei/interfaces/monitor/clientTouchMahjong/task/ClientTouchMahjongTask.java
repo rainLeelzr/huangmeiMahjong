@@ -13,6 +13,7 @@ import com.huangmei.commonhm.redis.GameRedis;
 import com.huangmei.commonhm.redis.VersionRedis;
 import com.huangmei.interfaces.monitor.MonitorTask;
 import com.huangmei.interfaces.monitor.clientTouchMahjong.task.callback.success.TouchMahjongSender;
+import com.huangmei.interfaces.monitor.clientTouchMahjong.toucher.Toucher;
 import com.huangmei.interfaces.websocket.MessageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,8 @@ import java.util.List;
  */
 public class ClientTouchMahjongTask implements MonitorTask {
     private static final Logger log = LoggerFactory.getLogger(MonitorTask.class);
+
+    private Toucher toucher;
 
     /**
      * 监控任务成功时，执行的方法
@@ -63,7 +66,8 @@ public class ClientTouchMahjongTask implements MonitorTask {
     @Override
     public void run() {
         try {
-            Mahjong touchMahjong = touchAMahjong();
+            toucher.setLeftCards(mahjongGameData.getLeftCards());
+            Mahjong touchMahjong = toucher.touch();
 
             // 扫描摸到牌的人可以的操作
             try {
@@ -163,12 +167,6 @@ public class ClientTouchMahjongTask implements MonitorTask {
         }
     }
 
-    // 从剩下的牌中抽出最后一张牌
-    private Mahjong touchAMahjong() {
-        List<Mahjong> leftCards = mahjongGameData.getLeftCards();
-        Mahjong remove = leftCards.remove(leftCards.size() - 1);
-        return remove;
-    }
 
     @Override
     public void setSuccessCallback(Runnable success) {
@@ -219,6 +217,11 @@ public class ClientTouchMahjongTask implements MonitorTask {
 
         public Builder setTaskName(String taskName) {
             task.taskName = taskName;
+            return this;
+        }
+
+        public Builder setToucher(Toucher toucher) {
+            task.toucher = toucher;
             return this;
         }
 

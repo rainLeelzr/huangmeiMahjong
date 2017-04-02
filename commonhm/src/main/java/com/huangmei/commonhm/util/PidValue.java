@@ -15,9 +15,9 @@ public enum PidValue {
      * 用户
      */
     LOGIN(1000, "用户登录"),
-    LOGOUT(1001,"注销登录"),
-    FREE_COINS(1002,"免费领取金币"),
-    PRIZE_DRAW(1003,"抽奖"),
+    LOGOUT(1001, "注销登录"),
+    FREE_COINS(1002, "免费领取金币"),
+    PRIZE_DRAW(1003, "抽奖"),
     GET_USER(1006, "用户信息"),
     GET_STANDINGS(1008, "获取战绩"),
 
@@ -62,7 +62,8 @@ public enum PidValue {
     JOIN_ROOM_MESSAGE(4000, "加入房间消息推送"),
     FIRST_PUT_OUT_ALL_CARD(4001, "游戏开始发牌消息推送"),
     CLIENT_TOUCH_MAHJONG(4002, "发一张牌给客户端消息推送"),
-    OTHER_USER_PLAY_A_MAHJONG(4003, "玩家打牌广播"),;
+    OTHER_USER_PLAY_A_MAHJONG(4003, "玩家打牌广播"),
+    AN_GANG_BROADCAST(4004, "玩家暗杠广播"),;
 
     private int pid;
 

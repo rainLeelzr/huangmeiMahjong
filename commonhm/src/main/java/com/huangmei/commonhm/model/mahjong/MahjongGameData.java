@@ -29,6 +29,7 @@ public class MahjongGameData {
         classMap.put("touchMahjong", Mahjong.class);
         classMap.put("pengs", Combo.class);
         classMap.put("gangs", Combo.class);
+        classMap.put("mahjongs", Mahjong.class);
 
         classMap.put("bankerSite", Integer.class);
         classMap.put("dices", Integer.class);
