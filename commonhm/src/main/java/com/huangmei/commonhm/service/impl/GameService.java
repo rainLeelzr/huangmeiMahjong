@@ -178,12 +178,12 @@ public class GameService {
     /**
      * 玩家操作时，验证其版本号
      */
-    private void validateVersion(Room room, long version) {
-        Long nowVersion = versionRedis.nowVersion(room.getId());
-        if (!nowVersion.equals(version)) {
-            throw CommonError.SYS_VERSION_TIMEOUT.newException();
-        }
-    }
+    //private void validateVersion(Room room, long version) {
+    //    Long nowVersion = versionRedis.nowVersion(room.getId());
+    //    if (!nowVersion.equals(version)) {
+    //        throw CommonError.SYS_VERSION_TIMEOUT.newException();
+    //    }
+    //}
 
 
     /**
@@ -203,7 +203,7 @@ public class GameService {
                            Long version)
             throws InstantiationException, IllegalAccessException {
         // 验证版本号
-        validateVersion(room, version);
+        //validateVersion(room, version);
 
         // 取出麻将数据
         MahjongGameData mahjongGameData = gameRedis.getMahjongGameData(
@@ -274,9 +274,11 @@ public class GameService {
     /**
      * 处理硬暗杠的请求逻辑
      */
-    public MahjongGameData yingAnGang(long version, User user, Room room, List<Mahjong> toBeGangMahjongs) {
-        // 验证版本号
-        //validateVersion(room, version);
+    public MahjongGameData yingAnGang(User user, Room room, List<Mahjong> toBeGangMahjongs) {
+        // 判断需要暗杠的牌是否一样
+        if (!Mahjong.isSame(toBeGangMahjongs)) {
+            throw CommonError.SYS_PARAM_ERROR.newException();
+        }
 
         // 取出等待客户端操作对象waitingClientOperate
         CanDoOperate waitingClientOperate = gameRedis.getWaitingClientOperate(room.getId());
@@ -291,8 +293,8 @@ public class GameService {
         PersonalCardInfo personalCardInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), user);
 
         // 判断玩家是否含有暗杠的牌
-        boolean isAnGang = PersonalCardInfo.hasMahjongsWithTouchMahjong(personalCardInfo, toBeGangMahjongs);
-        if (!isAnGang) {
+        boolean isYingAnGang = PersonalCardInfo.hasMahjongsWithTouchMahjong(personalCardInfo, toBeGangMahjongs);
+        if (!isYingAnGang) {
             throw CommonError.USER_NOT_HAVE_SPECIFIED_CARD.newException();
         }
 
@@ -309,5 +311,89 @@ public class GameService {
 
         gameRedis.saveMahjongGameData(mahjongGameData);
         return mahjongGameData;
+    }
+
+    /**
+     * 处理软暗杠的请求逻辑
+     */
+    public MahjongGameData ruanAnGang(User user, Room room, List<Mahjong> toBeGangMahjongs) {
+        // 取出等待客户端操作对象waitingClientOperate
+        CanDoOperate waitingClientOperate = gameRedis.getWaitingClientOperate(room.getId());
+        if (!waitingClientOperate.getRoomMember().getUserId().equals(user.getId())) {
+            throw CommonError.NOT_YOUR_TURN.newException();
+        }
+
+        // 判断需要暗杠的牌是否一样
+        if (Mahjong.isSame(toBeGangMahjongs)) {
+            throw CommonError.SYS_PARAM_ERROR.newException();
+        }
+
+        // 取出麻将数据对象
+        MahjongGameData mahjongGameData = gameRedis.getMahjongGameData(room.getId());
+
+        // 玩家个人卡信息
+        PersonalCardInfo personalCardInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), user);
+
+        // 判断玩家是否含有软暗杠的牌
+        boolean isRuanAnGang = isRuanAnGang(personalCardInfo, toBeGangMahjongs, mahjongGameData.getBaoMahjongs());
+        if (!isRuanAnGang) {
+            throw CommonError.USER_NOT_HAVE_SPECIFIED_CARD.newException();
+        }
+
+        // 玩家的个人卡信息中添加杠列表
+        Combo gang = new Combo();
+        gang.setType(Combo.Type.AAAA);
+        gang.setMahjongs(toBeGangMahjongs);
+        personalCardInfo.getGangs().add(gang);
+
+        // 玩家的个人卡信息的手牌中移除已杠的麻将
+        personalCardInfo.getHandCards().add(personalCardInfo.getTouchMahjong());
+        personalCardInfo.setTouchMahjong(null);
+        personalCardInfo.getHandCards().removeAll(toBeGangMahjongs);
+
+        gameRedis.saveMahjongGameData(mahjongGameData);
+        return mahjongGameData;
+    }
+
+    /**
+     * 验证玩家提交的软暗杠请求是否正确
+     */
+    private boolean isRuanAnGang(PersonalCardInfo personalCardInfo, List<Mahjong> toBeGangMahjongs, List<Mahjong> baoMahjongs) {
+        // 判断玩家的牌中是否含有提交过来杠的牌
+        boolean hasToBeGangMahjong = PersonalCardInfo.hasMahjongsWithTouchMahjong(personalCardInfo, toBeGangMahjongs);
+        if (!hasToBeGangMahjong) {
+            throw CommonError.USER_NOT_HAVE_SPECIFIED_CARD.newException();
+        }
+
+        // 判断toBeGangMahjongs有没有宝牌
+        Integer baoMahjongNumber = baoMahjongs.get(0).getNumber();
+        List<Integer> baoMahjongIndex = new ArrayList<>(toBeGangMahjongs.size() - 1);
+        for (int i = 0; i < toBeGangMahjongs.size(); i++) {
+            Mahjong toBeGangMahjong = toBeGangMahjongs.get(i);
+            if (toBeGangMahjong.getNumber().equals(baoMahjongNumber)) {
+                baoMahjongIndex.add(i);
+            }
+        }
+        if (baoMahjongIndex.size() == 0) {
+            throw CommonError.SYS_PARAM_ERROR.newException();
+        }
+
+        // 判断需要杠的牌中，除了宝牌以外的牌是否一样
+        Integer gangNumber = null;
+        for (int i = 0; i < toBeGangMahjongs.size(); i++) {
+            if (baoMahjongIndex.contains(i)) {
+                continue;
+            }
+            if (gangNumber == null) {
+                gangNumber = toBeGangMahjongs.get(i).getNumber();
+            } else {
+                if (!gangNumber.equals(toBeGangMahjongs.get(i).getNumber())) {
+                    throw CommonError.SYS_PARAM_ERROR.newException();
+                }
+            }
+        }
+
+        return true;
+
     }
 }

@@ -509,7 +509,6 @@ public class ActionRouter {
 
     @Pid(PidValue.YING_AN_GANG)
     @LoginResource
-    @SuppressWarnings("unchecked")
     public JsonResultY yingAnGang(WebSocketSession session, JSONObject data)
             throws Exception {
 
@@ -517,16 +516,86 @@ public class ActionRouter {
         Room room = sessionManager.getRoom(session.getId());
 
         List<Integer> toBeGangMahjongIds = JsonUtil.getIntegerList(data, "mahjongIds");
-        long version = JsonUtil.getLong(data, "version");
 
         List<Mahjong> mahjongs = Mahjong.parseFromIds(toBeGangMahjongIds);
         if (mahjongs.size() != 4) {
             throw CommonError.SYS_PARAM_ERROR.newException();
         }
 
-        MahjongGameData mahjongGameData = gameService.yingAnGang(version, user, room, mahjongs);
+        MahjongGameData mahjongGameData = gameService.yingAnGang(user, room, mahjongs);
+
+        // 响应玩家通过暗杠验证
+        messageManager.send(
+                session,
+                new JsonResultY.Builder()
+                        .setPid(PidValue.YING_AN_GANG)
+                        .setError(CommonError.SYS_SUSSES)
+                        .build());
 
         // 广播玩家执行暗杠
+        for (PersonalCardInfo personalCardInfo : mahjongGameData.getPersonalCardInfos()) {
+            AnGangBroadcast anGangBroadcast =
+                    new AnGangBroadcast(
+                            toBeGangMahjongIds,
+                            user.getUId(),
+                            getUserByUserId(
+                                    personalCardInfo.getRoomMember().getUserId()
+                            ).getUId()
+                    );
+            messageManager.sendMessageByUserId(
+                    personalCardInfo.getRoomMember().getUserId(),
+                    new JsonResultY.Builder()
+                            .setPid(PidValue.AN_GANG_BROADCAST)
+                            .setError(CommonError.SYS_SUSSES)
+                            .setData(anGangBroadcast)
+                            .build());
+        }
+
+        // 4个玩家，按座位号升序
+        List<User> users = getRoomUsers(mahjongGameData.getPersonalCardInfos());
+
+        // 玩家在leftCards的开头摸一张牌，并广播
+        monitorManager.watch(new ClientTouchMahjongTask
+                .Builder()
+                .setToucher(new GangToucher())
+                .setGetACardManager(getACardManager)
+                .setMessageManager(messageManager)
+                .setMahjongGameData(mahjongGameData)
+                .setUser(user)
+                .setUsers(users)
+                .setGameRedis(gameRedis)
+                .setVersionRedis(versionRedis)
+                .build());
+
+        return null;
+    }
+
+    @Pid(PidValue.RUAN_AN_GANG)
+    @LoginResource
+    public JsonResultY ruanAnGang(WebSocketSession session, JSONObject data)
+            throws Exception {
+
+        User user = sessionManager.getUser(session.getId());
+        Room room = sessionManager.getRoom(session.getId());
+
+        List<Integer> toBeGangMahjongIds = JsonUtil.getIntegerList(data, "mahjongIds");
+
+        List<Mahjong> mahjongs = Mahjong.parseFromIds(toBeGangMahjongIds);
+        if (mahjongs.size() != 4) {
+            throw CommonError.SYS_PARAM_ERROR.newException();
+        }
+
+        MahjongGameData mahjongGameData = gameService.ruanAnGang(user, room, mahjongs);
+
+        // 响应玩家通过暗杠验证
+        messageManager.send(
+                session,
+                new JsonResultY.Builder()
+                        .setPid(PidValue.RUAN_AN_GANG)
+                        .setError(CommonError.SYS_SUSSES)
+                        .build());
+
+        // 广播玩家执行软暗杠
         for (PersonalCardInfo personalCardInfo : mahjongGameData.getPersonalCardInfos()) {
             AnGangBroadcast anGangBroadcast =
                     new AnGangBroadcast(

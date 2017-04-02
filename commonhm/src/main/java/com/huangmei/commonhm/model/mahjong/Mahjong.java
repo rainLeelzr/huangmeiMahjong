@@ -203,10 +203,12 @@ public enum Mahjong implements Comparable<Mahjong> {
      * 每张麻将牌的唯一id
      */
     private Integer id;
+
     /**
      * 麻将牌的号码，每个号码有4张牌
      */
     private Integer number;
+
     /**
      * 麻将牌的名称
      */
@@ -272,6 +274,7 @@ public enum Mahjong implements Comparable<Mahjong> {
         for (Integer mahjongId : mahjongIds) {
             mahjongs.add(parse(mahjongId));
         }
+        Collections.sort(mahjongs);
         return mahjongs;
     }
 
@@ -289,6 +292,26 @@ public enum Mahjong implements Comparable<Mahjong> {
             comboIntegers.add(temp);
         }
         return comboIntegers;
+    }
+
+    /**
+     * 判断是否一样的麻将，例如都是1万
+     */
+    public static boolean isSame(List<Mahjong> toBeGangMahjongs) {
+        if (toBeGangMahjongs.size() == 0) {
+            return false;
+        }
+        Integer number = null;
+        for (Mahjong toBeGangMahjong : toBeGangMahjongs) {
+            if (number == null) {
+                number = toBeGangMahjong.getNumber();
+            } else {
+                if (!number.equals(toBeGangMahjong.getNumber())) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     @Override

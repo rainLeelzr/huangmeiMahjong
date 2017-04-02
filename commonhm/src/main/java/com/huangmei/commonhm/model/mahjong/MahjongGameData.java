@@ -93,7 +93,8 @@ public class MahjongGameData {
         // 获取所有麻将牌
         //List<Mahjong> allMahjongs = Mahjong.getAllMahjongs();
         // DEBUGING 生成指定麻将列表
-        List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1YingAnGangMahjongs();
+        //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1YingAnGangMahjongs();
+        List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1RuanAnGangMahjongs();
 
         // 参数验证
         if (bankerSite > players || bankerSite < 0 || players == 0) {

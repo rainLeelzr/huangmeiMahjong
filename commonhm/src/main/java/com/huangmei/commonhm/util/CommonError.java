@@ -16,7 +16,6 @@ public enum CommonError {
     SYS_SUSSES(100001, "成功", null),
     SYS_ERR(100002, "失败", null),
     SYS_PARAM_ERROR(100003, "参数错误", IllegalArgumentException.class),
-    SYS_VERSION_TIMEOUT(100004, "版本号已过期", IllegalArgumentException.class),
 
     /**
      * 用户

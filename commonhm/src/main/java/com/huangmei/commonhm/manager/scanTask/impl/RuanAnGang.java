@@ -5,7 +5,7 @@ import com.huangmei.commonhm.manager.operate.Operate;
 /**
  * 扫描是否可以软暗杠
  */
-public class RuanAnGang extends YingDaMingGang {
+public class RuanAnGang extends RuanDaMingGang {
 
     @Override
     public Operate getOperate() {
