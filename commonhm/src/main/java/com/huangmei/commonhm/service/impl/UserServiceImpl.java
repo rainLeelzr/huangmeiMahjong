@@ -62,7 +62,8 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
             user.setSex(sex);
             user.setOpenId(openId);
             user.setCoin(0);
-            user.setDiamond(0);
+            // DEBUGING 玩家钻石
+            user.setDiamond(1000);
             user.setHorn(0);
             Integer uId = CommonUtil.createUserCode();
             List<User> users = userDao.selectAll();
