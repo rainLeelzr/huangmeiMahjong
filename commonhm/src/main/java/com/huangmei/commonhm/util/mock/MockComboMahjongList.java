@@ -863,4 +863,57 @@ public class MockComboMahjongList {
 
         return Arrays.asList(m);
     }
+
+    /**
+     * 座位1软加杠
+     */
+    public static List<Mahjong> getSeat1RuanJiaGangMahjongs() {
+        List<Mahjong> all = Mahjong.getAllMahjongs();
+
+        // 自定义所有4个玩家的初始麻将牌
+        Mahjong[] m = new Mahjong[]{
+                all.remove(all.indexOf(Mahjong.ONE_WANG_1)),
+                all.remove(all.indexOf(Mahjong.ONE_WANG_2)),
+                all.remove(all.indexOf(Mahjong.THREE_TIAO_3)),
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null,
+                /////////////////////////////////////////////////
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null,
+                /////////////////////////////////////////////////
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null,
+                /////////////////////////////////////////////////
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null,
+                /////////////////////////////////////////////////
+                all.remove(all.indexOf(Mahjong.THREE_TIAO_1)),
+                all.remove(all.indexOf(Mahjong.THREE_TIAO_2)),
+                null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, all.remove(all.indexOf(Mahjong.BAI_BAN_3))
+        };
+        for (int i = 0; i < m.length; i++) {
+            if (m[i] == null) {
+                m[i] = getOneForm(all);
+            }
+        }
+
+        return Arrays.asList(m);
+    }
 }

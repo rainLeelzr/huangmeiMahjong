@@ -26,7 +26,8 @@ public class YingPeng extends AbstractPengScanTask {
                 personalCardInfo.getRoomMember().getUserId());
         // 有大明杠肯定有碰
         for (Operate myOperate : myOperates) {
-            if (myOperate.getBaseOperate() == BaseOperate.GANG) {
+            if (myOperate.getBaseOperate() == BaseOperate.YING_DA_MING_GANG ||
+                    myOperate.getBaseOperate() == BaseOperate.RUAN_DA_MING_GANG) {
                 return true;
             }
         }

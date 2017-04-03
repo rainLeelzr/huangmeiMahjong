@@ -695,6 +695,76 @@ public class ActionRouter {
         return null;
     }
 
+    @Pid(PidValue.RUAN_JIA_GANG)
+    @LoginResource
+    public JsonResultY ruanJiaGang(WebSocketSession session, JSONObject data)
+            throws Exception {
+
+        User user = sessionManager.getUser(session.getId());
+        Room room = sessionManager.getRoom(session.getId());
+
+        // 0,1,2下标是原有的碰麻将，3是加杠的麻将
+        List<Integer> toBeRuanJiaGangMahjongId = JsonUtil.getIntegerList(data, "mahjongIds");
+        if (toBeRuanJiaGangMahjongId.size() != 4) {
+            throw CommonError.SYS_PARAM_ERROR.newException();
+        }
+
+
+        List<Mahjong> mahjongs = new ArrayList<>(toBeRuanJiaGangMahjongId.size());
+        for (Integer mahjongId : toBeRuanJiaGangMahjongId) {
+            mahjongs.add(Mahjong.parse(mahjongId));
+        }
+
+        Object[] result = gameService.ruanJiaGang(user, room, mahjongs);
+        MahjongGameData mahjongGameData = (MahjongGameData) result[0];
+        Combo jiaGangCombo = (Combo) result[1];
+
+        // 响应玩家通过软加杠验证
+        messageManager.send(
+                session,
+                new JsonResultY.Builder()
+                        .setPid(PidValue.RUAN_JIA_GANG)
+                        .setError(CommonError.SYS_SUSSES)
+                        .build());
+
+        // 广播玩家执行软加杠
+        for (PersonalCardInfo personalCardInfo : mahjongGameData.getPersonalCardInfos()) {
+            GangBroadcast ruanJiaGangBroadcast =
+                    new GangBroadcast(
+                            Mahjong.parseToIds(jiaGangCombo.mahjongs),
+                            user.getUId(),
+                            getUserByUserId(
+                                    personalCardInfo.getRoomMember().getUserId()
+                            ).getUId()
+                    );
+            messageManager.sendMessageByUserId(
+                    personalCardInfo.getRoomMember().getUserId(),
+                    new JsonResultY.Builder()
+                            .setPid(PidValue.GANG_BROADCAST)
+                            .setError(CommonError.SYS_SUSSES)
+                            .setData(ruanJiaGangBroadcast)
+                            .build());
+        }
+
+        // 4个玩家，按座位号升序
+        List<User> users = getRoomUsers(mahjongGameData.getPersonalCardInfos());
+
+        // 玩家在leftCards的开头摸一张牌，并广播
+        monitorManager.watch(new ClientTouchMahjongTask
+                .Builder()
+                .setToucher(new GangToucher())
+                .setGetACardManager(getACardManager)
+                .setMessageManager(messageManager)
+                .setMahjongGameData(mahjongGameData)
+                .setUser(user)
+                .setUsers(users)
+                .setGameRedis(gameRedis)
+                .setVersionRedis(versionRedis)
+                .build());
+
+        return null;
+    }
+
     private List<User> getRoomUsers(List<PersonalCardInfo> personalCardInfos) {
         List<User> users = new ArrayList<>(personalCardInfos.size());
         for (PersonalCardInfo personalCardInfo : personalCardInfos) {

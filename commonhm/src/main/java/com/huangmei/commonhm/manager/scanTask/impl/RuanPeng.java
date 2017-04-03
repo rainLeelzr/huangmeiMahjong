@@ -25,9 +25,9 @@ public class RuanPeng extends AbstractPengScanTask {
             throws InstantiationException, IllegalAccessException {
         Set<Operate> myOperates = getMyOperates(
                 personalCardInfo.getRoomMember().getUserId());
-        // 有大明杠肯定有碰
+        // 有软大明杠肯定有软碰
         for (Operate myOperate : myOperates) {
-            if (myOperate.getBaseOperate() == BaseOperate.GANG) {
+            if (myOperate.getBaseOperate() == BaseOperate.RUAN_DA_MING_GANG) {
                 return true;
             }
         }

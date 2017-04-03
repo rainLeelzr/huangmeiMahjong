@@ -31,14 +31,14 @@ public enum Operate {
     CHI_YING_PING_HU(PidValue.YING_CHI_HU, BaseOperate.HU, "吃硬平胡"),
     CHI_RUAN_PING_HU(PidValue.RUAN_CHI_HU, BaseOperate.HU, "吃软平胡"),
 
-    YING_AN_GANG(PidValue.YING_AN_GANG, BaseOperate.GANG, "硬暗杠"),
-    RUAN_AN_GANG(PidValue.RUAN_AN_GANG, BaseOperate.GANG, "软暗杠"),
+    YING_AN_GANG(PidValue.YING_AN_GANG, BaseOperate.YING_AN_GANG, "硬暗杠"),
+    RUAN_AN_GANG(PidValue.RUAN_AN_GANG, BaseOperate.RUAN_AN_GANG, "软暗杠"),
 
-    YING_DA_MING_GANG(PidValue.YING_DA_MING_GANG, BaseOperate.GANG, "硬大明杠"),
-    RUAN_DA_MING_GANG(PidValue.RUAN_DA_MING_GANG, BaseOperate.GANG, "软大明杠"),
+    YING_DA_MING_GANG(PidValue.YING_DA_MING_GANG, BaseOperate.YING_DA_MING_GANG, "硬大明杠"),
+    RUAN_DA_MING_GANG(PidValue.RUAN_DA_MING_GANG, BaseOperate.RUAN_DA_MING_GANG, "软大明杠"),
 
-    YING_JIA_GANG(PidValue.YING_JIA_GANG, BaseOperate.GANG, "硬加杠"),
-    RUAN_JIA_GANG(PidValue.RUAN_JIA_GANG, BaseOperate.GANG, "软加杠"),
+    YING_JIA_GANG(PidValue.YING_JIA_GANG, BaseOperate.YING_JIA_GANG, "硬加杠"),
+    RUAN_JIA_GANG(PidValue.RUAN_JIA_GANG, BaseOperate.RUAN_JIA_GANG, "软加杠"),
 
     YING_PENG(PidValue.YING_PENG, BaseOperate.PENG, "硬碰"),
     RUAN_PENG(PidValue.RUAN_PENG, BaseOperate.PENG, "软碰"),

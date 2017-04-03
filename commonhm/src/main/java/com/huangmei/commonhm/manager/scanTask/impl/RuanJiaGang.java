@@ -5,6 +5,7 @@ import com.huangmei.commonhm.manager.putOutCard.scanTask.AbstractGangScanTask;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
 import com.huangmei.commonhm.model.mahjong.Combo;
+import com.huangmei.commonhm.model.mahjong.YingRuan;
 
 import java.util.List;
 
@@ -30,26 +31,27 @@ public class RuanJiaGang extends AbstractGangScanTask {
 
         Integer baoMahjongNumber = this.mahjongGameData.getBaoMahjongs().get(0).getNumber();
         for (Combo peng : pengs) {
-            // 考虑宝牌归位的情况
-            int baoMahjong = 0;
-            for (Mahjong mahjong : peng.getMahjongs()) {
-                if (mahjong.getNumber().equals(baoMahjongNumber)) {
-                    baoMahjong++;
-                }
-            }
-
-            if (baoMahjong == 3) {
-                //宝牌归位,不算软加杠
-                return false;
-            } else if (baoMahjong == 0) {
-                // 没有宝牌
-                return false;
-            }
-
-            // 如果有一只麻将与specifiedMahjong相同，则是软加杠
-            for (Mahjong mahjong : peng.getMahjongs()) {
-                if (mahjong.getNumber().equals(specifiedMahjong.getNumber())) {
+            if (peng.getYingRuan() == YingRuan.YING) {
+                // 硬碰组合，则摸到的必须是宝牌
+                if (specifiedMahjong.getNumber().equals(baoMahjongNumber)) {
                     return true;
+                }
+            } else {
+                // 如果摸到的是宝牌，则直接可以软加杠
+                if (specifiedMahjong.getNumber().equals(baoMahjongNumber)) {
+                    return true;
+                } else {
+                    // 找到真正碰的麻将（非宝牌麻将）
+                    Mahjong pengMahjong = null;
+                    for (Mahjong mahjong : peng.getMahjongs()) {
+                        if (!mahjong.getNumber().equals(baoMahjongNumber)) {
+                            pengMahjong = mahjong;
+                            break;
+                        }
+                    }
+                    if (pengMahjong.getNumber().equals(specifiedMahjong.getNumber())) {
+                        return true;
+                    }
                 }
             }
         }

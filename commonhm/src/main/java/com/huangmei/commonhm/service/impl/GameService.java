@@ -457,4 +457,90 @@ public class GameService {
         gameRedis.saveMahjongGameData(mahjongGameData);
         return new Object[]{mahjongGameData, jiaGangCombo};
     }
+
+    /**
+     * 验证玩家提交的软加杠请求是否正确
+     */
+    public Object[] ruanJiaGang(User user, Room room, List<Mahjong> mahjongs) {
+        // 取出等待客户端操作对象waitingClientOperate
+        CanDoOperate waitingClientOperate = gameRedis.getWaitingClientOperate(room.getId());
+        if (!waitingClientOperate.getRoomMember().getUserId().equals(user.getId())) {
+            throw CommonError.NOT_YOUR_TURN.newException();
+        }
+
+        // 取出麻将数据对象
+        MahjongGameData mahjongGameData = gameRedis.getMahjongGameData(room.getId());
+
+        // 玩家个人卡信息
+        PersonalCardInfo personalCardInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), user);
+
+        // 判断玩家是否含有碰
+        List<Combo> pengs = personalCardInfo.getPengs();
+        if (pengs.size() == 0) {
+            throw CommonError.SYS_PARAM_ERROR.newException();
+        }
+
+        // 分析mahjongs是不是软加杠组合，并找到需要被杠的麻将
+        if (Mahjong.isSame(mahjongs)) {// 如果麻将都一样，则不是软加杠
+            throw CommonError.SYS_PARAM_ERROR.newException();
+        }
+        Integer baoMahjongNumber = mahjongGameData.getBaoMahjongs().get(0).getNumber();
+        Mahjong beJiaGangMahjong = null;
+        for (Mahjong mahjong : mahjongs) {
+            if (!baoMahjongNumber.equals(mahjong.getNumber())) {
+                if (beJiaGangMahjong == null) {
+                    beJiaGangMahjong = mahjong;
+                } else {
+                    if (!beJiaGangMahjong.getNumber().equals(mahjong.getNumber())) {
+                        // 出现了与宝牌和beJiaGangMahjong都不相同的麻将，即mahjongs出现了3种麻将，则加杠麻将参数错误
+                        throw CommonError.SYS_PARAM_ERROR.newException();
+                    }
+                }
+
+            }
+        }
+
+        // 找到需要加杠的碰组合。
+        // 如果是硬碰，则需要有宝牌才能加杠
+        // 如果是软碰，则有宝牌和碰牌都可以加杠
+        Combo toBeJiaBangCombo = null;
+        for (Combo peng : pengs) {
+            for (Mahjong tempMahjong : peng.getMahjongs()) {
+                // 如果这个combo组合是宝牌归位碰，或者不等于beJiaGangMahjong,则不是需要加杠的组合
+                if (tempMahjong.getNumber().equals(baoMahjongNumber)) {
+                    if (peng.getYingRuan() == YingRuan.YING) {
+                        break;
+                    }
+                } else if (!tempMahjong.getNumber().equals(beJiaGangMahjong.getNumber())) {
+                    break;
+                }
+            }
+            toBeJiaBangCombo = peng;
+            break;
+        }
+        if (toBeJiaBangCombo == null) {
+            throw CommonError.USER_NOT_HAVE_SPECIFIED_CARD.newException();
+        }
+
+        // 添加杠combo
+        Combo jiaGangCombo = new Combo();
+        jiaGangCombo.setType(Combo.Type.AAAA);
+        jiaGangCombo.setYingRuan(YingRuan.RUAN);
+        List<Mahjong> jiaGangMahjongs = new ArrayList<>(toBeJiaBangCombo.getMahjongs());
+        jiaGangMahjongs.add(mahjongs.get(mahjongs.size() - 1));
+        Collections.sort(jiaGangMahjongs);
+        jiaGangCombo.setMahjongs(jiaGangMahjongs);
+        personalCardInfo.getGangs().add(jiaGangCombo);
+
+        // 删除碰combo
+        pengs.remove(toBeJiaBangCombo);
+
+        // 玩家的个人卡信息的手牌中移除已杠的麻将
+        personalCardInfo.getHandCards().add(personalCardInfo.getTouchMahjong());
+        personalCardInfo.setTouchMahjong(null);
+        personalCardInfo.getHandCards().remove(mahjongs.get(mahjongs.size() - 1));
+
+        gameRedis.saveMahjongGameData(mahjongGameData);
+        return new Object[]{mahjongGameData, jiaGangCombo};
+    }
 }

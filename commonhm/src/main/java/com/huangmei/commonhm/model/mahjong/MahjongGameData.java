@@ -3,6 +3,7 @@ package com.huangmei.commonhm.model.mahjong;
 
 import com.huangmei.commonhm.manager.operate.Operate;
 import com.huangmei.commonhm.model.RoomMember;
+import com.huangmei.commonhm.util.mock.MockComboMahjongList;
 import org.apache.commons.lang.math.RandomUtils;
 
 import java.util.*;
@@ -90,11 +91,12 @@ public class MahjongGameData {
      */
     public static MahjongGameData initData(int players, int bankerSite) {
         // 获取所有麻将牌
-        List<Mahjong> allMahjongs = Mahjong.getAllMahjongs();
+        //List<Mahjong> allMahjongs = Mahjong.getAllMahjongs();
         // DEBUGING 生成指定麻将列表
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1YingAnGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1RuanAnGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1YingJiaGangMahjongs();
+        List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1RuanJiaGangMahjongs();
 
         // 参数验证
         if (bankerSite > players || bankerSite < 0 || players == 0) {
@@ -128,7 +130,7 @@ public class MahjongGameData {
 
         // DEBUGING 打乱所有麻将牌顺序
         // 打乱所有麻将牌顺序
-        Collections.shuffle(allMahjongs);
+        //Collections.shuffle(allMahjongs);
         //System.out.println("乱序后麻将：" + allMahjongs);
 
         // allMahjongs的下标，一共120张牌，用于记录分到第几张牌
@@ -143,21 +145,21 @@ public class MahjongGameData {
             // 碰列表
             ArrayList<Combo> pengs = new ArrayList<>(1);
             // DEBUGING 模拟已碰
-            //Combo peng = new Combo();
-            //peng.setType(Combo.Type.AAA);
-            //peng.setYingRuan(YingRuan.YING);
-            //ArrayList<Mahjong> ms = new ArrayList<>(3);
-            //ms.add(Mahjong.BAI_BAN_1);
-            //ms.add(Mahjong.BAI_BAN_2);
-            //ms.add(Mahjong.BAI_BAN_3);
-            //peng.setMahjongs(ms);
-            //pengs.add(peng);
+            Combo peng = new Combo();
+            peng.setType(Combo.Type.AAA);
+            peng.setYingRuan(YingRuan.RUAN);
+            ArrayList<Mahjong> ms = new ArrayList<>(3);
+            ms.add(Mahjong.BAI_BAN_1);
+            ms.add(Mahjong.BAI_BAN_2);
+            ms.add(Mahjong.THREE_TIAO_1);
+            peng.setMahjongs(ms);
+            pengs.add(peng);
 
             handCard.setPengs(pengs);
 
             // 杠列表
             ArrayList<Combo> combos = new ArrayList<>(1);
-            // 模拟已杠
+            // DEBUGING 模拟已杠
             //Combo gang = new Combo();
             //gang.setType(Combo.Type.AAA);
             //ArrayList<Mahjong> ms = new ArrayList<>(4);

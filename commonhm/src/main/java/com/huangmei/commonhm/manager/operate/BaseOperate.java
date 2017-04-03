@@ -7,7 +7,15 @@ public enum BaseOperate {
     // 优先级高的要写在前面
     HU("胡"),//胡包括自摸、吃胡
 
-    GANG("杠"),
+    YING_AN_GANG("硬暗杠"),
+    RUAN_AN_GANG("软暗杠"),
+
+    YING_DA_MING_GANG("硬大明杠"),
+    RUAN_DA_MING_GANG("软大明杠"),
+
+    YING_JIA_GANG("硬加杠"),
+    RUAN_JIA_GANG("软加杠"),
+    //GANG("杠"),
 
     PENG("碰"),
 
