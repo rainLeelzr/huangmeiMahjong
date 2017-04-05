@@ -17,7 +17,8 @@ public enum BaseOperate {
     RUAN_JIA_GANG("软加杠"),
     //GANG("杠"),
 
-    PENG("碰"),
+    YING_PENG("硬碰"),
+    RUAN_PENG("软碰"),
 
     PLAY_A_MAHJONG("打出一张牌");
 

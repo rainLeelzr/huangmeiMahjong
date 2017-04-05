@@ -40,10 +40,12 @@ public enum Operate {
     YING_JIA_GANG(PidValue.YING_JIA_GANG, BaseOperate.YING_JIA_GANG, "硬加杠"),
     RUAN_JIA_GANG(PidValue.RUAN_JIA_GANG, BaseOperate.RUAN_JIA_GANG, "软加杠"),
 
-    YING_PENG(PidValue.YING_PENG, BaseOperate.PENG, "硬碰"),
-    RUAN_PENG(PidValue.RUAN_PENG, BaseOperate.PENG, "软碰"),
+    YING_PENG(PidValue.YING_PENG, BaseOperate.YING_PENG, "硬碰"),
+    RUAN_PENG(PidValue.RUAN_PENG, BaseOperate.RUAN_PENG, "软碰"),
 
-    PLAY_A_MAHJONG(PidValue.PLAY_A_MAHJONG, BaseOperate.PLAY_A_MAHJONG, "打出一张牌");
+    PLAY_A_MAHJONG(PidValue.PLAY_A_MAHJONG, BaseOperate.PLAY_A_MAHJONG, "打出一张牌"),
+
+    GUO(PidValue.GUO, BaseOperate.PLAY_A_MAHJONG, "过");
 
     /**
      * 操作唯一id

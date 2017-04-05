@@ -58,6 +58,18 @@ public class PersonalCardInfo {
     }
 
     /**
+     * 获取指定userId的PersonalCardInfo
+     */
+    public static PersonalCardInfo getPersonalCardInfo(List<PersonalCardInfo> personalCardInfos, Integer userId) {
+        for (PersonalCardInfo personalCardInfo : personalCardInfos) {
+            if (userId.equals(personalCardInfo.getRoomMember().getUserId())) {
+                return personalCardInfo;
+            }
+        }
+        throw CommonError.REDIS_GAME_DATA_ERROR.newException();
+    }
+
+    /**
      * 判断玩家有没有指定的麻将,包括刚摸上的麻将
      *
      * @param personalCardInfo 玩家个人卡信息

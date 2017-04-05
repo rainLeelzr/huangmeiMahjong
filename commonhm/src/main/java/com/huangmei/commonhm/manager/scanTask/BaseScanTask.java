@@ -109,7 +109,7 @@ public abstract class BaseScanTask {
                     toBeScanPersonalCardInfo.getRoomMember().getUserId());
             boolean contain = false;
             for (Operate myOperate : myOperates) {
-                if(myOperate.getBaseOperate() == getOperate().getBaseOperate()){
+                if (myOperate.getBaseOperate() == getOperate().getBaseOperate()) {
                     contain = true;
                     break;
                 }
@@ -167,6 +167,8 @@ public abstract class BaseScanTask {
             canDoOperate = new CanDoOperate();
             canDoOperate.setRoomMember(personalCardInfo.getRoomMember());
             canDoOperate.setOperates(new TreeSet<Operate>());
+            canDoOperate.setSpecialMahjong(specifiedMahjong);
+            canDoOperate.setSpecialUserId(user.getId());
             canOperates.add(canDoOperate);
         }
         return canDoOperate.getOperates();

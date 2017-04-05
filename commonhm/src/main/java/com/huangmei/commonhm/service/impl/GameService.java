@@ -1,7 +1,6 @@
 package com.huangmei.commonhm.service.impl;
 
 import com.huangmei.commonhm.dao.RoomMemberDao;
-import com.huangmei.commonhm.manager.getACard.GetACardManager;
 import com.huangmei.commonhm.manager.operate.CanDoOperate;
 import com.huangmei.commonhm.manager.putOutCard.AfterPutOutCardManager;
 import com.huangmei.commonhm.model.Room;
@@ -11,7 +10,6 @@ import com.huangmei.commonhm.model.mahjong.*;
 import com.huangmei.commonhm.redis.GameRedis;
 import com.huangmei.commonhm.redis.RoomRedis;
 import com.huangmei.commonhm.redis.VersionRedis;
-import com.huangmei.commonhm.redis.base.Redis;
 import com.huangmei.commonhm.util.CommonError;
 import com.huangmei.commonhm.util.JsonUtil;
 import org.apache.commons.collections.map.HashedMap;
@@ -129,11 +127,7 @@ public class GameService {
     /**
      * 打出一张麻将
      */
-    public Map<String, Object> playAMahjong(Room room, User user, Mahjong playedMahjong, long version) {
-        // 验证版本号
-        //
-        // validateVersion(room, version);
-
+    public Map<String, Object> playAMahjong(Room room, User user, Mahjong playedMahjong) {
         // 取出等待客户端操作对象waitingClientOperate
         CanDoOperate waitingClientOperate = gameRedis.getWaitingClientOperate(room.getId());
         if (!waitingClientOperate.getRoomMember().getUserId().equals(user.getId())) {
