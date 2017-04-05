@@ -7,4 +7,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class RoomDaoImpl extends BaseDaoImpl<Integer, Room> implements RoomDao {
 
+    @Override
+    public long countForPlayers(Integer multiple) {
+
+        return sqlSessionTemplate.selectOne(
+                statement("countForPlayers"),
+                multiple);
+    }
 }

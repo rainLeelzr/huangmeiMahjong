@@ -61,18 +61,12 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
             user.setNickName(nickName);
             user.setSex(sex);
             user.setOpenId(openId);
-            user.setCoin(0);
+            user.setCoin(30000);
             // DEBUGING 玩家钻石
             user.setDiamond(1000);
             user.setHorn(0);
             Integer uId = CommonUtil.createUserCode();
-            List<User> users = userDao.selectAll();
-            for (User u : users) {
-                if (u.getUId() == uId) {
-                    uId = CommonUtil.createUserCode();//确保用户uId的不同
-                }
-            }
-
+            uId = checkUId(uId);
             user.setUId(uId);
             userDao.save(user);
             loginType = 1;
@@ -101,6 +95,22 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         return result;
     }
 
+    /**
+     * 防止uId重复
+     *
+     * @param uId
+     * @return
+     */
+    private Integer checkUId(Integer uId) {
+        Entity.UserCriteria uc = new Entity.UserCriteria();
+        uc.setUId(Entity.Value.eq(uId));
+        long count = userDao.selectCount(uc);
+        if (count > 0) {
+            uId = CommonUtil.createUserCode();
+            uId = checkUId(uId);
+        }
+        return uId;
+    }
 
     public TextMessage TestConnection() {
         // TODO Auto-generated method stub
@@ -340,7 +350,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
      */
     @Override
     public Map<String, Object> freeCoins(JSONObject data, User user) {
-        Map<String, Object> result = new HashMap<String, Object>(3);
+        Map<String, Object> result = new HashMap<String, Object>(2);
         Integer way = TranRecord.way.FREE_COIN.getCode();
 
         TranRecord tr = new TranRecord();
@@ -348,7 +358,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         tr.setUserId(user.getId());
         Long count = tranRecordDao.countForPrizeDraw(tr);
         //每两小时领取一次,需要计时
-        
+
         if (count < 5) {//满足领取金币的资格
             if (count < 4) {
                 user.setCoin(user.getCoin() + 2000);
@@ -362,12 +372,38 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
             userDao.update(user);
             //交易记录
             createRecord(user, way, TranRecord.itemType.COIN.getCode(), 2000);
-            result.put("user",user);
-            result.put("count",count+1);
+            result.put("user", user);
+            result.put("count", count + 1);
             return result;
         } else {//不满足领取金币的资格
             throw CommonError.ALREADY_GET_COINS.newException();
         }
+    }
+
+    /**
+     * 购买金币/钻石/道具
+     *
+     * @param data
+     * @return
+     */
+    @Override
+    public Map<String, Object> buy(JSONObject data, User user) {
+        Map<String, Object> result = new HashMap<String, Object>(2);
+
+        Integer coin = (Integer) data.get("coin");
+        Integer diamond = (Integer) data.get("diamond");
+        Integer horn = (Integer) data.get("horn");
+
+        if (coin != null) {
+            user.setCoin(user.getCoin() + coin);
+        } else if (diamond != null) {
+            user.setDiamond(user.getDiamond() + diamond);
+        } else if (horn != null) {
+            user.setHorn(user.getHorn() + horn);
+        }
+        userDao.update(user);
+        result.put("user", user);
+        return result;
     }
 
 //	public TextMessage TestConnection() {

@@ -33,6 +33,10 @@
         <include refid="OrderbySQL"/>
         <include refid="LimitSQL"/>
     </select>
+    <select id="countForPlayers" parameterType="int" resultType="_long">
+        SELECT COUNT(r.id) FROM tb_room_member rm join tb_room r ON r.id=rm.room_id WHERE r.multiple=#{multiple} and
+        r.state !=3 ;
+    </select>
 
 
     <resultMap id="RoomResultMap" type="com.huangmei.commonhm.model.Room">
