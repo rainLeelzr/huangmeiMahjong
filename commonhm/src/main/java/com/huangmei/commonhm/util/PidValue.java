@@ -18,6 +18,7 @@ public enum PidValue {
     LOGOUT(1001, "注销登录"),
     FREE_COINS(1002, "免费领取金币"),
     PRIZE_DRAW(1003, "抽奖"),
+    BUY(1004, "购买"),
     GET_USER(1006, "用户信息"),
     GET_STANDINGS(1008, "获取战绩"),
 
@@ -30,6 +31,7 @@ public enum PidValue {
     DISMISS_ROOM(2003, "申请解散房间"),
     AGREE_DISMISS(2004, "是否同意解散房间"),
     READY(2005, "用户准备"),
+    NUMBER_OF_PLAYERS(2006, "金币场人数"),
 
     /**
      * 游戏过程

@@ -225,31 +225,34 @@ public class ActionRouter {
         }
         Map<String, Object> myResult = new HashMap<>();
         Set<RoomMember> roomMembers = (Set<RoomMember>) result.get(("roomMembers"));
-        for (RoomMember roomMember : roomMembers) {
-            if (roomMember.getUserId().equals((Integer) result.get("userId"))) {
-                myResult.put("roomMember", roomMember);
+        if (roomMembers != null) {
+
+            for (RoomMember roomMember : roomMembers) {
+                if (roomMember.getUserId().equals((Integer) result.get("userId"))) {
+                    myResult.put("roomMember", roomMember);
+                }
+
             }
+            List<User> users = (ArrayList<User>) result.get(("users"));
+            for (User u : users) {
+                if (u.getId().equals((Integer) result.get("userId"))) {
+                    myResult.put("user", u);
+                }
 
-        }
-        List<User> users = (ArrayList<User>) result.get(("users"));
-        for (User u : users) {
-            if (u.getId().equals((Integer) result.get("userId"))) {
-                myResult.put("user", u);
             }
+            JsonResultY jsonResultY = new JsonResultY.Builder()
+                    .setPid(PidValue.JOIN_ROOM_MESSAGE.getPid())
+                    .setError(CommonError.SYS_SUSSES)
+                    .setData(myResult)
+                    .build();
 
+            messageManager.sendMessageToOtherRoomUsers(
+                    ((Room) result.get(("room"))).getId().toString(),
+                    (Integer) result.get("userId"),
+                    jsonResultY);
+
+            result.remove("userId");
         }
-        JsonResultY jsonResultY = new JsonResultY.Builder()
-                .setPid(PidValue.JOIN_ROOM_MESSAGE.getPid())
-                .setError(CommonError.SYS_SUSSES)
-                .setData(myResult)
-                .build();
-
-        messageManager.sendMessageToOtherRoomUsers(
-                ((Room) result.get(("room"))).getId().toString(),
-                (Integer) result.get("userId"),
-                jsonResultY);
-
-        result.remove("userId");
         return new JsonResultY.Builder()
                 .setPid(PidValue.JOIN_ROOM.getPid())
                 .setError(CommonError.SYS_SUSSES)
@@ -284,7 +287,7 @@ public class ActionRouter {
     public JsonResultY ready(WebSocketSession session, JSONObject data)
             throws Exception {
         User user = sessionManager.getUser(session.getId());
-        Map<String, Object> result = roomService.ready(data, user);
+        Map<String, Object> result = roomService.ready(user);
         Integer type = (Integer) result.get("type");
 
         boolean isFirstPutOutCard = false;
@@ -434,8 +437,9 @@ public class ActionRouter {
         User user = sessionManager.getUser(session.getId());
 
         Map<String, Object> result = userService.prizeDraw(data, user);
-
-        sessionManager.userUpdate((User) result.get("user"), session);
+        if (!data.getBoolean("judge")) {
+            sessionManager.userUpdate((User) result.get("user"), session);
+        }
 
         return new JsonResultY.Builder()
                 .setPid(PidValue.PRIZE_DRAW.getPid())
@@ -456,6 +460,34 @@ public class ActionRouter {
 
         return new JsonResultY.Builder()
                 .setPid(PidValue.FREE_COINS.getPid())
+                .setError(CommonError.SYS_SUSSES)
+                .setData(result)
+                .build();
+    }
+
+    @Pid(PidValue.NUMBER_OF_PLAYERS)
+    @LoginResource
+    public JsonResultY numberOfPlayers(WebSocketSession session, JSONObject data)
+            throws Exception {
+
+        Map<String, Object> result = roomService.numberOfPlayers(data);
+
+        return new JsonResultY.Builder()
+                .setPid(PidValue.NUMBER_OF_PLAYERS.getPid())
+                .setError(CommonError.SYS_SUSSES)
+                .setData(result)
+                .build();
+    }
+
+    @Pid(PidValue.BUY)
+    @LoginResource
+    public JsonResultY buy(WebSocketSession session, JSONObject data)
+            throws Exception {
+        User user = sessionManager.getUser(session.getId());
+        Map<String, Object> result = userService.buy(data, user);
+
+        return new JsonResultY.Builder()
+                .setPid(PidValue.BUY.getPid())
                 .setError(CommonError.SYS_SUSSES)
                 .setData(result)
                 .build();
