@@ -78,9 +78,13 @@ public class GameRedis {
         }
     }
 
-    public void getNextCanOperates(Integer roomId) {
+    public CanDoOperate getNextCanOperates(Integer roomId) {
         CanDoOperate canDoOperate = (CanDoOperate) redis.sortedSet.getByMinScore(
                 String.format(CLIENT_OPERATE_QUEUE_SET_KEY, roomId), CanDoOperate.class);
+        return canDoOperate;
+    }
 
+    public void removeCanOperates(Integer roomId) {
+        redis.del(String.format(CLIENT_OPERATE_QUEUE_SET_KEY, roomId));
     }
 }

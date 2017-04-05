@@ -12,7 +12,7 @@ public class ClientOperate {
     private Integer uId;
 
     /**
-     * 摸牌后可以的操作，如吃胡、大明杠、碰，包含过
+     * 别人打一张牌后可以的操作，如吃胡、大明杠、碰，包含过
      */
     private List<Integer> operatePids;
 
@@ -35,6 +35,19 @@ public class ClientOperate {
      * 别人打出的麻将
      */
     private Integer playedMahjongId;
+
+    /**
+     * 打出麻将的人的uid
+     */
+    private Integer playerUId;
+
+    public Integer getPlayerUId() {
+        return playerUId;
+    }
+
+    public void setPlayerUId(Integer playerUId) {
+        this.playerUId = playerUId;
+    }
 
     public Integer getuId() {
         return uId;

@@ -8,6 +8,8 @@ import java.util.List;
 public class GangBroadcast {
 
     private List<Integer> mahjongIds;// 暗杠的麻将id
+    private List<Integer> playedUId;// 出牌的玩家uid
+    private List<Integer> playedMahjongId;// 别人打出的麻将
     private Integer gangPlayerUId;  // 暗杠玩家uid
     private Integer uId; //需要接受广播消息的玩家uid
 
@@ -36,6 +38,8 @@ public class GangBroadcast {
 
     public GangBroadcast(
             Integer uId,
+            //List<Integer> playedUId,
+            //List<Integer> playedMahjongId,
             List<Integer> mahjongIds,
             Integer gangPlayerUId,
             Integer operatePid,
@@ -43,12 +47,30 @@ public class GangBroadcast {
             List<List<Integer>> pengMahjongIds,
             List<List<Integer>> gangMahjongIds) {
         this.uId = uId;
+        //this.playedUId = playedUId;
+        //this.playedMahjongId = playedMahjongId;
         this.mahjongIds = mahjongIds;
         this.gangPlayerUId = gangPlayerUId;
         this.operatePid = operatePid;
         this.handCardIds = handCardIds;
         this.pengMahjongIds = pengMahjongIds;
         this.gangMahjongIds = gangMahjongIds;
+    }
+
+    public List<Integer> getPlayedUId() {
+        return playedUId;
+    }
+
+    public void setPlayedUId(List<Integer> playedUId) {
+        this.playedUId = playedUId;
+    }
+
+    public List<Integer> getPlayedMahjongId() {
+        return playedMahjongId;
+    }
+
+    public void setPlayedMahjongId(List<Integer> playedMahjongId) {
+        this.playedMahjongId = playedMahjongId;
     }
 
     public List<Integer> getHandCardIds() {

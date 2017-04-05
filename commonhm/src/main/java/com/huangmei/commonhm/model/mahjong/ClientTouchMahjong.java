@@ -1,6 +1,7 @@
 package com.huangmei.commonhm.model.mahjong;
 
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -50,6 +51,33 @@ public class ClientTouchMahjong {
      * 消息版本号
      */
     private Long version;
+
+    /**
+     * 杠操作时，摸一张牌
+     */
+    public static ClientTouchMahjong newGangClientTouchMahjong(MahjongGameData mahjongGameData,
+                                                               Integer touchMahjongId,
+                                                               Integer touchMahjongUId,
+                                                               List<Integer> operatePids,
+                                                               List<Integer> handCardIds,
+                                                               List<List<Integer>> pengMahjongIds,
+                                                               List<List<Integer>> gangMahjongIds,
+                                                               Integer uId
+    ) {
+        ClientTouchMahjong clientTouchMahjong = new ClientTouchMahjong();
+        clientTouchMahjong.setVersion(mahjongGameData.getVersion());
+        clientTouchMahjong.setLeftCardCount(mahjongGameData.getLeftCards().size());
+        clientTouchMahjong.setuId(uId);
+        clientTouchMahjong.setHandCardIds(handCardIds);
+        clientTouchMahjong.setTouchMahjongId(touchMahjongId);
+        clientTouchMahjong.setTouchMahjongUId(touchMahjongUId);
+
+        clientTouchMahjong.setPengMahjongIds(pengMahjongIds);
+        clientTouchMahjong.setGangMahjongIds(gangMahjongIds);
+        clientTouchMahjong.setOperatePids(operatePids);
+        clientTouchMahjong.setOperatePids(Collections.<Integer>emptyList());
+        return clientTouchMahjong;
+    }
 
     public List<List<Integer>> getPengMahjongIds() {
         return pengMahjongIds;

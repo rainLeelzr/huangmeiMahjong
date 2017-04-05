@@ -12,6 +12,7 @@ import com.huangmei.commonhm.redis.RoomRedis;
 import com.huangmei.commonhm.redis.VersionRedis;
 import com.huangmei.commonhm.util.CommonError;
 import com.huangmei.commonhm.util.JsonUtil;
+import com.huangmei.commonhm.util.PidValue;
 import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -293,10 +294,7 @@ public class GameService {
         }
 
         // 玩家的个人卡信息中添加杠列表
-        Combo gang = new Combo();
-        gang.setType(Combo.Type.AAAA);
-        gang.setYingRuan(YingRuan.YING);
-        gang.setMahjongs(toBeGangMahjongs);
+        Combo gang = Combo.newYingAnGang(toBeGangMahjongs);
         personalCardInfo.getGangs().add(gang);
 
         // 玩家的个人卡信息的手牌中移除已杠的麻将
@@ -336,10 +334,7 @@ public class GameService {
         }
 
         // 玩家的个人卡信息中添加杠列表
-        Combo gang = new Combo();
-        gang.setType(Combo.Type.AAAA);
-        gang.setYingRuan(YingRuan.RUAN);
-        gang.setMahjongs(toBeGangMahjongs);
+        Combo gang = Combo.newRuanAnGang(toBeGangMahjongs);
         personalCardInfo.getGangs().add(gang);
 
         // 玩家的个人卡信息的手牌中移除已杠的麻将
@@ -431,13 +426,9 @@ public class GameService {
         }
 
         // 添加杠combo
-        Combo jiaGangCombo = new Combo();
-        jiaGangCombo.setType(Combo.Type.AAAA);
-        jiaGangCombo.setYingRuan(YingRuan.YING);
-        List<Mahjong> jiaGangMahjongs = new ArrayList<>(toBeJiaBangCombo.getMahjongs());
-        jiaGangMahjongs.add(mahjong);
-        Collections.sort(jiaGangMahjongs);
-        jiaGangCombo.setMahjongs(jiaGangMahjongs);
+        List<Mahjong> yingjiaGangMahjongs = new ArrayList<>(toBeJiaBangCombo.getMahjongs());
+        yingjiaGangMahjongs.add(mahjong);
+        Combo jiaGangCombo = Combo.newYingJiaGang(yingjiaGangMahjongs);
         personalCardInfo.getGangs().add(jiaGangCombo);
 
         // 删除碰combo
@@ -517,13 +508,7 @@ public class GameService {
         }
 
         // 添加杠combo
-        Combo jiaGangCombo = new Combo();
-        jiaGangCombo.setType(Combo.Type.AAAA);
-        jiaGangCombo.setYingRuan(YingRuan.RUAN);
-        List<Mahjong> jiaGangMahjongs = new ArrayList<>(toBeJiaBangCombo.getMahjongs());
-        jiaGangMahjongs.add(mahjongs.get(mahjongs.size() - 1));
-        Collections.sort(jiaGangMahjongs);
-        jiaGangCombo.setMahjongs(jiaGangMahjongs);
+        Combo jiaGangCombo = Combo.newRuanJiaGang(mahjongs);
         personalCardInfo.getGangs().add(jiaGangCombo);
 
         // 删除碰combo
@@ -536,5 +521,40 @@ public class GameService {
 
         gameRedis.saveMahjongGameData(mahjongGameData);
         return new Object[]{mahjongGameData, jiaGangCombo};
+    }
+
+    /**
+     * 执行硬大明杠的逻辑
+     */
+    public Object[] yingDaMingGang(User user, Room room, List<Mahjong> mahjongs) {
+        // 取出等待客户端操作对象waitingClientOperate
+        CanDoOperate waitingClientOperate = gameRedis.getWaitingClientOperate(room.getId());
+        if (!waitingClientOperate.getRoomMember().getUserId().equals(user.getId())) {
+            throw CommonError.NOT_YOUR_TURN.newException();
+        }
+
+        // 取出麻将数据对象
+        MahjongGameData mahjongGameData = gameRedis.getMahjongGameData(room.getId());
+
+        // 玩家个人卡信息
+        PersonalCardInfo personalCardInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), user);
+
+        // 判断玩家手牌是否有3只跟别的玩家打出一样的麻将
+        Mahjong playedMahjong = mahjongs.remove(mahjongs.size() - 1);
+        if (!personalCardInfo.getHandCards().containsAll(mahjongs)) {
+            throw CommonError.SYS_PARAM_ERROR.newException();
+        }
+
+        mahjongs.add(playedMahjong);
+
+        // 添加杠combo
+        Combo yingDaMingGangCombo = Combo.newYingDaMingGang(mahjongs);
+        personalCardInfo.getGangs().add(yingDaMingGangCombo);
+
+        // 玩家的个人卡信息的手牌中移除已杠的麻将
+        personalCardInfo.getHandCards().remove(mahjongs);
+
+        gameRedis.saveMahjongGameData(mahjongGameData);
+        return new Object[]{mahjongGameData, yingDaMingGangCombo};
     }
 }

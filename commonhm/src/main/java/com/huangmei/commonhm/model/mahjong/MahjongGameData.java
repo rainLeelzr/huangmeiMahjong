@@ -3,6 +3,7 @@ package com.huangmei.commonhm.model.mahjong;
 
 import com.huangmei.commonhm.manager.operate.Operate;
 import com.huangmei.commonhm.model.RoomMember;
+import com.huangmei.commonhm.util.PidValue;
 import com.huangmei.commonhm.util.mock.MockComboMahjongList;
 import org.apache.commons.lang.math.RandomUtils;
 
@@ -40,6 +41,11 @@ public class MahjongGameData {
         classMap.put("baoMother", Mahjong.class);
         classMap.put("baoMahjongs", Mahjong.class);
         classMap.put("baoMahjongMakeUpMahjongs", Mahjong.class);
+
+        // combo
+        classMap.put("pidValue", PidValue.class);
+        classMap.put("yingRuan", YingRuan.class);
+
     }
 
     // 庄家的座位号，从1开始
