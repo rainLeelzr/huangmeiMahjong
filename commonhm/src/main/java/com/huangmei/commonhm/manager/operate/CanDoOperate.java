@@ -1,6 +1,7 @@
 package com.huangmei.commonhm.manager.operate;
 
 import com.huangmei.commonhm.model.RoomMember;
+import com.huangmei.commonhm.model.mahjong.Mahjong;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,11 +20,39 @@ public class CanDoOperate implements Comparable {
         classMap = new HashMap<>();
         classMap.put("roomMember", RoomMember.class);
         classMap.put("operates", Operate.class);
+        classMap.put("specialUserId", Integer.class);
+        classMap.put("specialMahjong", Mahjong.class);
     }
 
     private RoomMember roomMember;
 
     private Set<Operate> operates;
+
+    /**
+     * 打出牌的或摸到牌的玩家的userId
+     */
+    private Integer specialUserId;
+
+    /**
+     * 打出牌的或摸到牌的麻将
+     */
+    private Mahjong specialMahjong;
+
+    public Integer getSpecialUserId() {
+        return specialUserId;
+    }
+
+    public void setSpecialUserId(Integer specialUserId) {
+        this.specialUserId = specialUserId;
+    }
+
+    public Mahjong getSpecialMahjong() {
+        return specialMahjong;
+    }
+
+    public void setSpecialMahjong(Mahjong specialMahjong) {
+        this.specialMahjong = specialMahjong;
+    }
 
     public RoomMember getRoomMember() {
         return roomMember;

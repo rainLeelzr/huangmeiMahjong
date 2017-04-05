@@ -7,6 +7,7 @@ import com.huangmei.commonhm.redis.base.Redis;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.TreeSet;
 
 @Component
@@ -15,6 +16,8 @@ public class GameRedis {
     private static String MAHJONG_GAME_DATA_FIELD_KEY = "mahjongGameData";
 
     private static String WAITING_CLIENT_OPERATE_FIELD_KEY = "waitingClientOperate";
+
+    private static String CLIENT_OPERATE_QUEUE_SET_KEY = "clientOperateQueue_roomId_%s";
 
     @Autowired
     private Redis redis;
@@ -63,5 +66,21 @@ public class GameRedis {
     public void deleteWaitingClientOperate(Integer roomId) {
         redis.hash.delete(String.format(RoomRedis.ROOM_KEY, roomId),
                 WAITING_CLIENT_OPERATE_FIELD_KEY);
+    }
+
+    public void saveCanOperates(ArrayList<CanDoOperate> canOperates) {
+        for (CanDoOperate canOperate : canOperates) {
+            redis.sortedSet.add(
+                    String.format(CLIENT_OPERATE_QUEUE_SET_KEY, canOperate.getRoomMember().getRoomId()),
+                    canOperate,
+                    canOperate.getRoomMember().getSeat()
+            );
+        }
+    }
+
+    public void getNextCanOperates(Integer roomId) {
+        CanDoOperate canDoOperate = (CanDoOperate) redis.sortedSet.getByMinScore(
+                String.format(CLIENT_OPERATE_QUEUE_SET_KEY, roomId), CanDoOperate.class);
+
     }
 }

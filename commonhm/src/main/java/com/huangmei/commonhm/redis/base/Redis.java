@@ -6,6 +6,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -512,6 +513,36 @@ public class Redis {
                 results.add(deserialize(obj, type));
             }
             return results;
+        }
+
+        /**
+         * 获取score最小的元素
+         *
+         * @param key
+         * @param type
+         * @return
+         */
+        public Object getByMinScore(String key, Class type) {
+            Long size = size(key);
+            if (size == 0) {
+                return null;
+            }
+
+            java.util.Set<ZSetOperations.TypedTuple<String>> objs = stringRedisTemplate.opsForZSet().rangeWithScores(key, 0, 0);
+
+            //考虑到其他线程可能此时删除了key
+            if (objs == null || objs.size() == 0) {
+                return Collections.emptySet();
+            }
+
+            Object result = null;
+            for (ZSetOperations.TypedTuple<String> obj : objs) {
+                String str = obj.getValue();
+                result = deserialize(str, type);
+                break;
+            }
+
+            return result;
         }
 
         /**

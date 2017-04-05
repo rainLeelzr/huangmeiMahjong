@@ -96,7 +96,9 @@ public class MahjongGameData {
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1YingAnGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1RuanAnGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1YingJiaGangMahjongs();
-        List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1RuanJiaGangMahjongs();
+        //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1RuanJiaGangMahjongs();
+
+        List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1YingMingGangMahjongs();
 
         // 参数验证
         if (bankerSite > players || bankerSite < 0 || players == 0) {
@@ -145,15 +147,15 @@ public class MahjongGameData {
             // 碰列表
             ArrayList<Combo> pengs = new ArrayList<>(1);
             // DEBUGING 模拟已碰
-            Combo peng = new Combo();
-            peng.setType(Combo.Type.AAA);
-            peng.setYingRuan(YingRuan.RUAN);
-            ArrayList<Mahjong> ms = new ArrayList<>(3);
-            ms.add(Mahjong.BAI_BAN_1);
-            ms.add(Mahjong.BAI_BAN_2);
-            ms.add(Mahjong.THREE_TIAO_1);
-            peng.setMahjongs(ms);
-            pengs.add(peng);
+            //Combo peng = new Combo();
+            //peng.setType(Combo.Type.AAA);
+            //peng.setYingRuan(YingRuan.RUAN);
+            //ArrayList<Mahjong> ms = new ArrayList<>(3);
+            //ms.add(Mahjong.BAI_BAN_1);
+            //ms.add(Mahjong.BAI_BAN_2);
+            //ms.add(Mahjong.THREE_TIAO_1);
+            //peng.setMahjongs(ms);
+            //pengs.add(peng);
 
             handCard.setPengs(pengs);
 

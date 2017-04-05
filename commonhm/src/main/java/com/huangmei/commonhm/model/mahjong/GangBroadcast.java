@@ -11,13 +11,76 @@ public class GangBroadcast {
     private Integer gangPlayerUId;  // 暗杠玩家uid
     private Integer uId; //需要接受广播消息的玩家uid
 
+    /**
+     * 个人的手牌id
+     */
+    private List<Integer> handCardIds;
+
+    /**
+     * 碰了的牌
+     */
+    private List<List<Integer>> pengMahjongIds;
+
+    /**
+     * 杠了的牌
+     */
+    private List<List<Integer>> gangMahjongIds;
+
+    /**
+     * 杠的类型，与pid相对应
+     */
+    private Integer operatePid;
+
     public GangBroadcast() {
     }
 
-    public GangBroadcast(List<Integer> mahjongIds, Integer gangPlayerUId, Integer uId) {
+    public GangBroadcast(
+            Integer uId,
+            List<Integer> mahjongIds,
+            Integer gangPlayerUId,
+            Integer operatePid,
+            List<Integer> handCardIds,
+            List<List<Integer>> pengMahjongIds,
+            List<List<Integer>> gangMahjongIds) {
+        this.uId = uId;
         this.mahjongIds = mahjongIds;
         this.gangPlayerUId = gangPlayerUId;
-        this.uId = uId;
+        this.operatePid = operatePid;
+        this.handCardIds = handCardIds;
+        this.pengMahjongIds = pengMahjongIds;
+        this.gangMahjongIds = gangMahjongIds;
+    }
+
+    public List<Integer> getHandCardIds() {
+        return handCardIds;
+    }
+
+    public void setHandCardIds(List<Integer> handCardIds) {
+        this.handCardIds = handCardIds;
+    }
+
+    public List<List<Integer>> getPengMahjongIds() {
+        return pengMahjongIds;
+    }
+
+    public void setPengMahjongIds(List<List<Integer>> pengMahjongIds) {
+        this.pengMahjongIds = pengMahjongIds;
+    }
+
+    public List<List<Integer>> getGangMahjongIds() {
+        return gangMahjongIds;
+    }
+
+    public void setGangMahjongIds(List<List<Integer>> gangMahjongIds) {
+        this.gangMahjongIds = gangMahjongIds;
+    }
+
+    public Integer getOperatePid() {
+        return operatePid;
+    }
+
+    public void setOperatePid(Integer operatePid) {
+        this.operatePid = operatePid;
     }
 
     public Integer getGangPlayerUId() {
