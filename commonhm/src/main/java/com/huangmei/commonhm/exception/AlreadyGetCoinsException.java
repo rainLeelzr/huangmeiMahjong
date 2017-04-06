@@ -1,7 +1,7 @@
 package com.huangmei.commonhm.exception;
 
 /**
- * 用户不存在
+ * 今日免费领取金币次数已用完
  *
  * @author Administrator
  */

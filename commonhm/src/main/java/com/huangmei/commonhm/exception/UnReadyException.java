@@ -1,7 +1,7 @@
 package com.huangmei.commonhm.exception;
 
 /**
- * 房间成员已满
+ * 开始游戏失败,还有玩家没有准备
  * @author Administrator
  *
  */
