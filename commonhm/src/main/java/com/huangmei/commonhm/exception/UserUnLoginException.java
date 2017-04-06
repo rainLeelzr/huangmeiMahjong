@@ -1,7 +1,7 @@
 package com.huangmei.commonhm.exception;
 
 /**
- * 用户不存在
+ * 用户未登陆
  * @author Administrator
  *
  */

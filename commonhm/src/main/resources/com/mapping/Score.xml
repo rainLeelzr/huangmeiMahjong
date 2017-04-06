@@ -5,9 +5,11 @@
 
 	<insert id="save" useGeneratedKeys="true" keyProperty="id" parameterType="com.huangmei.commonhm.model.Score">
 		INSERT INTO TB_SCORE (
-			ID, AN_GANG_TIMES, COIN, DIAN_PAO_TIMES, IS_ZI_MO, JIE_PAO_TIMES, MING_GANG_TIMES, ROOM_ID, SCORE, TIMES, TYPE, USER_ID, WIN_TYPE
+        ID, AN_GANG_TIMES, COIN, DIAN_PAO_TIMES, IS_ZI_MO, JIE_PAO_TIMES, MING_GANG_TIMES, ROOM_ID, SCORE, TIMES, TYPE,
+        USER_ID, WIN_TYPE,CREATED_TIME
 		) VALUES (
-			#{id}, #{anGangTimes}, #{coin}, #{dianPaoTimes}, #{isZiMo}, #{jiePaoTimes}, #{mingGangTimes}, #{roomId}, #{score}, #{times}, #{type}, #{userId}, #{winType}
+        #{id}, #{anGangTimes}, #{coin}, #{dianPaoTimes}, #{isZiMo}, #{jiePaoTimes}, #{mingGangTimes}, #{roomId},
+        #{score}, #{times}, #{type}, #{userId}, #{winType}, #{createdTime}
 		)
 	</insert>
 
@@ -41,6 +43,7 @@
 		<result property="type" column="TYPE" />
 		<result property="userId" column="USER_ID" />
 		<result property="winType" column="WIN_TYPE" />
+        <result property="createdTime" column="CREATED_TIME"/>
 	</resultMap>
 
 	<sql id="SetSQL">
@@ -57,6 +60,7 @@
 			<if test="entity.type != null">TYPE = #{entity.type},</if>
 			<if test="entity.userId != null">USER_ID = #{entity.userId},</if>
 			<if test="entity.winType != null">WIN_TYPE = #{entity.winType},</if>
+            <if test="entity.createdTime != null">CREATED_TIME = #{entity.createdTime},</if>
 		</set>
 	</sql>
 

@@ -458,12 +458,61 @@ public class ActionRouter {
             throws Exception {
         User user = sessionManager.getUser(session.getId());
 
-        Map<String, Object> result = userService.freeCoins(data, user);
+        Map<String, Object> result = userService.freeCoins(user);
 
         sessionManager.userUpdate((User) result.get("user"), session);
 
         return new JsonResultY.Builder()
                 .setPid(PidValue.FREE_COINS.getPid())
+                .setError(CommonError.SYS_SUSSES)
+                .setData(result)
+                .build();
+    }
+
+    @Pid(PidValue.BIND_PHONE)
+    @LoginResource
+    public JsonResultY bindPhone(WebSocketSession session, JSONObject data)
+            throws Exception {
+        User user = sessionManager.getUser(session.getId());
+
+        Map<String, Object> result = userService.bindPhone(data, user);
+
+        sessionManager.userUpdate((User) result.get("user"), session);
+
+        return new JsonResultY.Builder()
+                .setPid(PidValue.BIND_PHONE.getPid())
+                .setError(CommonError.SYS_SUSSES)
+                .setData(result)
+                .build();
+    }
+
+    @Pid(PidValue.TEN_WINS)
+    @LoginResource
+    public JsonResultY tenWins(WebSocketSession session, JSONObject data)
+            throws Exception {
+        User user = sessionManager.getUser(session.getId());
+
+        Map<String, Object> result = userService.tenWins(user);
+
+        sessionManager.userUpdate((User) result.get("user"), session);
+
+        return new JsonResultY.Builder()
+                .setPid(PidValue.BIND_PHONE.getPid())
+                .setError(CommonError.SYS_SUSSES)
+                .setData(result)
+                .build();
+    }
+
+    @Pid(PidValue.GET_STANDINGS)
+    @LoginResource
+    public JsonResultY getStanding(WebSocketSession session, JSONObject data)
+            throws Exception {
+        User user = sessionManager.getUser(session.getId());
+
+        Map<String, Object> result = userService.getStanding(data, user);
+
+        return new JsonResultY.Builder()
+                .setPid(PidValue.BIND_PHONE.getPid())
                 .setError(CommonError.SYS_SUSSES)
                 .setData(result)
                 .build();

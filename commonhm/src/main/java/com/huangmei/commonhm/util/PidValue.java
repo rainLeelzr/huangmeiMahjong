@@ -19,7 +19,9 @@ public enum PidValue {
     FREE_COINS(1002, "免费领取金币"),
     PRIZE_DRAW(1003, "抽奖"),
     BUY(1004, "购买"),
+    BIND_PHONE(1005, "绑定手机"),
     GET_USER(1006, "用户信息"),
+    TEN_WINS(1007, "胜利十局"),
     GET_STANDINGS(1008, "获取战绩"),
 
     /**

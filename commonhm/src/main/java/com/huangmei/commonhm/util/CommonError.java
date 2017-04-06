@@ -25,7 +25,11 @@ public enum CommonError {
     USER_LACK_COINS(200003, "金币不足", UserLackCoinsException.class),
     USER_LACK_DIAMONDS(200004, "钻石不足", UserLackDiamondsException.class),
     ALREADY_DRAW_COINS(200005, "今日金币抽奖次数已用完", AlreadyDrawCoinsException.class),
-    ALREADY_GET_COINS(200006, "今日免费领取金币次数已用完", AlreadyGetCoinsException.class),
+    ALREADY_GET_COINS(200006, "今日领取金币次数已用完", AlreadyGetCoinsException.class),
+    ALREADY_BIND_PHONE(200007, "已经绑定过手机", AlreadyBindPhoneException.class),
+    ALREADY_GET_DIAMOND(200008, "已经领取过钻石了", AlreadyGetDiamondException.class),
+    UN_BIND_PHONE(200009, "未绑定手机", UnBindPhoneException.class),
+    NOT_ENOUGH_GAMES(200010, "未完成足够的局数", NotEnoughGamesException.class),
 
     /**
      * 房间
@@ -33,7 +37,7 @@ public enum CommonError {
     ROOM_NOT_EXIST(300001, "房间不存在", RoomNotExistException.class),
     ROOM_FULL(300002, "房间已满", RoomMemberFullException.class),
     ROOM_USER_IN_ROOM(300003, "玩家已经在房间中,不能再加入房间", UserInRoomException.class),
-    ROOM_USER_NOT_IN_ROOM(300004, "玩家没有在房间中,不能退出房间", UserNotInRoomException.class),
+    ROOM_USER_NOT_IN_ROOM(300004, "玩家没有在房间中", UserNotInRoomException.class),
     ROOM_READY_ERROR(300005, "玩家准备动作失败", ReadyErrorException.class),
     ROOM_UNREADY(300006, "开始游戏失败,还有玩家没有准备", UnReadyException.class),
 

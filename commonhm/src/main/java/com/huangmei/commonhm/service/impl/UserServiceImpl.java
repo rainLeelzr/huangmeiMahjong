@@ -1,7 +1,7 @@
 package com.huangmei.commonhm.service.impl;
 
-import com.huangmei.commonhm.dao.RecordDao;
 import com.huangmei.commonhm.dao.RoomMemberDao;
+import com.huangmei.commonhm.dao.ScoreDao;
 import com.huangmei.commonhm.dao.TranRecordDao;
 import com.huangmei.commonhm.dao.UserDao;
 import com.huangmei.commonhm.model.*;
@@ -23,7 +23,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
     @Autowired
     private RoomMemberDao roomMemberDao;
     @Autowired
-    private RecordDao recordDao;
+    private ScoreDao scoreDao;
     @Autowired
     private TranRecordDao tranRecordDao;
 
@@ -148,11 +148,11 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         Map<String, Object> result = new HashMap<String, Object>(3);
         if (user != null) {
             result.put("user", user);
-            Entity.RecordCriteria recordCriteria = new Entity.RecordCriteria();
-            recordCriteria.setUserId(Entity.Value.eq(user.getId()));
-            long count = recordDao.selectCount(recordCriteria);//总局数
-            recordCriteria.setWinType(Entity.Value.ne(0));
-            long win_count = recordDao.selectCount(recordCriteria);//胜利局数
+            Entity.ScoreCriteria scoreCriteria = new Entity.ScoreCriteria();
+            scoreCriteria.setUserId(Entity.Value.eq(user.getId()));
+            long count = scoreDao.selectCount(scoreCriteria);//总局数
+            scoreCriteria.setWinType(Entity.Value.ne(0));
+            long win_count = scoreDao.selectCount(scoreCriteria);//胜利局数
             result.put("win", win_count);
             result.put("lose", count - win_count);
             return result;
@@ -344,12 +344,11 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
     /**
      * 免费领取金币
      *
-     * @param data
      * @param user
      * @return
      */
     @Override
-    public Map<String, Object> freeCoins(JSONObject data, User user) {
+    public Map<String, Object> freeCoins(User user) {
         Map<String, Object> result = new HashMap<String, Object>(2);
         Integer way = TranRecord.way.FREE_COIN.getCode();
 
@@ -394,6 +393,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         Integer diamond = (Integer) data.get("diamond");
         Integer horn = (Integer) data.get("horn");
 
+        //支付接口对接
         if (coin != null) {
             user.setCoin(user.getCoin() + coin);
         } else if (diamond != null) {
@@ -404,6 +404,114 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         userDao.update(user);
         result.put("user", user);
         return result;
+    }
+
+    /**
+     * 绑定手机
+     *
+     * @param data
+     * @param user
+     * @return
+     */
+    @Override
+    public Map<String, Object> bindPhone(JSONObject data, User user) {
+        Map<String, Object> result = new HashMap<String, Object>(2);
+        String phone = (String) data.get("phone");
+
+        if (phone != null) {//绑定手机
+            if (user.getMobilePhone() == null) {//还没有绑定过手机
+                user.setMobilePhone(phone);
+            } else {
+                throw CommonError.ALREADY_BIND_PHONE.newException();
+            }
+        } else {//领取钻石
+            if (user.getMobilePhone() != null) {
+                Integer way = TranRecord.way.BIND_PHONE.getCode();
+                Entity.TranRecordCriteria tranRecordCriteria = new Entity.TranRecordCriteria();
+                tranRecordCriteria.setUserId(Entity.Value.eq(user.getId()));
+                tranRecordCriteria.setWay(Entity.Value.eq(way));
+                long count = tranRecordDao.selectCount(tranRecordCriteria);
+                if (count < 1) {//没有领取过绑定手机钻石
+                    user.setDiamond(user.getDiamond() + 2);
+                    //生成交易记录
+                    createRecord(user, way, TranRecord.itemType.DIAMOND.getCode(), 2);
+                } else {
+                    throw CommonError.ALREADY_GET_DIAMOND.newException();
+                }
+            } else {
+                throw CommonError.UN_BIND_PHONE.newException();
+            }
+        }
+        userDao.update(user);
+        result.put("user", user);
+        result.put("result", true);
+        return result;
+
+    }
+
+    /**
+     * 每日任务胜利十局可以领取2000金币
+     *
+     * @param user
+     * @return
+     */
+    @Override
+    public Map<String, Object> tenWins(User user) {
+        Map<String, Object> result = new HashMap<String, Object>(2);
+
+        TranRecord tr = new TranRecord();
+        tr.setWay(TranRecord.way.WIN.getCode());
+        tr.setUserId(user.getId());
+        Long count = tranRecordDao.countForPrizeDraw(tr);
+
+        if (count >= 10) {//当天胜利局数大于十局
+
+            tr.setWay(TranRecord.way.TEN_WINS.getCode());
+            count = tranRecordDao.countForPrizeDraw(tr);
+
+            if (count < 0) {//当天还没有领取胜利任务金币
+                user.setCoin(user.getCoin() + 2000);
+                userDao.update(user);
+                createRecord(user, TranRecord.way.TEN_WINS.getCode(), TranRecord.itemType.COIN.getCode(), 2000);
+                result.put("user", user);
+                result.put("result", true);
+                return result;
+            } else {
+                throw CommonError.ALREADY_GET_COINS.newException();
+            }
+        } else {
+            throw CommonError.NOT_ENOUGH_GAMES.newException();
+        }
+    }
+
+    /**
+     * 获取房间信息
+     *
+     * @param data
+     * @param user
+     * @return
+     */
+    @Override
+    public Map<String, Object> getStanding(JSONObject data, User user) {
+        Map<String, Object> result = new HashMap<String, Object>(2);
+        Integer roomId = (Integer) data.get("roomId");
+
+
+        Entity.ScoreCriteria scoreCriteria = new Entity.ScoreCriteria();
+        scoreCriteria.setUserId(Entity.Value.eq(user.getId()));
+        scoreCriteria.setRoomId(Entity.Value.eq(roomId));
+        List<Score> scores = scoreDao.selectList(scoreCriteria);
+
+        for (Score score : scores) {
+            Entity.ScoreCriteria sc = new Entity.ScoreCriteria();
+            sc.setTimes(Entity.Value.eq(score.getTimes()));
+            sc.setRoomId(Entity.Value.eq(roomId));
+            List<Score> scs = scoreDao.selectList(sc);
+
+
+        }
+
+        return null;
     }
 
 //	public TextMessage TestConnection() {

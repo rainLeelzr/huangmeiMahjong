@@ -42,8 +42,10 @@ public class Score implements Entity {
 	
 	/**  */
 	protected Integer winType;
-	
- 	public Integer getId() {
+
+    protected java.util.Date createdTime;
+
+    public Integer getId() {
 		return id;
 	}
 	
@@ -146,8 +148,16 @@ public class Score implements Entity {
 	public void setWinType(Integer winType) {
 		this.winType = winType;
 	}
-	
- 	@Override
+
+    public java.util.Date getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(java.util.Date createdTime) {
+        this.createdTime = createdTime;
+    }
+
+    @Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("id = ").append(id).append(", ");
@@ -163,7 +173,8 @@ public class Score implements Entity {
 		builder.append("type = ").append(type).append(", ");
 		builder.append("userId = ").append(userId).append(", ");
 		builder.append("winType = ").append(winType);
-		return builder.toString();
+        builder.append("createdTime = ").append(createdTime).append(", ");
+        return builder.toString();
 	}
 
 	@Override

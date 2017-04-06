@@ -479,11 +479,6 @@ public interface Entity extends Serializable {
                 if (entity != null) {
                     primaryKey.value = ((Notice) entity).getId();
                 }
-            } else if (entityClass == Record.class) {
-                primaryKey.name = "id";
-                if (entity != null) {
-                    primaryKey.value = ((Record) entity).getId();
-                }
             } else if (entityClass == Room.class) {
                 primaryKey.name = "id";
                 if (entity != null) {
@@ -529,8 +524,6 @@ public interface Entity extends Serializable {
                 ((AdminUser) obj).setId((Integer) value);
             } else if (entityClass == Notice.class) {
                 ((Notice) obj).setId((Integer) value);
-            } else if (entityClass == Record.class) {
-                ((Record) obj).setId((Integer) value);
             } else if (entityClass == Room.class) {
                 ((Room) obj).setId((Integer) value);
             } else if (entityClass == RoomMember.class) {
@@ -786,62 +779,6 @@ public interface Entity extends Serializable {
 
     }
 
-    public static class RecordCriteria extends SimpleCriteria {
-
-        public void setId(Criterion criterion) {
-            this.addCriterion(criterion.setField("id"));
-        }
-
-        public void setAnGangTimes(Criterion criterion) {
-            this.addCriterion(criterion.setField("an_gang_times"));
-        }
-
-        public void setCoin(Criterion criterion) {
-            this.addCriterion(criterion.setField("coin"));
-        }
-
-        public void setDianPaoTimes(Criterion criterion) {
-            this.addCriterion(criterion.setField("dian_pao_times"));
-        }
-
-        public void setIsZiMo(Criterion criterion) {
-            this.addCriterion(criterion.setField("is_zi_mo"));
-        }
-
-        public void setJiePaoTimes(Criterion criterion) {
-            this.addCriterion(criterion.setField("jie_pao_times"));
-        }
-
-        public void setMingGangTimes(Criterion criterion) {
-            this.addCriterion(criterion.setField("ming_gang_times"));
-        }
-
-        public void setRoomId(Criterion criterion) {
-            this.addCriterion(criterion.setField("room_id"));
-        }
-
-        public void setScore(Criterion criterion) {
-            this.addCriterion(criterion.setField("score"));
-        }
-
-        public void setTimes(Criterion criterion) {
-            this.addCriterion(criterion.setField("times"));
-        }
-
-        public void setType(Criterion criterion) {
-            this.addCriterion(criterion.setField("type"));
-        }
-
-        public void setUserId(Criterion criterion) {
-            this.addCriterion(criterion.setField("user_id"));
-        }
-
-        public void setWinType(Criterion criterion) {
-            this.addCriterion(criterion.setField("win_type"));
-        }
-
-    }
-
     public static class RoomCriteria extends SimpleCriteria {
 
         public void setId(Criterion criterion) {
@@ -984,6 +921,9 @@ public interface Entity extends Serializable {
             this.addCriterion(criterion.setField("win_type"));
         }
 
+        public void setCreatedTime(Criterion criterion) {
+            this.addCriterion(criterion.setField("created_time"));
+        }
     }
 
     public static class TranRecordCriteria extends SimpleCriteria {

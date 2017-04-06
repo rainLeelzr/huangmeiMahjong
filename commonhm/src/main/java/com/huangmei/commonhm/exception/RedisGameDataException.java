@@ -1,7 +1,7 @@
 package com.huangmei.commonhm.exception;
 
 /**
- * 房间成员已满
+ * redis中的游戏数据异常
  * @author Administrator
  *
  */
