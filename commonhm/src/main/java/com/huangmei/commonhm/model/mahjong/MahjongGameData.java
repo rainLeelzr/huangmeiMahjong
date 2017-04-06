@@ -104,7 +104,8 @@ public class MahjongGameData {
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1YingJiaGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1RuanJiaGangMahjongs();
 
-        List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1YingMingGangMahjongs();
+        //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1YingMingGangMahjongs();
+        List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1RuanMingGangMahjongs();
 
         // 参数验证
         if (bankerSite > players || bankerSite < 0 || players == 0) {

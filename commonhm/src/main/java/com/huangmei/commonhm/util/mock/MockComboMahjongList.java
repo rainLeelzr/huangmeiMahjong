@@ -353,6 +353,57 @@ public class MockComboMahjongList {
     /**
      * 软大明杠的麻将组合
      */
+    public static List<Mahjong> getSeat1RuanMingGangMahjongs() {
+        List<Mahjong> all = Mahjong.getAllMahjongs();
+
+        // 自定义所有4个玩家的初始麻将牌
+        Mahjong[] m = new Mahjong[]{
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null,
+                /////////////////////////////////////////////////
+                all.remove(all.indexOf(Mahjong.ONE_WANG_1)),
+                all.remove(all.indexOf(Mahjong.ONE_WANG_2)),
+                all.remove(all.indexOf(Mahjong.THREE_TIAO_1)),
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null,
+                /////////////////////////////////////////////////
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null,
+                /////////////////////////////////////////////////
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null, null, null,
+                null,
+                /////////////////////////////////////////////////
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, all.remove(all.indexOf(Mahjong.ONE_WANG_3))
+        };
+        for (int i = 0; i < m.length; i++) {
+            if (m[i] == null) {
+                m[i] = getOneForm(all);
+            }
+        }
+
+        return Arrays.asList(m);
+    }
+
+    /**
+     * 软大明杠的麻将组合
+     */
     public static List<Mahjong> getRuanDaMingGangMahjongs() {
         List<Mahjong> all = Mahjong.getAllMahjongs();
 

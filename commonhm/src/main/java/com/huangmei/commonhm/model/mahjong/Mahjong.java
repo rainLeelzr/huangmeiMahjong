@@ -274,7 +274,6 @@ public enum Mahjong implements Comparable<Mahjong> {
         for (Integer mahjongId : mahjongIds) {
             mahjongs.add(parse(mahjongId));
         }
-        Collections.sort(mahjongs);
         return mahjongs;
     }
 

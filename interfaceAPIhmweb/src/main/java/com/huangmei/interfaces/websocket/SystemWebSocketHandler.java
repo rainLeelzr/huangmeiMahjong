@@ -83,6 +83,7 @@ public class SystemWebSocketHandler implements WebSocketHandler {
                 }
             }
         } catch (Exception e) {
+            log.error(e.getMessage(), e);
             CommonError error = parse(e);
             if (error != null) {
                 jsonResultY = new JsonResultY.Builder()
@@ -90,7 +91,6 @@ public class SystemWebSocketHandler implements WebSocketHandler {
                         .setError(error)
                         .build();
             } else {
-                log.error(e.getMessage(), e);
                 jsonResultY = new JsonResultY.Builder()
                         .setPid(pid)
                         .setCode(CommonError.SYS_ERR.getCode())

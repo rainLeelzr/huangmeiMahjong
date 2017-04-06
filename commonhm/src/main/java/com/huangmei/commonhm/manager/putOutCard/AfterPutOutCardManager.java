@@ -41,10 +41,10 @@ public class AfterPutOutCardManager extends AbstractManager implements Initializ
         scanTasks.add(YingPeng.class);
 
         // 软大明杠
-        scanTasks.add(RuanDaMingGang.class);
+        //scanTasks.add(RuanDaMingGang.class);
 
         // 软碰
-        scanTasks.add(RuanPeng.class);
+        //scanTasks.add(RuanPeng.class);
 
         setPersonalCardInfoPicker();
     }

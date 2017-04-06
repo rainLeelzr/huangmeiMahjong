@@ -42,10 +42,10 @@ public class GetACardManager extends AbstractManager implements InitializingBean
         scanTasks.add(YingJiaGang.class);
 
         // 软暗杠
-        scanTasks.add(RuanAnGang.class);
+        //scanTasks.add(RuanAnGang.class);
 
         // 软加杠
-        scanTasks.add(RuanJiaGang.class);
+        //scanTasks.add(RuanJiaGang.class);
 
         setPersonalCardInfoPicker();
     }

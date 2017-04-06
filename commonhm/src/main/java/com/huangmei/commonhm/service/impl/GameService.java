@@ -2,6 +2,7 @@ package com.huangmei.commonhm.service.impl;
 
 import com.huangmei.commonhm.dao.RoomMemberDao;
 import com.huangmei.commonhm.manager.operate.CanDoOperate;
+import com.huangmei.commonhm.manager.operate.Operate;
 import com.huangmei.commonhm.manager.putOutCard.AfterPutOutCardManager;
 import com.huangmei.commonhm.model.Room;
 import com.huangmei.commonhm.model.RoomMember;
@@ -40,6 +41,24 @@ public class GameService {
 
     @Autowired
     private RoomRedis roomRedis;
+
+    /**
+     * 判断玩家有没有执行操作的权利
+     *
+     * @param roomId      玩家所在的房间id
+     * @param userId      玩家id
+     * @param toDoOperate 玩家需要执行的操作
+     */
+    private void canOperate(Integer roomId, Integer userId, Operate toDoOperate) {
+        // 取出等待客户端操作对象waitingClientOperate
+        CanDoOperate waitingClientOperate = gameRedis.getWaitingClientOperate(roomId);
+        if (!waitingClientOperate.getRoomMember().getUserId().equals(userId)) {
+            throw CommonError.NOT_YOUR_TURN.newException();
+        }
+        if (!waitingClientOperate.getOperates().contains(toDoOperate)) {
+            throw CommonError.NOT_YOUR_TURN.newException();
+        }
+    }
 
     /***
      * 初始化数据包括：骰子的点数、每个人的手牌、剩余的牌等信息。
@@ -552,9 +571,79 @@ public class GameService {
         personalCardInfo.getGangs().add(yingDaMingGangCombo);
 
         // 玩家的个人卡信息的手牌中移除已杠的麻将
-        personalCardInfo.getHandCards().remove(mahjongs);
+        personalCardInfo.getHandCards().removeAll(mahjongs);
 
         gameRedis.saveMahjongGameData(mahjongGameData);
         return new Object[]{mahjongGameData, yingDaMingGangCombo};
+    }
+
+    /**
+     * 在软碰或软杠的组合中，找到真正碰的牌，即找到非宝牌的牌
+     * 例如碰：一万 一万 五筒
+     * 五筒是宝牌，则会返回真正碰的牌：一万
+     *
+     * @param mahjongs         碰或杠的麻将列表，最多只能出现两种麻将，
+     * @param baoMahjongNumber 宝牌的number
+     * @return 真正碰的牌
+     */
+    private Mahjong findReallyMahjong(List<Mahjong> mahjongs, Integer baoMahjongNumber) {
+        Mahjong reallyMahjong = null;
+        Mahjong baoMahjong = null;
+        for (Mahjong mahjong : mahjongs) {
+            if (!baoMahjongNumber.equals(mahjong.getNumber())) {
+                if (reallyMahjong == null) {
+                    reallyMahjong = mahjong;
+                } else {
+                    if (!reallyMahjong.getNumber().equals(mahjong.getNumber())) {
+                        throw CommonError.SYS_PARAM_ERROR.newException();
+                    }
+                }
+            } else {
+                baoMahjong = mahjong;
+            }
+        }
+        if (baoMahjong == null) {
+            throw CommonError.SYS_PARAM_ERROR.newException();
+        }
+        if (reallyMahjong == null) {
+            throw CommonError.SYS_PARAM_ERROR.newException();
+        }
+        return reallyMahjong;
+    }
+
+    /**
+     * 执行软大明杠的逻辑
+     */
+    public Object[] ruanDaMingGang(User user, Room room, List<Mahjong> mahjongs) {
+        canOperate(room.getId(), user.getId(), Operate.RUAN_DA_MING_GANG);
+
+
+        // 取出麻将数据对象
+        MahjongGameData mahjongGameData = gameRedis.getMahjongGameData(room.getId());
+
+        // 验证需要软大明杠的麻将是否符合规则
+        findReallyMahjong(mahjongs, mahjongGameData.getBaoMahjongs().get(0).getNumber());
+
+        // 玩家个人卡信息
+        PersonalCardInfo personalCardInfo =
+                PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), user);
+
+        // 判断玩家手牌是否有3只跟别的玩家打出一样的麻将
+        Mahjong playedMahjong = mahjongs.remove(mahjongs.size() - 1);
+        if (!personalCardInfo.getHandCards().containsAll(mahjongs)) {
+            throw CommonError.SYS_PARAM_ERROR.newException();
+        }
+
+        mahjongs.add(playedMahjong);
+
+        // 添加杠combo
+        Combo ruanDaMingGangCombo = Combo.newRuanDaMingGang(mahjongs);
+        personalCardInfo.getGangs().add(ruanDaMingGangCombo);
+
+        // 玩家的个人卡信息的手牌中移除已杠的麻将
+        personalCardInfo.getHandCards().removeAll(mahjongs);
+
+        gameRedis.saveMahjongGameData(mahjongGameData);
+        return new Object[]{mahjongGameData, ruanDaMingGangCombo};
     }
 }
