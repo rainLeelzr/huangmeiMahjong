@@ -249,16 +249,8 @@ public class GameService {
     private boolean putOutCardValidate(Mahjong putOutCard, MahjongGameData
             mahjongGameData, User user) {
         // 获取玩家手牌信息
-        PersonalCardInfo personalCardInfo = null;
-        for (PersonalCardInfo gameData : mahjongGameData.getPersonalCardInfos()) {
-            if (gameData.getRoomMember().getUserId().equals(user.getId())) {
-                personalCardInfo = gameData;
-                break;
-            }
-        }
-        if (personalCardInfo == null) {
-            throw CommonError.REDIS_GAME_DATA_ERROR.newException();
-        }
+        PersonalCardInfo personalCardInfo =
+                PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), user.getId());
 
         // 判断客户端打出的牌是不是刚摸上手的
         if (putOutCard == personalCardInfo.getTouchMahjong()) {
@@ -277,7 +269,8 @@ public class GameService {
                 break;
             }
         }
-        if (isHandCard) {
+        // 在碰的情况下，personalCardInfo.getTouchMahjong()是null
+        if (isHandCard && personalCardInfo.getTouchMahjong() != null) {
             // 把摸到的麻将放到手牌列表
             personalCardInfo.getHandCards().add(personalCardInfo.getTouchMahjong());
         }
@@ -571,6 +564,37 @@ public class GameService {
         personalCardInfo.getGangs().add(yingDaMingGangCombo);
 
         // 玩家的个人卡信息的手牌中移除已杠的麻将
+        personalCardInfo.getHandCards().removeAll(mahjongs);
+
+        gameRedis.saveMahjongGameData(mahjongGameData);
+        return new Object[]{mahjongGameData, yingDaMingGangCombo};
+    }
+
+    /**
+     * 执行碰的逻辑
+     */
+    public Object[] peng(User user, Room room, List<Mahjong> mahjongs) {
+        canOperate(room.getId(), user.getId(), Operate.YING_PENG);
+
+        // 取出麻将数据对象
+        MahjongGameData mahjongGameData = gameRedis.getMahjongGameData(room.getId());
+
+        // 玩家个人卡信息
+        PersonalCardInfo personalCardInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), user);
+
+        // 判断玩家手牌是否有2只跟别的玩家打出一样的麻将
+        Mahjong playedMahjong = mahjongs.remove(mahjongs.size() - 1);
+        if (!personalCardInfo.getHandCards().containsAll(mahjongs)) {
+            throw CommonError.SYS_PARAM_ERROR.newException();
+        }
+
+        mahjongs.add(playedMahjong);
+
+        // 添加碰combo
+        Combo yingDaMingGangCombo = Combo.newPeng(mahjongs);
+        personalCardInfo.getPengs().add(yingDaMingGangCombo);
+
+        // 玩家的个人卡信息的手牌中移除已碰的麻将
         personalCardInfo.getHandCards().removeAll(mahjongs);
 
         gameRedis.saveMahjongGameData(mahjongGameData);

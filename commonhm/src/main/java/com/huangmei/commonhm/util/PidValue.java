@@ -39,22 +39,26 @@ public enum PidValue {
     PLAY_A_MAHJONG(3000, "打出一张牌"),
 
     YING_ZI_MO(3101, "硬自摸"),
+
     RUAN_ZI_MO(3102, "软自摸"),
-
     YING_CHI_HU(3103, "硬吃胡"),
+
     RUAN_CHI_HU(3104, "软吃胡"),
-
     YING_AN_GANG(3105, "硬暗杠"),
+
     RUAN_AN_GANG(3106, "软暗杠"),
-
     YING_DA_MING_GANG(3107, "硬大明杠"),
+
     RUAN_DA_MING_GANG(3108, "软大明杠"),
-
     YING_JIA_GANG(3109, "硬加杠"),
-    RUAN_JIA_GANG(3110, "软加杠"),
 
+    RUAN_JIA_GANG(3110, "软加杠"),
     YING_PENG(3111, "硬碰"),
+
     RUAN_PENG(3112, "软碰"),
+
+    QIANG_DA_MING_GANG_HU(3113, "抢大明杠胡"),
+    QIANG_JIA_GANG_HU(3114, "抢加杠胡"),
 
     GUO(3200, "过"),
 
@@ -66,7 +70,9 @@ public enum PidValue {
     CLIENT_TOUCH_MAHJONG(4002, "发一张牌给客户端消息推送"),
     OTHER_USER_PLAY_A_MAHJONG(4003, "玩家打牌广播"),
     GANG_BROADCAST(4004, "玩家杠广播"),
-    CLIENT_OPERATE(4005, "客户端吃胡/明杠/碰/过消息推送"),;
+    CLIENT_OPERATE(4005, "客户端吃胡/明杠/碰/过消息推送"),
+    PENG_BROADCAST(4006, "玩家碰广播"),
+    QIANG_GANG(4007, "抢杠消息推送");
 
     private int pid;
 

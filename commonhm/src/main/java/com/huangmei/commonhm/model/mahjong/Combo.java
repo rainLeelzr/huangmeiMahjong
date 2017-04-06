@@ -32,6 +32,19 @@ public class Combo {
     }
 
     /**
+     * 创建碰的combo
+     */
+    public static Combo newPeng(List<Mahjong> mahjongs) {
+        Combo combo = new Combo();
+        combo.setType(Combo.Type.AAA);
+        combo.setYingRuan(YingRuan.YING);
+        combo.setPidValue(PidValue.YING_PENG);
+        combo.setMahjongs(mahjongs);
+        Collections.sort(mahjongs);
+        return combo;
+    }
+
+    /**
      * 创建软大明杠的combo
      */
     public static Combo newRuanDaMingGang(List<Mahjong> mahjongs) {

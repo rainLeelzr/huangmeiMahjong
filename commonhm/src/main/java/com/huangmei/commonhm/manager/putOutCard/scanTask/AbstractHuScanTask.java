@@ -169,35 +169,97 @@ public abstract class AbstractHuScanTask extends BaseScanTask {
         }
 
         Combo combo = AAA(mahjongs);
-        if (combo == null) {
-            combo = ABC(mahjongs);
-            if (combo == null) {
-                combo = AA(mahjongs);
-                if (combo == null) {
-                    return false;
-                } else {
-                    if (hasEyes) {
-                        return false;
-                    } else {
-                        hasEyes = true;
-                    }
-                    return checkPingHu(mahjongs);
-                }
+        if (combo != null) {
+            if (checkPingHu(mahjongs)) {
+                return true;
             } else {
-                if (mahjongs.size() == 0) {
-                    return true;
+                putBackMahjongToList(combo, mahjongs);
+                combo = ABC(mahjongs);
+                if (combo != null) {
+                    if (checkPingHu(mahjongs)) {
+                        return true;
+                    } else {
+                        putBackMahjongToList(combo, mahjongs);
+                        combo = AA(mahjongs);
+                        if (combo != null) {
+                            return checkPingHu(mahjongs);
+                        } else {
+                            return false;
+                        }
+                    }
                 } else {
-                    return checkPingHu(mahjongs);
+                    combo = AA(mahjongs);
+                    if (combo != null) {
+                        return checkPingHu(mahjongs);
+                    } else {
+                        return false;
+                    }
                 }
             }
         } else {
-            if (mahjongs.size() == 0) {
-                return true;
+            combo = ABC(mahjongs);
+            if (combo != null) {
+                if (checkPingHu(mahjongs)) {
+                    return true;
+                } else {
+                    putBackMahjongToList(combo, mahjongs);
+                    combo = AA(mahjongs);
+                    if (combo != null) {
+                        return checkPingHu(mahjongs);
+                    } else {
+                        return false;
+                    }
+                }
             } else {
-                return checkPingHu(mahjongs);
+                combo = AA(mahjongs);
+                if (combo != null) {
+                    return checkPingHu(mahjongs);
+                } else {
+                    return false;
+                }
             }
         }
     }
+
+    /**
+     * 根据传入的list，组成AAA、ABC、AA组合
+     * 组合成功，返回true，不成功返回false
+     */
+    //private boolean checkPingHu(List<Mahjong> mahjongs) {
+    //    if (mahjongs.size() == 0) {
+    //        return true;
+    //    }
+    //
+    //    Combo combo = AAA(mahjongs);
+    //    if (combo == null) {
+    //        combo = ABC(mahjongs);
+    //        if (combo == null) {
+    //            combo = AA(mahjongs);
+    //            if (combo == null) {
+    //                return false;
+    //            } else {
+    //                if (hasEyes) {
+    //                    return false;
+    //                } else {
+    //                    hasEyes = true;
+    //                }
+    //                return checkPingHu(mahjongs);
+    //            }
+    //        } else {
+    //            if (mahjongs.size() == 0) {
+    //                return true;
+    //            } else {
+    //                return checkPingHu(mahjongs);
+    //            }
+    //        }
+    //    } else {
+    //        if (mahjongs.size() == 0) {
+    //            return true;
+    //        } else {
+    //            return checkPingHu(mahjongs);
+    //        }
+    //    }
+    //}
 
     /**
      * 根据传入的list，组成AA组合
