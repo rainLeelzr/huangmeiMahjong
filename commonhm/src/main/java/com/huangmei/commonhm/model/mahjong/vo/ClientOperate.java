@@ -29,7 +29,7 @@ public class ClientOperate {
     /**
      * 杠了的牌
      */
-    private List<List<Integer>> gangMahjongIs;
+    private List<GangVo> gangs;
 
     /**
      * 别人打出的麻将
@@ -81,12 +81,12 @@ public class ClientOperate {
         this.pengMahjongIs = pengMahjongIs;
     }
 
-    public List<List<Integer>> getGangMahjongIs() {
-        return gangMahjongIs;
+    public List<GangVo> getGangs() {
+        return gangs;
     }
 
-    public void setGangMahjongIs(List<List<Integer>> gangMahjongIs) {
-        this.gangMahjongIs = gangMahjongIs;
+    public void setGangs(List<GangVo> gangs) {
+        this.gangs = gangs;
     }
 
     public Integer getPlayedMahjongId() {

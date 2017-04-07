@@ -3,14 +3,14 @@ package com.huangmei.commonhm.model.mahjong.vo;
 import java.util.List;
 
 /**
- * 用于玩家打牌广播
+ * 用于玩家碰广播
  */
 public class PengBroadcast {
 
-    private List<Integer> mahjongIds;// 暗杠的麻将id
+    private List<Integer> mahjongIds;// 碰的麻将id
     private List<Integer> playedUId;// 出牌的玩家uid
     private List<Integer> playedMahjongId;// 别人打出的麻将
-    private Integer pengPlayerUId;  // 暗杠玩家uid
+    private Integer pengPlayerUId;  // 碰玩家uid
     private Integer uId; //需要接受广播消息的玩家uid
 
     /**
@@ -26,7 +26,7 @@ public class PengBroadcast {
     /**
      * 杠了的牌
      */
-    private List<List<Integer>> gangMahjongIds;
+    private List<GangVo> gangs;
 
     /**
      * 碰的类型，与pid相对应
@@ -45,7 +45,7 @@ public class PengBroadcast {
             Integer operatePid,
             List<Integer> handCardIds,
             List<List<Integer>> pengMahjongIds,
-            List<List<Integer>> gangMahjongIds) {
+            List<GangVo> gangs) {
         this.uId = uId;
         //this.playedUId = playedUId;
         //this.playedMahjongId = playedMahjongId;
@@ -54,7 +54,7 @@ public class PengBroadcast {
         this.operatePid = operatePid;
         this.handCardIds = handCardIds;
         this.pengMahjongIds = pengMahjongIds;
-        this.gangMahjongIds = gangMahjongIds;
+        this.gangs = gangs;
     }
 
     public List<Integer> getPlayedUId() {
@@ -89,12 +89,12 @@ public class PengBroadcast {
         this.pengMahjongIds = pengMahjongIds;
     }
 
-    public List<List<Integer>> getGangMahjongIds() {
-        return gangMahjongIds;
+    public List<GangVo> getGangs() {
+        return gangs;
     }
 
-    public void setGangMahjongIds(List<List<Integer>> gangMahjongIds) {
-        this.gangMahjongIds = gangMahjongIds;
+    public void setGangs(List<GangVo> gangs) {
+        this.gangs = gangs;
     }
 
     public Integer getOperatePid() {

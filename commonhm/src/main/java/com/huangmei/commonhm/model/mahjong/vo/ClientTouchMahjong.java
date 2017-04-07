@@ -37,7 +37,7 @@ public class ClientTouchMahjong {
     /**
      * 杠了的牌
      */
-    private List<List<Integer>> gangMahjongIds;
+    private List<GangVo> gangs;
 
     /**
      * 摸到的麻将
@@ -63,7 +63,7 @@ public class ClientTouchMahjong {
                                                                List<Integer> operatePids,
                                                                List<Integer> handCardIds,
                                                                List<List<Integer>> pengMahjongIds,
-                                                               List<List<Integer>> gangMahjongIds,
+                                                               List<GangVo> gangs,
                                                                Integer uId
     ) {
         ClientTouchMahjong clientTouchMahjong = new ClientTouchMahjong();
@@ -75,10 +75,18 @@ public class ClientTouchMahjong {
         clientTouchMahjong.setTouchMahjongUId(touchMahjongUId);
 
         clientTouchMahjong.setPengMahjongIds(pengMahjongIds);
-        clientTouchMahjong.setGangMahjongIds(gangMahjongIds);
+        clientTouchMahjong.setGangs(gangs);
         clientTouchMahjong.setOperatePids(operatePids);
         clientTouchMahjong.setOperatePids(Collections.<Integer>emptyList());
         return clientTouchMahjong;
+    }
+
+    public List<GangVo> getGangs() {
+        return gangs;
+    }
+
+    public void setGangs(List<GangVo> gangs) {
+        this.gangs = gangs;
     }
 
     public List<List<Integer>> getPengMahjongIds() {
@@ -87,14 +95,6 @@ public class ClientTouchMahjong {
 
     public void setPengMahjongIds(List<List<Integer>> pengMahjongIds) {
         this.pengMahjongIds = pengMahjongIds;
-    }
-
-    public List<List<Integer>> getGangMahjongIds() {
-        return gangMahjongIds;
-    }
-
-    public void setGangMahjongIds(List<List<Integer>> gangMahjongIds) {
-        this.gangMahjongIds = gangMahjongIds;
     }
 
     public Integer getTouchMahjongUId() {

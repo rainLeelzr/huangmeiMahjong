@@ -686,8 +686,7 @@ public class GameService {
         // 取出麻将数据对象
         MahjongGameData mahjongGameData = gameRedis.getMahjongGameData(room.getId());
 
-        // 验证是否可以胡
-
+        // 获取胡牌类型
         List<CanDoOperate> canOperates = getACardManager.scan(
                 mahjongGameData,
                 qiangGangMahjong,
@@ -696,5 +695,20 @@ public class GameService {
 
 
         return new Object[]{mahjongGameData};
+    }
+
+    /**
+     * 从redis获取clientOperateQueue，下一个可以操作的人
+     */
+    public CanDoOperate guo(User user, Room room) {
+        CanDoOperate nextCanOperates = gameRedis.getNextCanOperates(room.getId());
+
+        if (nextCanOperates != null) {
+            gameRedis.saveWaitingClientOperate(nextCanOperates);
+
+        }
+
+        return nextCanOperates;
+
     }
 }

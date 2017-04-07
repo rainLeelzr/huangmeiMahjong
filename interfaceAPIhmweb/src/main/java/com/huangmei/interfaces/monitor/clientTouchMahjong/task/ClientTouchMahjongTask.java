@@ -9,6 +9,7 @@ import com.huangmei.commonhm.model.mahjong.vo.ClientTouchMahjong;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.MahjongGameData;
 import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
+import com.huangmei.commonhm.model.mahjong.vo.GangVo;
 import com.huangmei.commonhm.redis.GameRedis;
 import com.huangmei.commonhm.redis.VersionRedis;
 import com.huangmei.interfaces.monitor.MonitorTask;
@@ -29,24 +30,19 @@ import java.util.List;
  */
 public class ClientTouchMahjongTask implements MonitorTask {
     private static final Logger log = LoggerFactory.getLogger(MonitorTask.class);
-
-    private Toucher toucher;
-
     /**
      * 监控任务成功时，执行的方法
      */
     protected Runnable successCallback;
-
     /**
      * 监控任务失败时，执行的方法
      */
     protected Runnable failCallback;
-
     /**
      * 监控任务结束后，不管任务成功与否，都需要执行的回调方法
      */
     protected Runnable finishCallback;
-
+    private Toucher toucher;
     private String taskName;
     private GetACardManager getACardManager;
     private MahjongGameData mahjongGameData;
@@ -116,7 +112,7 @@ public class ClientTouchMahjongTask implements MonitorTask {
                     clientTouchMahjong.setTouchMahjongUId(user.getUId());
 
                     clientTouchMahjong.setPengMahjongIds(Mahjong.parseCombosToMahjongIds(personalCardInfo.getPengs()));
-                    clientTouchMahjong.setGangMahjongIds(Mahjong.parseCombosToMahjongIds(personalCardInfo.getGangs()));
+                    clientTouchMahjong.setGangs(GangVo.parseFromGangCombos(personalCardInfo.getGangs()));
                     if (isToucher && canOperates.size() != 0) {
                         clientTouchMahjong.setOperatePids(Operate.parseToPids(canOperates.get(0).getOperates()));
                     } else {

@@ -668,7 +668,7 @@ public class ActionRouter {
             clientOperate.setOperatePids(Operate.parseToPids(firstCanDoOperate.getOperates()));
             clientOperate.setHandCardIds(Mahjong.parseToIds(personalCardInfo.getHandCards()));
             clientOperate.setPengMahjongIs(Mahjong.parseCombosToMahjongIds(personalCardInfo.getPengs()));
-            clientOperate.setGangMahjongIs(Mahjong.parseCombosToMahjongIds(personalCardInfo.getGangs()));
+            clientOperate.setGangs(GangVo.parseFromGangCombos(personalCardInfo.getGangs()));
             clientOperate.setPlayedMahjongId(playedMahjong.getId());
             clientOperate.setPlayerUId(user.getUId());
 
@@ -1061,7 +1061,7 @@ public class ActionRouter {
             clientOperate.setOperatePids(Operate.parseToPids(firstCanDoOperate.getOperates()));
             clientOperate.setHandCardIds(Mahjong.parseToIds(personalCardInfo.getHandCards()));
             clientOperate.setPengMahjongIs(Mahjong.parseCombosToMahjongIds(personalCardInfo.getPengs()));
-            clientOperate.setGangMahjongIs(Mahjong.parseCombosToMahjongIds(personalCardInfo.getGangs()));
+            clientOperate.setGangs(GangVo.parseFromGangCombos(personalCardInfo.getGangs()));
             clientOperate.setPlayedMahjongId(playedMahjong.getId());
             clientOperate.setPlayerUId(user.getUId());
 
@@ -1124,7 +1124,7 @@ public class ActionRouter {
                                     PidValue.YING_PENG.getPid(),
                                     Mahjong.parseToIds(personalCardInfo.getHandCards()),
                                     Mahjong.parseCombosToMahjongIds(personalCardInfo.getPengs()),
-                                    Mahjong.parseCombosToMahjongIds(personalCardInfo.getGangs())
+                                    GangVo.parseFromGangCombos(personalCardInfo.getGangs())
                             ))
                             .build()
             );
@@ -1143,10 +1143,26 @@ public class ActionRouter {
         Room room = sessionManager.getRoom(session.getId());
 
         // 别人打出来，我抢杠的麻将
-        Mahjong qiangGangMahjong = Mahjong.parse(JsonUtil.getInt(data, "mahjong"));
+        Mahjong qiangGangMahjong = Mahjong.parse(JsonUtil.getInt(data, "mahjongId"));
 
         Object[] result = gameService.qiangDaMingGangHu(user, room, qiangGangMahjong);
         MahjongGameData mahjongGameData = (MahjongGameData) result[0];
+
+
+        // 删除clientOperateQueue
+        gameRedis.removeCanOperates(room.getId());
+
+        return null;
+    }
+
+    @Pid(PidValue.GUO)
+    @LoginResource
+    public JsonResultY guo(WebSocketSession session, JSONObject data) throws IllegalAccessException, InstantiationException {
+        User user = sessionManager.getUser(session.getId());
+        Room room = sessionManager.getRoom(session.getId());
+
+        // 下一个可以操作的人
+        CanDoOperate nextCanDoOperate = gameService.guo(user, room);
 
 
         // 删除clientOperateQueue
