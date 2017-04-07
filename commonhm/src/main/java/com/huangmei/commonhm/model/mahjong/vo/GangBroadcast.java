@@ -1,4 +1,4 @@
-package com.huangmei.commonhm.model.mahjong;
+package com.huangmei.commonhm.model.mahjong.vo;
 
 import java.util.List;
 
@@ -26,7 +26,7 @@ public class GangBroadcast {
     /**
      * 杠了的牌
      */
-    private List<List<Integer>> gangMahjongIds;
+    private List<GangVo> gangs;
 
     /**
      * 杠的类型，与pid相对应
@@ -45,7 +45,7 @@ public class GangBroadcast {
             Integer operatePid,
             List<Integer> handCardIds,
             List<List<Integer>> pengMahjongIds,
-            List<List<Integer>> gangMahjongIds) {
+            List<GangVo> gangs) {
         this.uId = uId;
         //this.playedUId = playedUId;
         //this.playedMahjongId = playedMahjongId;
@@ -54,7 +54,7 @@ public class GangBroadcast {
         this.operatePid = operatePid;
         this.handCardIds = handCardIds;
         this.pengMahjongIds = pengMahjongIds;
-        this.gangMahjongIds = gangMahjongIds;
+        this.gangs = gangs;
     }
 
     public List<Integer> getPlayedUId() {
@@ -89,12 +89,12 @@ public class GangBroadcast {
         this.pengMahjongIds = pengMahjongIds;
     }
 
-    public List<List<Integer>> getGangMahjongIds() {
-        return gangMahjongIds;
+    public List<GangVo> getGangs() {
+        return gangs;
     }
 
-    public void setGangMahjongIds(List<List<Integer>> gangMahjongIds) {
-        this.gangMahjongIds = gangMahjongIds;
+    public void setGangs(List<GangVo> gangs) {
+        this.gangs = gangs;
     }
 
     public Integer getOperatePid() {

@@ -1,5 +1,7 @@
-package com.huangmei.commonhm.model.mahjong;
+package com.huangmei.commonhm.model.mahjong.vo;
 
+
+import com.huangmei.commonhm.model.mahjong.MahjongGameData;
 
 import java.util.Collections;
 import java.util.List;

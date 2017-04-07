@@ -99,12 +99,12 @@ public class MahjongGameData {
         // 获取所有麻将牌
         //List<Mahjong> allMahjongs = Mahjong.getAllMahjongs();
         // DEBUGING 生成指定麻将列表
-        List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1YingAnGangMahjongs();
+        //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1YingAnGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1RuanAnGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1YingJiaGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1RuanJiaGangMahjongs();
 
-        //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1YingMingGangMahjongs();
+        List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1YingMingGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1RuanMingGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2PengMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat3QiangDaMingGangMahjongs();

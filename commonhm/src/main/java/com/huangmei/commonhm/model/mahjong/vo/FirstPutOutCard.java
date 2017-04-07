@@ -1,4 +1,4 @@
-package com.huangmei.commonhm.model.mahjong;
+package com.huangmei.commonhm.model.mahjong.vo;
 
 
 import java.util.List;

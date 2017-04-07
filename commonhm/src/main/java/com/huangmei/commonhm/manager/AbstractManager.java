@@ -31,10 +31,10 @@ public abstract class AbstractManager {
 
     protected abstract void setPersonalCardInfoPicker();
 
-    public ArrayList<CanDoOperate> scan(MahjongGameData mahjongGameData, Mahjong putOutMahjong, User user) throws
+    public List<CanDoOperate> scan(MahjongGameData mahjongGameData, Mahjong putOutMahjong, User user) throws
             IllegalAccessException,
             InstantiationException {
-        ArrayList<CanDoOperate> canDoOperates = new ArrayList<>();
+        List<CanDoOperate> canDoOperates = new ArrayList<>();
         for (Class<? extends BaseScanTask> scanTask : scanTasks) {
             BaseScanTask task = scanTask.newInstance();
             task.setMahjongGameData(mahjongGameData);

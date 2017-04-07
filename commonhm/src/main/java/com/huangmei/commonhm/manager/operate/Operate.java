@@ -31,6 +31,8 @@ public enum Operate {
     CHI_YING_PING_HU(PidValue.YING_CHI_HU, BaseOperate.HU, "吃硬平胡"),
     CHI_RUAN_PING_HU(PidValue.RUAN_CHI_HU, BaseOperate.HU, "吃软平胡"),
 
+    QIANG_DA_MING_GANG_HU(PidValue.QIANG_DA_MING_GANG_HU, BaseOperate.HU, "抢大明杠胡"),
+
     YING_AN_GANG(PidValue.YING_AN_GANG, BaseOperate.YING_AN_GANG, "硬暗杠"),
     RUAN_AN_GANG(PidValue.RUAN_AN_GANG, BaseOperate.RUAN_AN_GANG, "软暗杠"),
 

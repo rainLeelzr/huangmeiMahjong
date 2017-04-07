@@ -1,7 +1,7 @@
 package com.huangmei.interfaces.monitor.clientTouchMahjong.task.callback.success;
 
 import com.huangmei.commonhm.model.User;
-import com.huangmei.commonhm.model.mahjong.ClientTouchMahjong;
+import com.huangmei.commonhm.model.mahjong.vo.ClientTouchMahjong;
 import com.huangmei.commonhm.util.CommonError;
 import com.huangmei.commonhm.util.JsonResultY;
 import com.huangmei.commonhm.util.PidValue;

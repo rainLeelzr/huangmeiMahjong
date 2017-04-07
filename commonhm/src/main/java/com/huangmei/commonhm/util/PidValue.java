@@ -73,8 +73,8 @@ public enum PidValue {
     OTHER_USER_PLAY_A_MAHJONG(4003, "玩家打牌广播"),
     GANG_BROADCAST(4004, "玩家杠广播"),
     CLIENT_OPERATE(4005, "客户端吃胡/明杠/碰/过消息推送"),
-    PENG_BROADCAST(4006, "玩家碰广播"),
-    QIANG_GANG(4007, "抢杠消息推送");
+    PENG_BROADCAST(4006, "玩家碰广播"),;
+    //QIANG_GANG(4007, "抢杠消息推送");
 
     private int pid;
 

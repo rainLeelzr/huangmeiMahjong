@@ -5,7 +5,7 @@ import com.huangmei.commonhm.manager.operate.CanDoOperate;
 import com.huangmei.commonhm.manager.operate.Operate;
 import com.huangmei.commonhm.model.RoomMember;
 import com.huangmei.commonhm.model.User;
-import com.huangmei.commonhm.model.mahjong.ClientTouchMahjong;
+import com.huangmei.commonhm.model.mahjong.vo.ClientTouchMahjong;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.MahjongGameData;
 import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;

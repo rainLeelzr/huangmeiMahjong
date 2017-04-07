@@ -1,6 +1,7 @@
 package com.huangmei.commonhm.service.impl;
 
 import com.huangmei.commonhm.dao.RoomMemberDao;
+import com.huangmei.commonhm.manager.getACard.GetACardManager;
 import com.huangmei.commonhm.manager.operate.CanDoOperate;
 import com.huangmei.commonhm.manager.operate.Operate;
 import com.huangmei.commonhm.manager.putOutCard.AfterPutOutCardManager;
@@ -8,12 +9,14 @@ import com.huangmei.commonhm.model.Room;
 import com.huangmei.commonhm.model.RoomMember;
 import com.huangmei.commonhm.model.User;
 import com.huangmei.commonhm.model.mahjong.*;
+import com.huangmei.commonhm.model.mahjong.vo.ClientTouchMahjong;
+import com.huangmei.commonhm.model.mahjong.vo.FirstPutOutCard;
+import com.huangmei.commonhm.model.mahjong.vo.PlayedMahjong;
 import com.huangmei.commonhm.redis.GameRedis;
 import com.huangmei.commonhm.redis.RoomRedis;
 import com.huangmei.commonhm.redis.VersionRedis;
 import com.huangmei.commonhm.util.CommonError;
 import com.huangmei.commonhm.util.JsonUtil;
-import com.huangmei.commonhm.util.PidValue;
 import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +38,9 @@ public class GameService {
 
     @Autowired
     private AfterPutOutCardManager afterPutOutCardManager;
+
+    @Autowired
+    private GetACardManager getACardManager;
 
     @Autowired
     private RoomMemberDao roomMemberDao;
@@ -236,7 +242,7 @@ public class GameService {
         }
 
         // 扫描其他用户是否有吃胡、大明杠、碰的操作
-        ArrayList<CanDoOperate> canOperates =
+        List<CanDoOperate> canOperates =
                 afterPutOutCardManager.scan(mahjongGameData, putOutMahjong, user);
         log.debug("扫描出来可以的操作：{}", canOperates);
 
@@ -669,5 +675,26 @@ public class GameService {
 
         gameRedis.saveMahjongGameData(mahjongGameData);
         return new Object[]{mahjongGameData, ruanDaMingGangCombo};
+    }
+
+    /**
+     * 执行抢大明杠的逻辑
+     */
+    public Object[] qiangDaMingGangHu(User user, Room room, Mahjong qiangGangMahjong) throws InstantiationException, IllegalAccessException {
+        canOperate(room.getId(), user.getId(), Operate.QIANG_DA_MING_GANG_HU);
+
+        // 取出麻将数据对象
+        MahjongGameData mahjongGameData = gameRedis.getMahjongGameData(room.getId());
+
+        // 验证是否可以胡
+
+        List<CanDoOperate> canOperates = getACardManager.scan(
+                mahjongGameData,
+                qiangGangMahjong,
+                user
+        );
+
+
+        return new Object[]{mahjongGameData};
     }
 }

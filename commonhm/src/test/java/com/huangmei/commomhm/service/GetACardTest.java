@@ -101,7 +101,7 @@ public class GetACardTest extends AbstractTestClass {
         user.setId(1);
 
         // 扫描摸到牌的人可以的操作
-        ArrayList<CanDoOperate> canOperates =
+        List<CanDoOperate> canOperates =
                 getACardManager.scan(
                         temp,
                         putOutCard,
@@ -175,7 +175,7 @@ public class GetACardTest extends AbstractTestClass {
         user.setId(1);
 
         // 扫描摸到牌的人可以的操作
-        ArrayList<CanDoOperate> canOperates =
+        List<CanDoOperate> canOperates =
                 getACardManager.scan(
                         temp,
                         putOutCard,
@@ -410,7 +410,7 @@ public class GetACardTest extends AbstractTestClass {
         user.setId(1);
 
         // 扫描摸到牌的人可以的操作
-        ArrayList<CanDoOperate> canOperates =
+        List<CanDoOperate> canOperates =
                 getACardManager.scan(
                         temp,
                         putOutCard,
@@ -565,7 +565,7 @@ public class GetACardTest extends AbstractTestClass {
         user.setId(1);
 
         // 扫描摸到牌的人可以的操作
-        ArrayList<CanDoOperate> canOperates =
+        List<CanDoOperate> canOperates =
                 getACardManager.scan(
                         temp,
                         putOutCard,
@@ -720,7 +720,7 @@ public class GetACardTest extends AbstractTestClass {
         user.setId(1);
 
         // 扫描摸到牌的人可以的操作
-        ArrayList<CanDoOperate> canOperates =
+        List<CanDoOperate> canOperates =
                 getACardManager.scan(
                         temp,
                         putOutCard,
@@ -874,7 +874,7 @@ public class GetACardTest extends AbstractTestClass {
         user.setId(1);
 
         // 扫描摸到牌的人可以的操作
-        ArrayList<CanDoOperate> canOperates =
+        List<CanDoOperate> canOperates =
                 getACardManager.scan(
                         temp,
                         putOutCard,
@@ -1028,7 +1028,7 @@ public class GetACardTest extends AbstractTestClass {
         user.setId(1);
 
         // 扫描摸到牌的人可以的操作
-        ArrayList<CanDoOperate> canOperates =
+        List<CanDoOperate> canOperates =
                 getACardManager.scan(
                         temp,
                         putOutCard,
@@ -1182,7 +1182,7 @@ public class GetACardTest extends AbstractTestClass {
         user.setId(1);
 
         // 扫描摸到牌的人可以的操作
-        ArrayList<CanDoOperate> canOperates =
+        List<CanDoOperate> canOperates =
                 getACardManager.scan(
                         temp,
                         specifiedMahjong,
@@ -1348,7 +1348,7 @@ public class GetACardTest extends AbstractTestClass {
         user.setId(1);
 
         // 扫描摸到牌的人可以的操作
-        ArrayList<CanDoOperate> canOperates =
+        List<CanDoOperate> canOperates =
                 getACardManager.scan(
                         temp,
                         putOutCard,

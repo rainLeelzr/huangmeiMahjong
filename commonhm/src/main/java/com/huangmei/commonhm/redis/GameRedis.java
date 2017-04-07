@@ -7,7 +7,7 @@ import com.huangmei.commonhm.redis.base.Redis;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeSet;
 
 @Component
@@ -68,7 +68,7 @@ public class GameRedis {
                 WAITING_CLIENT_OPERATE_FIELD_KEY);
     }
 
-    public void saveCanOperates(ArrayList<CanDoOperate> canOperates) {
+    public void saveCanOperates(List<CanDoOperate> canOperates) {
         for (CanDoOperate canOperate : canOperates) {
             redis.sortedSet.add(
                     String.format(CLIENT_OPERATE_QUEUE_SET_KEY, canOperate.getRoomMember().getRoomId()),
