@@ -512,7 +512,7 @@ public class MockComboMahjongList {
     }
 
     /**
-     * 座位2吃胡，座位3杠
+     * 座位2吃胡，座位3杠，座位4胡
      */
     public static List<Mahjong> getSeat2ChiPingHuSeat3DaMingGangMahjongs() {
         List<Mahjong> all = Mahjong.getAllMahjongs();
@@ -547,11 +547,19 @@ public class MockComboMahjongList {
                 null, null, null,
                 null,
                 /////////////////////////////////////////////////
-                null, null, null,
-                null, null, null,
-                null, null, null,
-                null, null, null,
-                null,
+                all.remove(all.indexOf(Mahjong.FIVE_WANG_1)),
+                all.remove(all.indexOf(Mahjong.FIVE_WANG_4)),
+                all.remove(all.indexOf(Mahjong.NINE_WANG_3)),
+                all.remove(all.indexOf(Mahjong.SEVEN_WANG_2)),
+                all.remove(all.indexOf(Mahjong.TWO_TIAO_1)),
+                all.remove(all.indexOf(Mahjong.THREE_TIAO_4)),
+                all.remove(all.indexOf(Mahjong.FOUR_TIAO_2)),
+                all.remove(all.indexOf(Mahjong.NINE_TONG_2)),
+                all.remove(all.indexOf(Mahjong.NINE_TONG_3)),
+                all.remove(all.indexOf(Mahjong.NINE_TONG_1)),
+                all.remove(all.indexOf(Mahjong.SEVEN_TONG_4)),
+                all.remove(all.indexOf(Mahjong.EIGHT_TONG_3)),
+                all.remove(all.indexOf(Mahjong.SIX_TONG_2)),
                 /////////////////////////////////////////////////
                 null, null, null, null, null, null, null, null, null, null,
                 null, null, null, null, null, null, null, null, null, null,

@@ -78,13 +78,20 @@ public class GameRedis {
         }
     }
 
-    public CanDoOperate getNextCanOperates(Integer roomId) {
+    public CanDoOperate getNextCanDoOperate(Integer roomId) {
         CanDoOperate canDoOperate = (CanDoOperate) redis.sortedSet.getByMinScore(
                 String.format(CLIENT_OPERATE_QUEUE_SET_KEY, roomId), CanDoOperate.class);
+        if (canDoOperate != null) {
+            redis.sortedSet.deleteByScore(
+                    String.format(CLIENT_OPERATE_QUEUE_SET_KEY, roomId),
+                    canDoOperate.getRoomMember().getSeat(),
+                    canDoOperate.getRoomMember().getSeat()
+            );
+        }
         return canDoOperate;
     }
 
-    public void removeCanOperates(Integer roomId) {
+    public void deleteCanOperates(Integer roomId) {
         redis.del(String.format(CLIENT_OPERATE_QUEUE_SET_KEY, roomId));
     }
 }

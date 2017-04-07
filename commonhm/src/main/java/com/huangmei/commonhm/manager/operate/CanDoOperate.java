@@ -85,6 +85,19 @@ public class CanDoOperate implements Comparable {
 
     @Override
     public int compareTo(Object o) {
-        return this.getRoomMember().getSeat() - ((CanDoOperate) o).getRoomMember().getSeat();
+        Operate first = null;
+        for (Operate operate : operates) {
+            first = operate;
+            break;
+        }
+
+        Operate second = null;
+        for (Operate operate : ((CanDoOperate) o).getOperates()) {
+            second = operate;
+            break;
+        }
+
+        return first.ordinal() - second.ordinal();
+
     }
 }

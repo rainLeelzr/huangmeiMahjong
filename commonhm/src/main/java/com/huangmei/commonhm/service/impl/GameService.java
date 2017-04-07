@@ -171,6 +171,14 @@ public class GameService {
         // 删除redis的等待客户端操作对象waitingClientOperate
         gameRedis.deleteWaitingClientOperate(room.getId());
 
+        // 添加打出的麻将到游戏数据
+        PersonalCardInfo personalCardInfo = PersonalCardInfo.getPersonalCardInfo(
+                mahjongGameData.getPersonalCardInfos(),
+                user.getId()
+        );
+        mahjongGameData.getOutCards().add(new OutCard(playedMahjong, personalCardInfo.getRoomMember()));
+        gameRedis.saveMahjongGameData(mahjongGameData);
+
         // 广播打出的牌
         List<PlayedMahjong> playedMahjongs = playedMahjongBroadcast(mahjongGameData, user, playedMahjong);
 
@@ -700,15 +708,28 @@ public class GameService {
     /**
      * 从redis获取clientOperateQueue，下一个可以操作的人
      */
-    public CanDoOperate guo(User user, Room room) {
-        CanDoOperate nextCanOperates = gameRedis.getNextCanOperates(room.getId());
+    public Object[] guo(User user, Room room) {
+        // 取出等待客户端操作对象waitingClientOperate
+        CanDoOperate waitingClientOperate = gameRedis.getWaitingClientOperate(room.getId());
+        if (!waitingClientOperate.getRoomMember().getUserId().equals(user.getId())) {
+            throw CommonError.NOT_YOUR_TURN.newException();
+        }
+        if (!waitingClientOperate.getOperates().contains(Operate.GUO)) {
+            throw CommonError.NOT_YOUR_TURN.newException();
+        }
 
-        if (nextCanOperates != null) {
-            gameRedis.saveWaitingClientOperate(nextCanOperates);
+        CanDoOperate nextCanDoOperate = gameRedis.getNextCanDoOperate(room.getId());
+
+        if (nextCanDoOperate != null) {
+            gameRedis.saveWaitingClientOperate(nextCanDoOperate);
 
         }
 
-        return nextCanOperates;
+        // 取出麻将数据对象
+        MahjongGameData mahjongGameData = gameRedis.getMahjongGameData(room.getId());
+
+
+        return new Object[]{nextCanDoOperate, waitingClientOperate, mahjongGameData};
 
     }
 }
