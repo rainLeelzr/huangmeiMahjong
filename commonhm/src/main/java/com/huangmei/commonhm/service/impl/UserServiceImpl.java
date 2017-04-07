@@ -9,6 +9,7 @@ import com.huangmei.commonhm.service.RoomService;
 import com.huangmei.commonhm.service.UserService;
 import com.huangmei.commonhm.util.CommonError;
 import com.huangmei.commonhm.util.CommonUtil;
+import com.huangmei.commonhm.util.vo.ScoreVo;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -485,33 +486,73 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
     }
 
     /**
-     * 获取房间信息
+     * 获取房间战绩
      *
-     * @param data
+     * @param room
      * @param user
      * @return
      */
     @Override
-    public Map<String, Object> getStanding(JSONObject data, User user) {
+    public Map<String, Object> getStanding(Room room, User user) {
         Map<String, Object> result = new HashMap<String, Object>(2);
-        Integer roomId = (Integer) data.get("roomId");
+        Map<String, Integer> players = new HashMap<String, Integer>(4);
+        List stands = new ArrayList();
 
+        if (room != null) {
 
-        Entity.ScoreCriteria scoreCriteria = new Entity.ScoreCriteria();
-        scoreCriteria.setUserId(Entity.Value.eq(user.getId()));
-        scoreCriteria.setRoomId(Entity.Value.eq(roomId));
-        List<Score> scores = scoreDao.selectList(scoreCriteria);
+            Entity.ScoreCriteria scoreCriteria = new Entity.ScoreCriteria();
+            scoreCriteria.setUserId(Entity.Value.eq(user.getId()));
+            scoreCriteria.setRoomId(Entity.Value.eq(room.getId()));
+            List<Score> scores = scoreDao.selectList(scoreCriteria);
+            if (scores.size() > 0) {
 
-        for (Score score : scores) {
-            Entity.ScoreCriteria sc = new Entity.ScoreCriteria();
-            sc.setTimes(Entity.Value.eq(score.getTimes()));
-            sc.setRoomId(Entity.Value.eq(roomId));
-            List<Score> scs = scoreDao.selectList(sc);
+                for (Score score : scores) {//个人在这个房间的所有战绩
+                    ScoreVo sv = new ScoreVo();
+                    sv.setCreatedTime(score.getCreatedTime());
+                    sv.setRoomCode(room.getRoomCode());
 
+                    if (score.getWinType() != 0) {
+                        sv.setState(ScoreVo.WIN);
+                    } else {
+                        sv.setState(ScoreVo.LOSE);
+                    }
 
+                    Entity.ScoreCriteria sc = new Entity.ScoreCriteria();
+                    sc.setTimes(Entity.Value.eq(score.getTimes()));
+                    sc.setRoomId(Entity.Value.eq(room.getId()));
+                    List<Score> scs = scoreDao.selectList(sc);
+                    for (Score se : scs) {//其中每局四个玩家的战绩
+                        User u = getUserByUserId(se.getUserId());
+                        if (se.getWinType() != 0) {
+                            players.put(u.getUId().toString(), se.getScore() * room.getMultiple());
+                        } else {
+                            players.put(u.getUId().toString(), -(se.getScore() * room.getMultiple()));
+                        }
+                    }
+                    sv.setPlayers(players);
+                    stands.add(sv);
+                }
+                result.put("stands", stands);
+                return result;
+            } else {
+                throw CommonError.NOT_STANDS.newException();
+            }
+        } else {
+            throw CommonError.ROOM_USER_NOT_IN_ROOM.newException();
         }
+    }
 
-        return null;
+    /**
+     * 根据userId查询用户
+     *
+     * @param userId
+     * @return
+     */
+    private User getUserByUserId(Integer userId) {
+        Entity.UserCriteria userCriteria = new Entity.UserCriteria();
+        userCriteria.setId(Entity.Value.eq(userId));
+        User user = userDao.selectOne(userCriteria);
+        return user;
     }
 
 //	public TextMessage TestConnection() {

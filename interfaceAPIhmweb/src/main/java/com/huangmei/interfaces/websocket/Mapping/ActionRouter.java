@@ -508,7 +508,7 @@ public class ActionRouter {
         sessionManager.userUpdate((User) result.get("user"), session);
 
         return new JsonResultY.Builder()
-                .setPid(PidValue.BIND_PHONE.getPid())
+                .setPid(PidValue.TEN_WINS.getPid())
                 .setError(CommonError.SYS_SUSSES)
                 .setData(result)
                 .build();
@@ -519,11 +519,11 @@ public class ActionRouter {
     public JsonResultY getStanding(WebSocketSession session, JSONObject data)
             throws Exception {
         User user = sessionManager.getUser(session.getId());
-
-        Map<String, Object> result = userService.getStanding(data, user);
+        Room room = sessionManager.getRoom(session.getId());
+        Map<String, Object> result = userService.getStanding(room, user);
 
         return new JsonResultY.Builder()
-                .setPid(PidValue.BIND_PHONE.getPid())
+                .setPid(PidValue.GET_STANDINGS.getPid())
                 .setError(CommonError.SYS_SUSSES)
                 .setData(result)
                 .build();
