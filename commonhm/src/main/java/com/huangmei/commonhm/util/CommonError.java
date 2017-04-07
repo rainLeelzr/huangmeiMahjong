@@ -30,6 +30,7 @@ public enum CommonError {
     ALREADY_GET_DIAMOND(200008, "已经领取过钻石了", AlreadyGetDiamondException.class),
     UN_BIND_PHONE(200009, "未绑定手机", UnBindPhoneException.class),
     NOT_ENOUGH_GAMES(200010, "未完成足够的局数", NotEnoughGamesException.class),
+    NOT_STANDS(200011, "玩家在此房间还没有战绩", NotStandsException.class),
 
     /**
      * 房间

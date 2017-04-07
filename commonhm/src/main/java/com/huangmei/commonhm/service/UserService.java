@@ -1,5 +1,6 @@
 package com.huangmei.commonhm.service;
 
+import com.huangmei.commonhm.model.Room;
 import com.huangmei.commonhm.model.User;
 import net.sf.json.JSONObject;
 import org.springframework.web.socket.TextMessage;
@@ -25,5 +26,5 @@ public interface UserService extends BaseService<Integer, User> {
 
 	Map<String, Object> tenWins(User user);
 
-	Map<String, Object> getStanding(JSONObject data, User user);
+    Map<String, Object> getStanding(Room room, User user);
 }

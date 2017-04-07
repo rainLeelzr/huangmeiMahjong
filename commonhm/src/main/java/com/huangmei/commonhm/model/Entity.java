@@ -474,11 +474,6 @@ public interface Entity extends Serializable {
                 if (entity != null) {
                     primaryKey.value = ((AdminUser) entity).getId();
                 }
-            } else if (entityClass == Notice.class) {
-                primaryKey.name = "id";
-                if (entity != null) {
-                    primaryKey.value = ((Notice) entity).getId();
-                }
             } else if (entityClass == Room.class) {
                 primaryKey.name = "id";
                 if (entity != null) {
@@ -522,8 +517,6 @@ public interface Entity extends Serializable {
                 return;
             } else if (entityClass == AdminUser.class) {
                 ((AdminUser) obj).setId((Integer) value);
-            } else if (entityClass == Notice.class) {
-                ((Notice) obj).setId((Integer) value);
             } else if (entityClass == Room.class) {
                 ((Room) obj).setId((Integer) value);
             } else if (entityClass == RoomMember.class) {
@@ -751,33 +744,6 @@ public interface Entity extends Serializable {
 
     }
 
-    public static class NoticeCriteria extends SimpleCriteria {
-
-        public void setId(Criterion criterion) {
-            this.addCriterion(criterion.setField("id"));
-        }
-
-        public void setItemType(Criterion criterion) {
-            this.addCriterion(criterion.setField("item_type"));
-        }
-
-        public void setQuantity(Criterion criterion) {
-            this.addCriterion(criterion.setField("quantity"));
-        }
-
-        public void setTranTimes(Criterion criterion) {
-            this.addCriterion(criterion.setField("tran_times"));
-        }
-
-        public void setUserId(Criterion criterion) {
-            this.addCriterion(criterion.setField("user_id"));
-        }
-
-        public void setWay(Criterion criterion) {
-            this.addCriterion(criterion.setField("way"));
-        }
-
-    }
 
     public static class RoomCriteria extends SimpleCriteria {
 
