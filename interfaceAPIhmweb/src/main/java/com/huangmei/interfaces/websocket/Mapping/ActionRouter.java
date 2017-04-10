@@ -308,50 +308,40 @@ public class ActionRouter {
         boolean isFirstPutOutCard = false;
         List<Object[]> firstPutOutCardBroadcasts = new ArrayList<>(4);
 
+        GameStartVo gameStartVo = null;
+
+        MahjongGameData mahjongGameData = null;
+
+        User bankerUser = null;
+
+        List<User> users = null;
+
         if (type == 2) {
             isFirstPutOutCard = true;
 
-            List<FirstPutOutCard> firstPutOutCards =
-                    (List<FirstPutOutCard>) result.get(GameService.FIRST_PUT_OUT_CARD_KEY);
+            List<FirstPutOutCard> firstPutOutCards = (List<FirstPutOutCard>) result.get(GameService.FIRST_PUT_OUT_CARD_KEY);
 
-            MahjongGameData mahjongGameData = (MahjongGameData) result.get(
-                    MahjongGameData.class.getSimpleName());
+            mahjongGameData = (MahjongGameData) result.get(MahjongGameData.class.getSimpleName());
             result.remove(MahjongGameData.class.getSimpleName());
 
+            gameStartVo = (GameStartVo) result.get(GameStartVo.class.getSimpleName());
+            result.remove(GameStartVo.class.getSimpleName());
+
             // 获取庄家uId
-            Integer bankerUserId = firstPutOutCards.get(0).getBankerUId();
-            WebSocketSession bankerSession = sessionManager.getByUserId(bankerUserId);
-            User bankerUser;
-            if (bankerSession == null) {
-                bankerUser = userService.selectOne(bankerUserId);
-            } else {
-                bankerUser = sessionManager.getUser(bankerSession.getId());
-            }
+            Integer bankerUserId = gameStartVo.getBankerUId();
+            bankerUser = getUserByUserId(bankerUserId);
 
             // 4个玩家，按座位号升序
-            List<User> users = new ArrayList<>(firstPutOutCards.size());
+            users = new ArrayList<>(firstPutOutCards.size());
 
             // 广播给4个用户第一次发牌
             for (FirstPutOutCard firstPutOutCard : firstPutOutCards) {
                 Map<String, Object> myResult = new HashMap<>();
                 myResult.put("type", 2);
 
-                // 获取庄家uId
-                firstPutOutCard.setBankerUId(bankerUser.getUId());
-
                 // 需要接受广播消息的用户uid
                 Integer acceptBroadcastUserId = firstPutOutCard.getuId();
-                User acceptBroadcastUser;
-                if (acceptBroadcastUserId.equals(bankerUserId)) {
-                    acceptBroadcastUser = bankerUser;
-                } else {
-                    WebSocketSession tempSession = sessionManager.getByUserId(acceptBroadcastUserId);
-                    if (tempSession == null) {
-                        acceptBroadcastUser = userService.selectOne(acceptBroadcastUserId);
-                    } else {
-                        acceptBroadcastUser = sessionManager.getUser(tempSession.getId());
-                    }
-                }
+                User acceptBroadcastUser = getUserByUserId(acceptBroadcastUserId);
                 firstPutOutCard.setuId(acceptBroadcastUser.getUId());
 
                 users.add(acceptBroadcastUser);
@@ -369,6 +359,36 @@ public class ActionRouter {
                 };
                 firstPutOutCardBroadcasts.add(broadcast);
             }
+        }
+        result.remove(GameService.FIRST_PUT_OUT_CARD_KEY);
+        JsonResultY jsonResultY = new JsonResultY.Builder()
+                .setPid(PidValue.READY.getPid())
+                .setError(CommonError.SYS_SUSSES)
+                .setData(result)
+                .build();
+
+        // 广播玩家准备
+        messageManager.sendMessageToRoomUsers(
+                (result.get("roomId")).toString(),
+                jsonResultY);
+
+        if (isFirstPutOutCard) {
+            // 广播游戏开始
+            messageManager.sendMessageToRoomUsers(
+                    (result.get("roomId")).toString(),
+                    new JsonResultY.Builder()
+                            .setPid(PidValue.GAME_START.getPid())
+                            .setError(CommonError.SYS_SUSSES)
+                            .setData(gameStartVo)
+                            .build()
+            );
+
+            // 广播給客户端他们各自的牌
+            for (Object[] firstPutOutCardBroadcast : firstPutOutCardBroadcasts) {
+                messageManager.sendMessageByUserId(
+                        (Integer) firstPutOutCardBroadcast[0],
+                        (JsonResultY) firstPutOutCardBroadcast[1]);
+            }
 
             // 庄家摸一张牌
             monitorManager.watch(new ClientTouchMahjongTask
@@ -382,25 +402,6 @@ public class ActionRouter {
                     .setGameRedis(gameRedis)
                     .setVersionRedis(versionRedis)
                     .build());
-
-        }
-        result.remove(GameService.FIRST_PUT_OUT_CARD_KEY);
-        JsonResultY jsonResultY = new JsonResultY.Builder()
-                .setPid(PidValue.READY.getPid())
-                .setError(CommonError.SYS_SUSSES)
-                .setData(result)
-                .build();
-        messageManager.sendMessageToRoomUsers(
-                (result.get("roomId")).toString(),
-                jsonResultY);
-
-        // 如果是第一次发牌，则广播給客户端他们各自的牌
-        if (isFirstPutOutCard) {
-            for (Object[] firstPutOutCardBroadcast : firstPutOutCardBroadcasts) {
-                messageManager.sendMessageByUserId(
-                        (Integer) firstPutOutCardBroadcast[0],
-                        (JsonResultY) firstPutOutCardBroadcast[1]);
-            }
         }
 
         return null;
