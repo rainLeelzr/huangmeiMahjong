@@ -418,34 +418,44 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
     public Map<String, Object> bindPhone(JSONObject data, User user) {
         Map<String, Object> result = new HashMap<String, Object>(2);
         String phone = (String) data.get("phone");
+        Integer check = (Integer) data.get("check");
 
-        if (phone != null) {//绑定手机
-            if (user.getMobilePhone() == null) {//还没有绑定过手机
-                user.setMobilePhone(phone);
+        Integer way = TranRecord.way.BIND_PHONE.getCode();
+        Entity.TranRecordCriteria tranRecordCriteria = new Entity.TranRecordCriteria();
+        tranRecordCriteria.setUserId(Entity.Value.eq(user.getId()));
+        tranRecordCriteria.setWay(Entity.Value.eq(way));
+        long count = tranRecordDao.selectCount(tranRecordCriteria);
+
+        if (check != null) {//检查用户是否已经领取绑定手机钻石
+            if (count < 1) {
+                result.put("receive", false);
             } else {
-                throw CommonError.ALREADY_BIND_PHONE.newException();
+                result.put("receive", true);
             }
-        } else {//领取钻石
-            if (user.getMobilePhone() != null) {
-                Integer way = TranRecord.way.BIND_PHONE.getCode();
-                Entity.TranRecordCriteria tranRecordCriteria = new Entity.TranRecordCriteria();
-                tranRecordCriteria.setUserId(Entity.Value.eq(user.getId()));
-                tranRecordCriteria.setWay(Entity.Value.eq(way));
-                long count = tranRecordDao.selectCount(tranRecordCriteria);
-                if (count < 1) {//没有领取过绑定手机钻石
-                    user.setDiamond(user.getDiamond() + 2);
-                    //生成交易记录
-                    createRecord(user, way, TranRecord.itemType.DIAMOND.getCode(), 2);
+        } else {
+            if (phone != null) {//绑定手机
+                if (user.getMobilePhone() == null) {//还没有绑定过手机
+                    user.setMobilePhone(phone);
                 } else {
-                    throw CommonError.ALREADY_GET_DIAMOND.newException();
+                    throw CommonError.ALREADY_BIND_PHONE.newException();
                 }
-            } else {
-                throw CommonError.UN_BIND_PHONE.newException();
+            } else {//领取钻石
+                if (user.getMobilePhone() != null) {//已经绑定手机
+
+                    if (count < 1) {//没有领取过绑定手机钻石
+                        user.setDiamond(user.getDiamond() + 2);
+                        //生成交易记录
+                        createRecord(user, way, TranRecord.itemType.DIAMOND.getCode(), 2);
+                    } else {
+                        throw CommonError.ALREADY_GET_DIAMOND.newException();
+                    }
+                } else {
+                    throw CommonError.UN_BIND_PHONE.newException();
+                }
             }
+            userDao.update(user);
+            result.put("user", user);
         }
-        userDao.update(user);
-        result.put("user", user);
-        result.put("result", true);
         return result;
 
     }
@@ -457,32 +467,36 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
      * @return
      */
     @Override
-    public Map<String, Object> tenWins(User user) {
+    public Map<String, Object> tenWins(JSONObject data, User user) {
         Map<String, Object> result = new HashMap<String, Object>(2);
+        String query = (String) data.get("query");
 
         TranRecord tr = new TranRecord();
         tr.setWay(TranRecord.way.WIN.getCode());
         tr.setUserId(user.getId());
         Long count = tranRecordDao.countForPrizeDraw(tr);
 
-        if (count >= 10) {//当天胜利局数大于十局
-
-            tr.setWay(TranRecord.way.TEN_WINS.getCode());
-            count = tranRecordDao.countForPrizeDraw(tr);
-
-            if (count < 0) {//当天还没有领取胜利任务金币
-                user.setCoin(user.getCoin() + 2000);
-                userDao.update(user);
-                createRecord(user, TranRecord.way.TEN_WINS.getCode(), TranRecord.itemType.COIN.getCode(), 2000);
-                result.put("user", user);
-                result.put("result", true);
-                return result;
-            } else {
-                throw CommonError.ALREADY_GET_COINS.newException();
-            }
+        if (query != null) {//查询当前胜利局数
+            result.put("winNum", count);
         } else {
-            throw CommonError.NOT_ENOUGH_GAMES.newException();
+            if (count >= 10) {//当天胜利局数大于十局
+
+                tr.setWay(TranRecord.way.TEN_WINS.getCode());
+                count = tranRecordDao.countForPrizeDraw(tr);
+
+                if (count < 0) {//当天还没有领取胜利任务金币
+                    user.setCoin(user.getCoin() + 2000);
+                    userDao.update(user);
+                    createRecord(user, TranRecord.way.TEN_WINS.getCode(), TranRecord.itemType.COIN.getCode(), 2000);
+                    result.put("user", user);
+                } else {
+                    throw CommonError.ALREADY_GET_COINS.newException();
+                }
+            } else {
+                throw CommonError.NOT_ENOUGH_GAMES.newException();
+            }
         }
+        return result;
     }
 
     /**
