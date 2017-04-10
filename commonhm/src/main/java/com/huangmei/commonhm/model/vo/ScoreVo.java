@@ -1,4 +1,4 @@
-package com.huangmei.commonhm.util.vo;
+package com.huangmei.commonhm.model.vo;
 
 import java.util.Date;
 import java.util.Map;

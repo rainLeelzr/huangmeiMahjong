@@ -9,7 +9,7 @@ import com.huangmei.commonhm.service.RoomService;
 import com.huangmei.commonhm.service.UserService;
 import com.huangmei.commonhm.util.CommonError;
 import com.huangmei.commonhm.util.CommonUtil;
-import com.huangmei.commonhm.util.vo.ScoreVo;
+import com.huangmei.commonhm.model.vo.ScoreVo;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -349,35 +349,45 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
      * @return
      */
     @Override
-    public Map<String, Object> freeCoins(User user) {
+    public Map<String, Object> freeCoins(JSONObject data, User user) {
         Map<String, Object> result = new HashMap<String, Object>(2);
         Integer way = TranRecord.way.FREE_COIN.getCode();
+        String query = (String) data.get("query");
 
         TranRecord tr = new TranRecord();
         tr.setWay(way);
         tr.setUserId(user.getId());
         Long count = tranRecordDao.countForPrizeDraw(tr);
-        //每两小时领取一次,需要计时
 
-        if (count < 5) {//满足领取金币的资格
-            if (count < 4) {
-                user.setCoin(user.getCoin() + 2000);
+        if (query != null) {//表示查询当前用户的领取情况
+            result.put("count", count);
+            if (count > 0) {
+                TranRecord tranRecord = tranRecordDao.selectRecent(tr);
+                result.put("lastDrawTime", tranRecord.getTranTimes());
+                result.put("now", new Date());
+            }
 
-            } else {//当天第5次
-                user.setCoin(user.getCoin() + 2000);
+        } else {
+            //每两小时领取一次,需要计时
+
+            if (count < 5) {//满足领取金币的资格
+                if (count < 4) {
+                    user.setCoin(user.getCoin() + 2000);
+                } else {//当天第5次
+                    user.setCoin(user.getCoin() + 2000);
                 user.setDiamond(user.getDiamond() + 1);
                 createRecord(user, way, TranRecord.itemType.DIAMOND.getCode(), 1);
-
             }
-            userDao.update(user);
-            //交易记录
-            createRecord(user, way, TranRecord.itemType.COIN.getCode(), 2000);
-            result.put("user", user);
-            result.put("count", count + 1);
-            return result;
-        } else {//不满足领取金币的资格
-            throw CommonError.ALREADY_GET_COINS.newException();
+                userDao.update(user);
+                //交易记录
+                createRecord(user, way, TranRecord.itemType.COIN.getCode(), 2000);
+                result.put("user", user);
+                result.put("count", count + 1);
+            } else {//不满足领取金币的资格
+                throw CommonError.ALREADY_GET_COINS.newException();
+            }
         }
+        return result;
     }
 
     /**

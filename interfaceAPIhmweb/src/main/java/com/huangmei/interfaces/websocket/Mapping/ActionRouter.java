@@ -469,9 +469,11 @@ public class ActionRouter {
             throws Exception {
         User user = sessionManager.getUser(session.getId());
 
-        Map<String, Object> result = userService.freeCoins(user);
+        Map<String, Object> result = userService.freeCoins(data, user);
 
-        sessionManager.userUpdate((User) result.get("user"), session);
+        if ((User) result.get("user") != null) {
+            sessionManager.userUpdate((User) result.get("user"), session);
+        }
 
         return new JsonResultY.Builder()
                 .setPid(PidValue.FREE_COINS.getPid())
@@ -553,6 +555,7 @@ public class ActionRouter {
             throws Exception {
         User user = sessionManager.getUser(session.getId());
         Map<String, Object> result = userService.buy(data, user);
+        sessionManager.userUpdate((User) result.get("user"), session);
 
         return new JsonResultY.Builder()
                 .setPid(PidValue.BUY.getPid())
