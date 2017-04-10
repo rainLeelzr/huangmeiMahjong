@@ -1,5 +1,7 @@
 package com.huangmei.commonhm.model.mahjong.vo;
 
+import java.util.List;
+
 /**
  * 用于玩家打牌广播
  */
@@ -9,7 +11,47 @@ public class PlayedMahjong {
     private Integer playedMahjongId;// 打出的麻将id
     private Integer playedUId;  // 打牌的玩家uid
     private Integer uId; //需要接受广播消息的玩家uid
+
+    /**
+     * 个人的手牌id
+     */
+    private List<Integer> handCardIds;
+
+    /**
+     * 碰了的牌
+     */
+    private List<List<Integer>> pengMahjongIs;
+
+    /**
+     * 杠了的牌
+     */
+    private List<GangVo> gangs;
+
     private Long version;
+
+    public List<Integer> getHandCardIds() {
+        return handCardIds;
+    }
+
+    public void setHandCardIds(List<Integer> handCardIds) {
+        this.handCardIds = handCardIds;
+    }
+
+    public List<List<Integer>> getPengMahjongIs() {
+        return pengMahjongIs;
+    }
+
+    public void setPengMahjongIs(List<List<Integer>> pengMahjongIs) {
+        this.pengMahjongIs = pengMahjongIs;
+    }
+
+    public List<GangVo> getGangs() {
+        return gangs;
+    }
+
+    public void setGangs(List<GangVo> gangs) {
+        this.gangs = gangs;
+    }
 
     public Integer getLeftCardCount() {
         return leftCardCount;
