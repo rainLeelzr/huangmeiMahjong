@@ -8,7 +8,10 @@ import com.huangmei.commonhm.manager.qiangGang.QiangGangManager;
 import com.huangmei.commonhm.model.Room;
 import com.huangmei.commonhm.model.RoomMember;
 import com.huangmei.commonhm.model.User;
-import com.huangmei.commonhm.model.mahjong.*;
+import com.huangmei.commonhm.model.mahjong.Combo;
+import com.huangmei.commonhm.model.mahjong.Mahjong;
+import com.huangmei.commonhm.model.mahjong.MahjongGameData;
+import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
 import com.huangmei.commonhm.model.mahjong.vo.*;
 import com.huangmei.commonhm.redis.GameRedis;
 import com.huangmei.commonhm.redis.VersionRedis;
@@ -1000,10 +1003,19 @@ public class ActionRouter {
             if (waitingClientOperate.getOperates().contains(Operate.QIANG_DA_MING_GANG_HU)
                     || waitingClientOperate.getOperates().contains(Operate.QIANG_JIA_GANG_HU)) {
                 // 别人大明杠或加杠，自己抢大明杠或加杠的情况
-                // todome 找到杠玩家的uid
-                User gangUser = null;
+                // 找到杠玩家的uid
+                Integer gangUserId = mahjongGameData
+                        .getTouchMahjongs()
+                        .get(mahjongGameData.getTouchMahjongs().size() - 1)
+                        .getUserId();
+                User gangUser = getUserByUserId(gangUserId);
                 handleGangTouchAMahjong(mahjongGameData, gangUser);
             } else if (waitingClientOperate.getOperates().contains(Operate.CHI_YING_PENG_PENG_HU)
+                    || waitingClientOperate.getOperates().contains(Operate.CHI_YING_PING_HU)
+                    || waitingClientOperate.getOperates().contains(Operate.CHI_YING_QI_DUI_HU)
+                    || waitingClientOperate.getOperates().contains(Operate.CHI_RUAN_QI_DUI_HU)
+                    || waitingClientOperate.getOperates().contains(Operate.CHI_RUAN_QI_DUI_HU)
+                    || waitingClientOperate.getOperates().contains(Operate.CHI_RUAN_QI_DUI_HU)
                     || waitingClientOperate.getOperates().contains(Operate.YING_DA_MING_GANG)
                     || waitingClientOperate.getOperates().contains(Operate.YING_PENG)) {
                 // 别人打牌，自己可以吃胡、大明杠、碰的情况
@@ -1088,7 +1100,13 @@ public class ActionRouter {
             clientOperate.setPlayedMahjongId(nextCanDoOperate.getSpecialMahjong().getId());
             if (nextCanDoOperate.getOperates().contains(Operate.QIANG_DA_MING_GANG_HU) ||
                     nextCanDoOperate.getOperates().contains(Operate.QIANG_JIA_GANG_HU)) {
-                // todome 抢杠时，找到明杠玩家的uid
+                // 抢杠时，找到明杠玩家的uid
+                Integer gangUserId = mahjongGameData
+                        .getTouchMahjongs()
+                        .get(mahjongGameData.getTouchMahjongs().size() - 1)
+                        .getUserId();
+                User gangUser = getUserByUserId(gangUserId);
+                clientOperate.setPlayerUId(gangUser.getUId());
             } else {
                 // 非抢杠时，找到上次出牌的玩家的uid
                 clientOperate.setPlayerUId(
