@@ -3,6 +3,9 @@ package com.huangmei.commonhm.util.vo;
 import java.util.Date;
 import java.util.Map;
 
+/**
+ * 用于封装用户房间战绩的vo类
+ */
 public class ScoreVo {
     private Date createdTime;
     private Integer state;

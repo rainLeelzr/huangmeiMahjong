@@ -488,7 +488,9 @@ public class ActionRouter {
 
         Map<String, Object> result = userService.bindPhone(data, user);
 
-        sessionManager.userUpdate((User) result.get("user"), session);
+        if ((User) result.get("user") != null) {
+            sessionManager.userUpdate((User) result.get("user"), session);
+        }
 
         return new JsonResultY.Builder()
                 .setPid(PidValue.BIND_PHONE.getPid())
@@ -503,9 +505,11 @@ public class ActionRouter {
             throws Exception {
         User user = sessionManager.getUser(session.getId());
 
-        Map<String, Object> result = userService.tenWins(user);
+        Map<String, Object> result = userService.tenWins(data, user);
 
-        sessionManager.userUpdate((User) result.get("user"), session);
+        if ((User) result.get("user") != null) {
+            sessionManager.userUpdate((User) result.get("user"), session);
+        }
 
         return new JsonResultY.Builder()
                 .setPid(PidValue.TEN_WINS.getPid())
