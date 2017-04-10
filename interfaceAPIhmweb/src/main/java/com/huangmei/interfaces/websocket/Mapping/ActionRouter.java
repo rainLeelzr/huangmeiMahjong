@@ -1095,11 +1095,11 @@ public class ActionRouter {
                                 mahjongGameData
                                         .getOutCards()
                                         .get(mahjongGameData.getOutCards().size() - 1)
-                                        .getRoomMember().getId())
+                                        .getRoomMember().getUserId())
                                 .getUId());
             }
 
-            messageManager.sendMessageByUserId(nextCanDoOperate.getRoomMember().getUserId(), new JsonResultY.Builder()
+            messageManager.sendMessageByUserId(cardInfo.getRoomMember().getUserId(), new JsonResultY.Builder()
                     .setPid(PidValue.CLIENT_OPERATE)
                     .setError(CommonError.SYS_SUSSES)
                     .setData(clientOperate)

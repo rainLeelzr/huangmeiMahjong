@@ -11,6 +11,7 @@ import com.huangmei.commonhm.model.User;
 import com.huangmei.commonhm.model.mahjong.*;
 import com.huangmei.commonhm.model.mahjong.vo.ClientTouchMahjong;
 import com.huangmei.commonhm.model.mahjong.vo.FirstPutOutCard;
+import com.huangmei.commonhm.model.mahjong.vo.GangVo;
 import com.huangmei.commonhm.model.mahjong.vo.PlayedMahjong;
 import com.huangmei.commonhm.redis.GameRedis;
 import com.huangmei.commonhm.redis.RoomRedis;
@@ -197,6 +198,9 @@ public class GameService {
             temp.setLeftCardCount(mahjongGameData.getLeftCards().size());
             temp.setPlayedMahjongId(playedMahjong.getId());
             temp.setPlayedUId(user.getUId());
+            temp.setHandCardIds(Mahjong.parseToIds(personalCardInfo.getHandCards()));
+            temp.setPengMahjongIs(Mahjong.parseCombosToMahjongIds(personalCardInfo.getPengs()));
+            temp.setGangs(GangVo.parseFromGangCombos(personalCardInfo.getGangs()));
             temp.setVersion(mahjongGameData.getVersion());
             playedMahjongs.add(temp);
         }
