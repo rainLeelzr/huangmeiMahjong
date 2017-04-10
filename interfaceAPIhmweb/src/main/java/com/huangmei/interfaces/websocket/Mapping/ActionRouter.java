@@ -311,22 +311,17 @@ public class ActionRouter {
         if (type == 2) {
             isFirstPutOutCard = true;
 
-            List<FirstPutOutCard> firstPutOutCards =
-                    (List<FirstPutOutCard>) result.get(GameService.FIRST_PUT_OUT_CARD_KEY);
+            List<FirstPutOutCard> firstPutOutCards = (List<FirstPutOutCard>) result.get(GameService.FIRST_PUT_OUT_CARD_KEY);
 
-            MahjongGameData mahjongGameData = (MahjongGameData) result.get(
-                    MahjongGameData.class.getSimpleName());
+            MahjongGameData mahjongGameData = (MahjongGameData) result.get(MahjongGameData.class.getSimpleName());
             result.remove(MahjongGameData.class.getSimpleName());
 
+            GameStartVo gameStartVo = (GameStartVo) result.get(GameStartVo.class.getSimpleName());
+            result.remove(GameStartVo.class.getSimpleName());
+
             // 获取庄家uId
-            Integer bankerUserId = firstPutOutCards.get(0).getBankerUId();
-            WebSocketSession bankerSession = sessionManager.getByUserId(bankerUserId);
-            User bankerUser;
-            if (bankerSession == null) {
-                bankerUser = userService.selectOne(bankerUserId);
-            } else {
-                bankerUser = sessionManager.getUser(bankerSession.getId());
-            }
+            Integer bankerUserId = gameStartVo.getBankerUId();
+            User bankerUser = getUserByUserId(bankerUserId);
 
             // 4个玩家，按座位号升序
             List<User> users = new ArrayList<>(firstPutOutCards.size());
@@ -336,22 +331,9 @@ public class ActionRouter {
                 Map<String, Object> myResult = new HashMap<>();
                 myResult.put("type", 2);
 
-                // 获取庄家uId
-                firstPutOutCard.setBankerUId(bankerUser.getUId());
-
                 // 需要接受广播消息的用户uid
                 Integer acceptBroadcastUserId = firstPutOutCard.getuId();
-                User acceptBroadcastUser;
-                if (acceptBroadcastUserId.equals(bankerUserId)) {
-                    acceptBroadcastUser = bankerUser;
-                } else {
-                    WebSocketSession tempSession = sessionManager.getByUserId(acceptBroadcastUserId);
-                    if (tempSession == null) {
-                        acceptBroadcastUser = userService.selectOne(acceptBroadcastUserId);
-                    } else {
-                        acceptBroadcastUser = sessionManager.getUser(tempSession.getId());
-                    }
-                }
+                User acceptBroadcastUser = getUserByUserId(acceptBroadcastUserId);
                 firstPutOutCard.setuId(acceptBroadcastUser.getUId());
 
                 users.add(acceptBroadcastUser);
