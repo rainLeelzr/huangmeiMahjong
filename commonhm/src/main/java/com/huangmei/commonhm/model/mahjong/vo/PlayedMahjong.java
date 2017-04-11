@@ -20,7 +20,7 @@ public class PlayedMahjong {
     /**
      * 碰了的牌
      */
-    private List<List<Integer>> pengMahjongIs;
+    private List<List<Integer>> pengMahjongIds;
 
     /**
      * 杠了的牌
@@ -37,12 +37,12 @@ public class PlayedMahjong {
         this.handCardIds = handCardIds;
     }
 
-    public List<List<Integer>> getPengMahjongIs() {
-        return pengMahjongIs;
+    public List<List<Integer>> getPengMahjongIds() {
+        return pengMahjongIds;
     }
 
-    public void setPengMahjongIs(List<List<Integer>> pengMahjongIs) {
-        this.pengMahjongIs = pengMahjongIs;
+    public void setPengMahjongIds(List<List<Integer>> pengMahjongIs) {
+        this.pengMahjongIds = pengMahjongIds;
     }
 
     public List<GangVo> getGangs() {
