@@ -2,6 +2,7 @@ package com.huangmei.commonhm.service.impl;
 
 import com.huangmei.commonhm.dao.RoomMemberDao;
 import com.huangmei.commonhm.manager.getACard.GetACardManager;
+import com.huangmei.commonhm.manager.operate.BaseOperate;
 import com.huangmei.commonhm.manager.operate.CanDoOperate;
 import com.huangmei.commonhm.manager.operate.Operate;
 import com.huangmei.commonhm.manager.putOutCard.AfterPutOutCardManager;
@@ -10,7 +11,10 @@ import com.huangmei.commonhm.model.Room;
 import com.huangmei.commonhm.model.RoomMember;
 import com.huangmei.commonhm.model.User;
 import com.huangmei.commonhm.model.mahjong.*;
-import com.huangmei.commonhm.model.mahjong.vo.*;
+import com.huangmei.commonhm.model.mahjong.vo.FirstPutOutCard;
+import com.huangmei.commonhm.model.mahjong.vo.GameStartVo;
+import com.huangmei.commonhm.model.mahjong.vo.GangVo;
+import com.huangmei.commonhm.model.mahjong.vo.PlayedMahjong;
 import com.huangmei.commonhm.redis.GameRedis;
 import com.huangmei.commonhm.redis.RoomRedis;
 import com.huangmei.commonhm.redis.VersionRedis;
@@ -64,6 +68,31 @@ public class GameService {
             throw CommonError.NOT_YOUR_TURN.newException();
         }
         if (!waitingClientOperate.getOperates().contains(toDoOperate)) {
+            throw CommonError.NOT_YOUR_TURN.newException();
+        }
+    }
+
+    /**
+     * 判断玩家有没有执行操作的权利
+     *
+     * @param roomId      玩家所在的房间id
+     * @param userId      玩家id
+     * @param toDoOperate 玩家需要执行的操作
+     */
+    private void canOperate(Integer roomId, Integer userId, BaseOperate baseOperate) {
+        // 取出等待客户端操作对象waitingClientOperate
+        CanDoOperate waitingClientOperate = gameRedis.getWaitingClientOperate(roomId);
+        if (!waitingClientOperate.getRoomMember().getUserId().equals(userId)) {
+            throw CommonError.NOT_YOUR_TURN.newException();
+        }
+
+        boolean match = false;
+        for (Operate operate : waitingClientOperate.getOperates()) {
+            if (operate.getBaseOperate() == baseOperate) {
+                match = true;
+            }
+        }
+        if (!match) {
             throw CommonError.NOT_YOUR_TURN.newException();
         }
     }
@@ -188,7 +217,8 @@ public class GameService {
     }
 
 
-    private List<PlayedMahjong> playedMahjongBroadcast(MahjongGameData mahjongGameData, User user, Mahjong playedMahjong) {
+    private List<PlayedMahjong> playedMahjongBroadcast(MahjongGameData mahjongGameData, User user, Mahjong
+            playedMahjong) {
         List<PlayedMahjong> playedMahjongs = new ArrayList<>(mahjongGameData.getPersonalCardInfos().size());
         for (PersonalCardInfo personalCardInfo : mahjongGameData.getPersonalCardInfos()) {
             PlayedMahjong temp = new PlayedMahjong();
@@ -197,7 +227,7 @@ public class GameService {
             temp.setPlayedMahjongId(playedMahjong.getId());
             temp.setPlayedUId(user.getUId());
             temp.setHandCardIds(Mahjong.parseToIds(personalCardInfo.getHandCards()));
-            temp.setPengMahjongIs(Mahjong.parseCombosToMahjongIds(personalCardInfo.getPengs()));
+            temp.setPengMahjongIds(Mahjong.parseCombosToMahjongIds(personalCardInfo.getPengs()));
             temp.setGangs(GangVo.parseFromGangCombos(personalCardInfo.getGangs()));
             temp.setVersion(mahjongGameData.getVersion());
             playedMahjongs.add(temp);
@@ -229,6 +259,7 @@ public class GameService {
      * @param room          用户所在的房间
      * @param version       消息版本号
      */
+
     public void putOutCard(Mahjong putOutMahjong, Room room, User user,
                            Long version)
             throws InstantiationException, IllegalAccessException {
@@ -739,7 +770,7 @@ public class GameService {
      * 赢自摸处理逻辑
      */
     public void yingZiMo(Room room, User user) throws InstantiationException, IllegalAccessException {
-        canOperate(room.getId(), user.getId(), Operate.ZI_MO_YING_PING_HU);
+        canOperate(room.getId(), user.getId(), BaseOperate.HU);
 
         // 取出麻将数据对象
         MahjongGameData mahjongGameData = gameRedis.getMahjongGameData(room.getId());
@@ -750,6 +781,7 @@ public class GameService {
                 mahjongGameData.getTouchMahjongs().get(mahjongGameData.getTouchMahjongs().size() - 1).getMahjong(),
                 user
         );
+
 
     }
 }
