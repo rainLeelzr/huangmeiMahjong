@@ -176,7 +176,7 @@ public class ClientTouchMahjongTask implements MonitorTask {
             touchedMahjong.setType(TouchMahjong.Type.COMMON.getId());
         }
 
-        mahjongGameData.getTouchMahjongs().add(new TouchMahjong());
+        mahjongGameData.getTouchMahjongs().add(touchedMahjong);
     }
 
 

@@ -31,7 +31,7 @@ public class Score implements Entity {
 	/**  */
 	protected Integer score;
 	
-	/**  */
+	/** 局数 */
 	protected Integer times;
 	
 	/**  */
@@ -40,7 +40,7 @@ public class Score implements Entity {
 	/**  */
 	protected Integer userId;
 	
-	/**  */
+	/** 胡牌牌型 */
 	protected Integer winType;
 
     protected java.util.Date createdTime;

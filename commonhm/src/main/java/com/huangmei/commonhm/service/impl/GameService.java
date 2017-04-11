@@ -9,6 +9,7 @@ import com.huangmei.commonhm.manager.putOutCard.AfterPutOutCardManager;
 import com.huangmei.commonhm.manager.yingHu.YingHuManager;
 import com.huangmei.commonhm.model.Room;
 import com.huangmei.commonhm.model.RoomMember;
+import com.huangmei.commonhm.model.Score;
 import com.huangmei.commonhm.model.User;
 import com.huangmei.commonhm.model.mahjong.*;
 import com.huangmei.commonhm.model.mahjong.vo.FirstPutOutCard;
@@ -20,6 +21,7 @@ import com.huangmei.commonhm.redis.RoomRedis;
 import com.huangmei.commonhm.redis.VersionRedis;
 import com.huangmei.commonhm.util.CommonError;
 import com.huangmei.commonhm.util.JsonUtil;
+import com.huangmei.commonhm.util.PidValue;
 import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -781,6 +783,48 @@ public class GameService {
                 mahjongGameData.getTouchMahjongs().get(mahjongGameData.getTouchMahjongs().size() - 1).getMahjong(),
                 user
         );
+
+        if (canOperates.isEmpty()) {
+            throw CommonError.SYS_PARAM_ERROR.newException();
+        }
+
+        Date now = new Date();
+
+        List<Score> scores = new ArrayList<>(mahjongGameData.getPersonalCardInfos().size());
+
+        for (int i = 0; i < mahjongGameData.getPersonalCardInfos().size(); i++) {
+            PersonalCardInfo personalCardInfo = mahjongGameData.getPersonalCardInfos().get(i);
+            Score score = new Score();
+            score.setRoomId(room.getId());
+            score.setUserId(personalCardInfo.getRoomMember().getUserId());
+            score.setCreatedTime(now);
+
+            boolean isWinner = personalCardInfo.getRoomMember().getUserId().equals(user.getId());
+
+            // 杠数量
+            int anGangTimes = 0;
+            int mingGangTimes = 0;
+            List<Combo> gangCombos = personalCardInfo.getGangs();
+            for (Combo gangCombo : gangCombos) {
+                if (gangCombo.getPidValue() == PidValue.YING_AN_GANG) {
+                    anGangTimes++;
+                } else if (gangCombo.getPidValue() == PidValue.YING_DA_MING_GANG
+                        || gangCombo.getPidValue() == PidValue.YING_JIA_GANG) {
+                    mingGangTimes++;
+                }
+            }
+            score.setAnGangTimes(anGangTimes);
+            score.setMingGangTimes(mingGangTimes);
+
+            if (isWinner) {
+                score.setIsZiMo(1);
+            } else {
+                score.setIsZiMo(0);
+            }
+
+
+            scores.add(score);
+        }
 
 
     }
