@@ -53,7 +53,6 @@ public class PengCardMonitorTask extends AbstractResponseTimeoutMonitorTask {
 
         public Builder setResponseTimes(int responseTimes) {
             task.responseTimes = responseTimes;
-            task.timeout = responseTimes + System.currentTimeMillis();
             return this;
         }
 

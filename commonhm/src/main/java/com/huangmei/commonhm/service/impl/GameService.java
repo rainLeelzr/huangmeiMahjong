@@ -5,6 +5,7 @@ import com.huangmei.commonhm.manager.getACard.GetACardManager;
 import com.huangmei.commonhm.manager.operate.CanDoOperate;
 import com.huangmei.commonhm.manager.operate.Operate;
 import com.huangmei.commonhm.manager.putOutCard.AfterPutOutCardManager;
+import com.huangmei.commonhm.manager.yingHu.YingHuManager;
 import com.huangmei.commonhm.model.Room;
 import com.huangmei.commonhm.model.RoomMember;
 import com.huangmei.commonhm.model.User;
@@ -39,6 +40,9 @@ public class GameService {
 
     @Autowired
     private GetACardManager getACardManager;
+
+    @Autowired
+    private YingHuManager yingHuManager;
 
     @Autowired
     private RoomMemberDao roomMemberDao;
@@ -728,6 +732,24 @@ public class GameService {
 
 
         return new Object[]{nextCanDoOperate, waitingClientOperate, mahjongGameData};
+
+    }
+
+    /**
+     * 赢自摸处理逻辑
+     */
+    public void yingZiMo(Room room, User user) throws InstantiationException, IllegalAccessException {
+        canOperate(room.getId(), user.getId(), Operate.ZI_MO_YING_PING_HU);
+
+        // 取出麻将数据对象
+        MahjongGameData mahjongGameData = gameRedis.getMahjongGameData(room.getId());
+
+        // 获取胡牌类型
+        List<CanDoOperate> canOperates = yingHuManager.scan(
+                mahjongGameData,
+                mahjongGameData.getTouchMahjongs().get(mahjongGameData.getTouchMahjongs().size() - 1).getMahjong(),
+                user
+        );
 
     }
 }

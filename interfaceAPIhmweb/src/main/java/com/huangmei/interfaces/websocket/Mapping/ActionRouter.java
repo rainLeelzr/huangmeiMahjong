@@ -79,6 +79,110 @@ public class ActionRouter {
     @Autowired
     private VersionRedis versionRedis;
 
+    /**
+     * 下一个玩家摸牌逻辑
+     */
+    private void handleGangTouchAMahjong(MahjongGameData mahjongGameData, User gangUser) {
+        // 4个玩家，按座位号升序
+        List<User> users = getRoomUsers(mahjongGameData.getPersonalCardInfos());
+
+        // 给杠的用户在leftCards的开头摸一张牌，并广播
+        monitorManager.watch(new ClientTouchMahjongTask
+                .Builder()
+                .setToucher(new GangToucher())
+                .setGetACardManager(getACardManager)
+                .setMessageManager(messageManager)
+                .setMahjongGameData(mahjongGameData)
+                .setUser(gangUser)
+                .setUsers(users)
+                .setGameRedis(gameRedis)
+                .setVersionRedis(versionRedis)
+                .build());
+    }
+
+    /**
+     * 下一个玩家摸牌逻辑
+     */
+    private void handleCommonNextUserTouchAMahjong(MahjongGameData mahjongGameData) {
+        User currentUser = getLastPutOutCardUser(mahjongGameData);
+
+        handleCommonNextUserTouchAMahjong(mahjongGameData, currentUser);
+    }
+
+    /**
+     * 下一个玩家摸牌逻辑
+     */
+    private void handleCommonNextUserTouchAMahjong(MahjongGameData mahjongGameData, User currentUser) {
+        // 4个玩家，按座位号升序
+        List<User> users = getRoomUsers(mahjongGameData.getPersonalCardInfos());
+
+        // 一个玩家出牌后，轮到下一个玩家摸牌
+        User nextUser = getNextTouchMahjongUser(mahjongGameData, currentUser);
+
+        // 下一个玩家摸一张牌
+        monitorManager.watch(new ClientTouchMahjongTask
+                .Builder()
+                .setToucher(new CommonToucher())
+                .setGetACardManager(getACardManager)
+                .setMessageManager(messageManager)
+                .setMahjongGameData(mahjongGameData)
+                .setUser(nextUser)
+                .setUsers(users)
+                .setGameRedis(gameRedis)
+                .setVersionRedis(versionRedis)
+                .build());
+    }
+
+
+    /**
+     * 处理操作链中，通知下一个人的操作
+     */
+    private void handleNextCanDoOperate(MahjongGameData mahjongGameData, CanDoOperate nextCanDoOperate) {
+        // 可以操作的人
+        User beOperateUser = getUserByUserId(nextCanDoOperate.getRoomMember().getUserId());
+
+        for (PersonalCardInfo cardInfo : mahjongGameData.getPersonalCardInfos()) {
+            ClientOperate clientOperate = new ClientOperate();
+            clientOperate.setuId(beOperateUser.getUId());
+            clientOperate.setOperatePids(Operate.parseToPids(nextCanDoOperate.getOperates()));
+            clientOperate.setHandCardIds(Mahjong.parseToIds(cardInfo.getHandCards()));
+            clientOperate.setPengMahjongIs(Mahjong.parseCombosToMahjongIds(cardInfo.getPengs()));
+            clientOperate.setGangs(GangVo.parseFromGangCombos(cardInfo.getGangs()));
+            clientOperate.setPlayedMahjongId(nextCanDoOperate.getSpecialMahjong().getId());
+            if (nextCanDoOperate.getOperates().contains(Operate.QIANG_DA_MING_GANG_HU) ||
+                    nextCanDoOperate.getOperates().contains(Operate.QIANG_JIA_GANG_HU)) {
+                // 抢杠时，找到明杠玩家的uid
+                Integer gangUserId = mahjongGameData
+                        .getTouchMahjongs()
+                        .get(mahjongGameData.getTouchMahjongs().size() - 1)
+                        .getUserId();
+                User gangUser = getUserByUserId(gangUserId);
+                clientOperate.setPlayerUId(gangUser.getUId());
+            } else {
+                // 非抢杠时，找到上次出牌的玩家的uid
+                clientOperate.setPlayerUId(
+                        getUserByUserId(
+                                mahjongGameData
+                                        .getOutCards()
+                                        .get(mahjongGameData.getOutCards().size() - 1)
+                                        .getRoomMember().getUserId())
+                                .getUId());
+            }
+
+            messageManager.sendMessageByUserId(cardInfo.getRoomMember().getUserId(), new JsonResultY.Builder()
+                    .setPid(PidValue.CLIENT_OPERATE)
+                    .setError(CommonError.SYS_SUSSES)
+                    .setData(clientOperate)
+                    .build());
+        }
+
+        nextCanDoOperate.getOperates().add(Operate.GUO);
+        gameRedis.saveWaitingClientOperate(nextCanDoOperate);
+    }
+
+    /**
+     * 获取最后一个打出牌的人
+     */
     private User getLastPutOutCardUser(MahjongGameData mahjongGameData) {
         return getUserByUserId(
                 mahjongGameData
@@ -89,6 +193,9 @@ public class ActionRouter {
         );
     }
 
+    /**
+     * 获取房间用户
+     */
     private List<User> getRoomUsers(List<PersonalCardInfo> personalCardInfos) {
         List<User> users = new ArrayList<>(personalCardInfos.size());
         for (PersonalCardInfo personalCardInfo : personalCardInfos) {
@@ -948,6 +1055,17 @@ public class ActionRouter {
                             .setError(CommonError.SYS_SUSSES)
                             .setData(new PengBroadcast(
                                     getUserByUserId(personalCardInfo.getRoomMember().getUserId()).getUId(),
+                                    getUserByUserId(mahjongGameData
+                                            .getOutCards()
+                                            .get(mahjongGameData.getOutCards().size() - 1)
+                                            .getRoomMember()
+                                            .getUserId()
+                                    ).getUId(),
+                                    mahjongGameData
+                                            .getOutCards()
+                                            .get(mahjongGameData.getOutCards().size() - 1)
+                                            .getMahjong()
+                                            .getId(),
                                     Mahjong.parseToIds(yingDaMingGangCombo.mahjongs),
                                     user.getUId(),
                                     PidValue.YING_PENG.getPid(),
@@ -1039,104 +1157,17 @@ public class ActionRouter {
         return null;
     }
 
-    /**
-     * 下一个玩家摸牌逻辑
-     */
-    private void handleGangTouchAMahjong(MahjongGameData mahjongGameData, User gangUser) {
-        // 4个玩家，按座位号升序
-        List<User> users = getRoomUsers(mahjongGameData.getPersonalCardInfos());
+    @Pid(PidValue.YING_ZI_MO)
+    @LoginResource
+    public JsonResultY yingZiMo(WebSocketSession session, JSONObject data) throws IllegalAccessException, InstantiationException {
+        User user = sessionManager.getUser(session.getId());
+        Room room = sessionManager.getRoom(session.getId());
 
-        // 给杠的用户在leftCards的开头摸一张牌，并广播
-        monitorManager.watch(new ClientTouchMahjongTask
-                .Builder()
-                .setToucher(new GangToucher())
-                .setGetACardManager(getACardManager)
-                .setMessageManager(messageManager)
-                .setMahjongGameData(mahjongGameData)
-                .setUser(gangUser)
-                .setUsers(users)
-                .setGameRedis(gameRedis)
-                .setVersionRedis(versionRedis)
-                .build());
+        gameService.yingZiMo(room, user);
+
+
+        return null;
     }
 
-    /**
-     * 下一个玩家摸牌逻辑
-     */
-    private void handleCommonNextUserTouchAMahjong(MahjongGameData mahjongGameData) {
-        User currentUser = getLastPutOutCardUser(mahjongGameData);
-
-        handleCommonNextUserTouchAMahjong(mahjongGameData, currentUser);
-    }
-
-    /**
-     * 下一个玩家摸牌逻辑
-     */
-    private void handleCommonNextUserTouchAMahjong(MahjongGameData mahjongGameData, User currentUser) {
-        // 4个玩家，按座位号升序
-        List<User> users = getRoomUsers(mahjongGameData.getPersonalCardInfos());
-
-        // 一个玩家出牌后，轮到下一个玩家摸牌
-        User nextUser = getNextTouchMahjongUser(mahjongGameData, currentUser);
-
-        // 下一个玩家摸一张牌
-        monitorManager.watch(new ClientTouchMahjongTask
-                .Builder()
-                .setToucher(new CommonToucher())
-                .setGetACardManager(getACardManager)
-                .setMessageManager(messageManager)
-                .setMahjongGameData(mahjongGameData)
-                .setUser(nextUser)
-                .setUsers(users)
-                .setGameRedis(gameRedis)
-                .setVersionRedis(versionRedis)
-                .build());
-    }
-
-    /**
-     * 处理操作链中，通知下一个人的操作
-     */
-    private void handleNextCanDoOperate(MahjongGameData mahjongGameData, CanDoOperate nextCanDoOperate) {
-        // 可以操作的人
-        User beOperateUser = getUserByUserId(nextCanDoOperate.getRoomMember().getUserId());
-
-        for (PersonalCardInfo cardInfo : mahjongGameData.getPersonalCardInfos()) {
-            ClientOperate clientOperate = new ClientOperate();
-            clientOperate.setuId(beOperateUser.getUId());
-            clientOperate.setOperatePids(Operate.parseToPids(nextCanDoOperate.getOperates()));
-            clientOperate.setHandCardIds(Mahjong.parseToIds(cardInfo.getHandCards()));
-            clientOperate.setPengMahjongIs(Mahjong.parseCombosToMahjongIds(cardInfo.getPengs()));
-            clientOperate.setGangs(GangVo.parseFromGangCombos(cardInfo.getGangs()));
-            clientOperate.setPlayedMahjongId(nextCanDoOperate.getSpecialMahjong().getId());
-            if (nextCanDoOperate.getOperates().contains(Operate.QIANG_DA_MING_GANG_HU) ||
-                    nextCanDoOperate.getOperates().contains(Operate.QIANG_JIA_GANG_HU)) {
-                // 抢杠时，找到明杠玩家的uid
-                Integer gangUserId = mahjongGameData
-                        .getTouchMahjongs()
-                        .get(mahjongGameData.getTouchMahjongs().size() - 1)
-                        .getUserId();
-                User gangUser = getUserByUserId(gangUserId);
-                clientOperate.setPlayerUId(gangUser.getUId());
-            } else {
-                // 非抢杠时，找到上次出牌的玩家的uid
-                clientOperate.setPlayerUId(
-                        getUserByUserId(
-                                mahjongGameData
-                                        .getOutCards()
-                                        .get(mahjongGameData.getOutCards().size() - 1)
-                                        .getRoomMember().getUserId())
-                                .getUId());
-            }
-
-            messageManager.sendMessageByUserId(cardInfo.getRoomMember().getUserId(), new JsonResultY.Builder()
-                    .setPid(PidValue.CLIENT_OPERATE)
-                    .setError(CommonError.SYS_SUSSES)
-                    .setData(clientOperate)
-                    .build());
-        }
-
-        nextCanDoOperate.getOperates().add(Operate.GUO);
-        gameRedis.saveWaitingClientOperate(nextCanDoOperate);
-    }
 
 }

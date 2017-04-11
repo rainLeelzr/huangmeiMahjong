@@ -29,10 +29,6 @@ public abstract class AbstractResponseTimeoutMonitorTask implements MonitorTask 
     protected String version;
 
     /**
-     * 超时时间，时间戳。如果超过了此时间（毫秒），还有客户端未响应，则为超时。在设置responseTimes时，自动计算出此值
-     */
-    protected long timeout;
-    /**
      * 判断客户端是否有响应的方法
      */
     protected ResponseHelper responseHelper;
@@ -52,10 +48,7 @@ public abstract class AbstractResponseTimeoutMonitorTask implements MonitorTask 
      * 任务监控管理器
      */
     protected MonitorManager monitorManager;
-    /**
-     * 上一次执行此监控任务的时间。由任务执行线程赋值
-     */
-    private long lastWatchTime;
+
     /**
      * 同一个监控任务需要重复监控时，两次任务执行的最短间隔时间（毫秒），默认50毫秒
      */
@@ -74,30 +67,13 @@ public abstract class AbstractResponseTimeoutMonitorTask implements MonitorTask 
      */
     @Override
     public void run() {
-        //如果这个任务在前intervalTime毫秒内执行过，则把此任务放回队列
-        long now = System.currentTimeMillis();
-        if (this.lastWatchTime + intervalTime > now) {
-            monitorManager.watch(this);
-            return;
-        }
-        lastWatchTime = now;
-
-        // 还未到达超时时间，判断客户端是否已响应。
+        // 判断客户端是否已响应。
         // 如果已响应，则监控任务成功，并执行success方法和finish方法；
-        // 如果未响应，则把此任务放回监控管理器，等待下次监控
-        if (now <= timeout) {
-            if (responseHelper.hasResponse(version)) {
-                success();
-                finish();
-            } else {
-                monitorManager.watch(this);
-            }
-            return;
+        if (responseHelper.hasResponse(version)) {
+            success();
+        } else {
+            fail();
         }
-
-        // 如果达到超时时间，则监控任务失败，不需要再判断客户端是否已响应。
-        // 并执行fail方法和finish方法
-        fail();
         finish();
     }
 

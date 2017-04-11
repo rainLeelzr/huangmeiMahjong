@@ -8,8 +8,8 @@ import java.util.List;
 public class PengBroadcast {
 
     private List<Integer> mahjongIds;// 碰的麻将id
-    private List<Integer> playedUId;// 出牌的玩家uid
-    private List<Integer> playedMahjongId;// 别人打出的麻将
+    private Integer playedUId;// 出牌的玩家uid
+    private Integer playedMahjongId;// 别人打出的麻将
     private Integer pengPlayerUId;  // 碰玩家uid
     private Integer uId; //需要接受广播消息的玩家uid
 
@@ -38,8 +38,8 @@ public class PengBroadcast {
 
     public PengBroadcast(
             Integer uId,
-            //List<Integer> playedUId,
-            //List<Integer> playedMahjongId,
+            Integer playedUId,
+            Integer playedMahjongId,
             List<Integer> mahjongIds,
             Integer pengPlayerUId,
             Integer operatePid,
@@ -47,8 +47,8 @@ public class PengBroadcast {
             List<List<Integer>> pengMahjongIds,
             List<GangVo> gangs) {
         this.uId = uId;
-        //this.playedUId = playedUId;
-        //this.playedMahjongId = playedMahjongId;
+        this.playedUId = playedUId;
+        this.playedMahjongId = playedMahjongId;
         this.mahjongIds = mahjongIds;
         this.pengPlayerUId = pengPlayerUId;
         this.operatePid = operatePid;
@@ -57,19 +57,19 @@ public class PengBroadcast {
         this.gangs = gangs;
     }
 
-    public List<Integer> getPlayedUId() {
+    public Integer getPlayedUId() {
         return playedUId;
     }
 
-    public void setPlayedUId(List<Integer> playedUId) {
+    public void setPlayedUId(Integer playedUId) {
         this.playedUId = playedUId;
     }
 
-    public List<Integer> getPlayedMahjongId() {
+    public Integer getPlayedMahjongId() {
         return playedMahjongId;
     }
 
-    public void setPlayedMahjongId(List<Integer> playedMahjongId) {
+    public void setPlayedMahjongId(Integer playedMahjongId) {
         this.playedMahjongId = playedMahjongId;
     }
 
