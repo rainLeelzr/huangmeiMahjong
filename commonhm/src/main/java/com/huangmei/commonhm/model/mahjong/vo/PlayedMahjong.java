@@ -41,7 +41,7 @@ public class PlayedMahjong {
         return pengMahjongIds;
     }
 
-    public void setPengMahjongIds(List<List<Integer>> pengMahjongIs) {
+    public void setPengMahjongIds(List<List<Integer>> pengMahjongIds) {
         this.pengMahjongIds = pengMahjongIds;
     }
 
