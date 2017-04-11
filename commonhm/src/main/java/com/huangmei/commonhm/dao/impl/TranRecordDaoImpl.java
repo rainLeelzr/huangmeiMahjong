@@ -14,4 +14,12 @@ public class TranRecordDaoImpl extends BaseDaoImpl<Integer, TranRecord> implemen
                 tranRecord
         );
     }
+
+    @Override
+    public TranRecord selectRecent(TranRecord tranRecord) {
+        return sqlSessionTemplate.selectOne(
+                statement("selectRecent"),
+                tranRecord
+        );
+    }
 }

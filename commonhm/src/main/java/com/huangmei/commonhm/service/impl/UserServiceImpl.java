@@ -9,7 +9,7 @@ import com.huangmei.commonhm.service.RoomService;
 import com.huangmei.commonhm.service.UserService;
 import com.huangmei.commonhm.util.CommonError;
 import com.huangmei.commonhm.util.CommonUtil;
-import com.huangmei.commonhm.util.vo.ScoreVo;
+import com.huangmei.commonhm.model.vo.ScoreVo;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -140,7 +140,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
 
     /**
      * 获取用户信息
-     *
+     *@param user
      * @param data
      * @return
      */
@@ -166,22 +166,22 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
 
     /**
      * 抽奖
-     *
      * @param data
+     * @param user
      * @return
      */
     @Override
     public Map<String, Object> prizeDraw(JSONObject data, User user) {
         Map<String, Object> result = new HashMap<String, Object>(3);
         Integer way = TranRecord.way.DRAW_BY_FREE.getCode();
-        boolean judge = data.getBoolean("judge");
+        String query = (String) data.get("query");
 
         TranRecord tr = new TranRecord();
         tr.setWay(way);
         tr.setUserId(user.getId());
         Long count = tranRecordDao.countForPrizeDraw(tr);
 
-        if (judge) {
+        if (query != null) {//户端需要判断是否免费抽奖
             if (count < 1) {
                 result.put("free", true);
             } else {
@@ -211,13 +211,11 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
 
         return result;
 
-
     }
 
 
     /**
      * 抽奖实现
-     *
      * @param user
      * @param result
      * @param way
@@ -263,27 +261,22 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
             case "100钻石":
                 user.setDiamond(user.getDiamond() + 100);
                 createRecord(user, way, TranRecord.itemType.DIAMOND.getCode(), 100);
-
                 break;
             case "50钻石":
                 user.setDiamond(user.getDiamond() + 50);
                 createRecord(user, way, TranRecord.itemType.DIAMOND.getCode(), 50);
-
                 break;
             case "10钻石":
                 user.setDiamond(user.getDiamond() + 10);
                 createRecord(user, way, TranRecord.itemType.DIAMOND.getCode(), 10);
-
                 break;
             case "5钻石":
                 user.setDiamond(user.getDiamond() + 5);
                 createRecord(user, way, TranRecord.itemType.DIAMOND.getCode(), 5);
-
                 break;
             case "50000金币":
                 user.setCoin(user.getCoin() + 50000);
                 createRecord(user, way, TranRecord.itemType.COIN.getCode(), 50000);
-
                 break;
             case "2钻石":
                 user.setDiamond(user.getDiamond() + 2);
@@ -292,7 +285,6 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
             case "2000金币":
                 user.setCoin(user.getCoin() + 2000);
                 createRecord(user, way, TranRecord.itemType.COIN.getCode(), 2000);
-
                 break;
         }
         userDao.update(user);
@@ -344,46 +336,57 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
 
     /**
      * 免费领取金币
-     *
      * @param user
+     * @param data
      * @return
      */
     @Override
-    public Map<String, Object> freeCoins(User user) {
+    public Map<String, Object> freeCoins(JSONObject data, User user) {
         Map<String, Object> result = new HashMap<String, Object>(2);
         Integer way = TranRecord.way.FREE_COIN.getCode();
+        String query = (String) data.get("query");
 
         TranRecord tr = new TranRecord();
         tr.setWay(way);
         tr.setUserId(user.getId());
         Long count = tranRecordDao.countForPrizeDraw(tr);
-        //每两小时领取一次,需要计时
 
-        if (count < 5) {//满足领取金币的资格
-            if (count < 4) {
-                user.setCoin(user.getCoin() + 2000);
-
-            } else {//当天第5次
-                user.setCoin(user.getCoin() + 2000);
-                user.setDiamond(user.getDiamond() + 1);
-                createRecord(user, way, TranRecord.itemType.DIAMOND.getCode(), 1);
-
+        if (query != null) {//表示查询当前用户的领取情况
+            result.put("count", count);
+            if (count > 0) {
+                TranRecord tranRecord = tranRecordDao.selectRecent(tr);
+                result.put("lastDrawTime", tranRecord.getTranTimes());
+                result.put("now", new Date());
             }
-            userDao.update(user);
-            //交易记录
-            createRecord(user, way, TranRecord.itemType.COIN.getCode(), 2000);
-            result.put("user", user);
-            result.put("count", count + 1);
-            return result;
-        } else {//不满足领取金币的资格
-            throw CommonError.ALREADY_GET_COINS.newException();
+
+        } else {
+            //每两小时领取一次,需要计时
+
+            if (count < 5) {//满足领取金币的资格
+                if (count < 4) {
+                    user.setCoin(user.getCoin() + 2000);
+                } else {//当天第5次
+                    user.setCoin(user.getCoin() + 2000);
+                    user.setDiamond(user.getDiamond() + 1);
+                    createRecord(user, way, TranRecord.itemType.DIAMOND.getCode(), 1);
+                }
+                userDao.update(user);
+                //交易记录
+                createRecord(user, way, TranRecord.itemType.COIN.getCode(), 2000);
+                result.put("user", user);
+                result.put("count", count + 1);
+            } else {//不满足领取金币的资格
+                throw CommonError.ALREADY_GET_COINS.newException();
+            }
         }
+        return result;
     }
 
     /**
      * 购买金币/钻石/道具
      *
      * @param data
+     * @param user
      * @return
      */
     @Override
@@ -395,6 +398,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         Integer horn = (Integer) data.get("horn");
 
         //支付接口对接
+
         if (coin != null) {
             user.setCoin(user.getCoin() + coin);
         } else if (diamond != null) {
@@ -418,7 +422,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
     public Map<String, Object> bindPhone(JSONObject data, User user) {
         Map<String, Object> result = new HashMap<String, Object>(2);
         String phone = (String) data.get("phone");
-        Integer check = (Integer) data.get("check");
+        String query = (String) data.get("query");
 
         Integer way = TranRecord.way.BIND_PHONE.getCode();
         Entity.TranRecordCriteria tranRecordCriteria = new Entity.TranRecordCriteria();
@@ -426,7 +430,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         tranRecordCriteria.setWay(Entity.Value.eq(way));
         long count = tranRecordDao.selectCount(tranRecordCriteria);
 
-        if (check != null) {//检查用户是否已经领取绑定手机钻石
+        if (query != null) {//检查用户是否已经领取绑定手机钻石
             if (count < 1) {
                 result.put("receive", false);
             } else {
@@ -464,6 +468,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
      * 每日任务胜利十局可以领取2000金币
      *
      * @param user
+     * @param data
      * @return
      */
     @Override
@@ -474,15 +479,20 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         TranRecord tr = new TranRecord();
         tr.setWay(TranRecord.way.WIN.getCode());
         tr.setUserId(user.getId());
+        Long num = tranRecordDao.countForPrizeDraw(tr);
+
+        tr.setWay(TranRecord.way.TEN_WINS.getCode());
         Long count = tranRecordDao.countForPrizeDraw(tr);
 
         if (query != null) {//查询当前胜利局数
-            result.put("winNum", count);
+            result.put("winNum", num);
+            if (count < 0) {
+                result.put("receive", false);
+            } else {
+                result.put("receive", true);
+            }
         } else {
-            if (count >= 10) {//当天胜利局数大于十局
-
-                tr.setWay(TranRecord.way.TEN_WINS.getCode());
-                count = tranRecordDao.countForPrizeDraw(tr);
+            if (num >= 10) {//当天胜利局数大于十局
 
                 if (count < 0) {//当天还没有领取胜利任务金币
                     user.setCoin(user.getCoin() + 2000);
@@ -555,6 +565,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
             throw CommonError.ROOM_USER_NOT_IN_ROOM.newException();
         }
     }
+
 
     /**
      * 根据userId查询用户

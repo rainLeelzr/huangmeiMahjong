@@ -37,6 +37,10 @@
             resultType="_long">
 		select COUNT(id) from tb_tran_record where to_days(tran_times) = to_days(now()) AND way = #{way} AND user_id=#{userId};
 	</select>
+    <select id="selectRecent" parameterType="com.huangmei.commonhm.model.TranRecord"
+            resultMap="TranRecordResultMap">
+		SELECT * FROM tb_tran_record WHERE id=(SELECT MAX(id)FROM tb_tran_record WHERE user_id = #{userId} and way = #{way});
+	</select>
 
     <resultMap id="TranRecordResultMap" type="com.huangmei.commonhm.model.TranRecord">
         <id property="id" column="ID"/>

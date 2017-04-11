@@ -9,6 +9,7 @@ import com.huangmei.commonhm.redis.RoomRedis;
 import com.huangmei.commonhm.service.RoomService;
 import com.huangmei.commonhm.util.CommonError;
 import com.huangmei.commonhm.util.CommonUtil;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -537,6 +538,33 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
         } else {
             throw CommonError.USER_NOT_EXIST.newException();
         }
+
+    }
+
+    /**
+     * 聊天模块
+     *
+     * @param data
+     * @param user
+     * @return
+     */
+    @Override
+    public Map<String, Object> communication(JSONObject data, User user) {
+        Map<String, Object> result = new HashMap<String, Object>(3);
+        Integer type = (Integer) data.get("type");
+        JSONArray content = (JSONArray) data.get("content");
+
+        RoomMember roomMember = checkInRoom(user.getId());
+        if (roomMember != null) {
+            result.put("roomId", roomMember.getRoomId());
+            result.put("type", type);
+            result.put("content", content);
+            return result;
+
+        } else {
+            throw CommonError.ROOM_USER_NOT_IN_ROOM.newException();
+        }
+
 
     }
 

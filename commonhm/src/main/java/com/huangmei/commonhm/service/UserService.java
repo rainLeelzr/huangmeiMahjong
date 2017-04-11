@@ -18,7 +18,7 @@ public interface UserService extends BaseService<Integer, User> {
 
     Map<String,Object> prizeDraw(JSONObject data,User user);
 
-	Map<String, Object> freeCoins(User user);
+    Map<String, Object> freeCoins(JSONObject data, User user);
 
 	Map<String, Object> buy(JSONObject data, User user);
 
@@ -27,4 +27,6 @@ public interface UserService extends BaseService<Integer, User> {
 	Map<String, Object> tenWins(JSONObject data, User user);
 
     Map<String, Object> getStanding(Room room, User user);
+
+
 }
