@@ -10,8 +10,8 @@ import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
@@ -24,8 +24,10 @@ public class MessageManager {
     private static final Logger log = LoggerFactory
             .getLogger(MessageManager.class);
 
-    private static final ExecutorService executor = Executors
-            .newFixedThreadPool(20);
+    //private static final ExecutorService executor = Executors
+    //        .newFixedThreadPool(20);
+
+    private static final ScheduledExecutorService executor = Executors.newScheduledThreadPool(20);
 
     @Autowired
     private SessionManager sessionManager;
@@ -42,6 +44,20 @@ public class MessageManager {
         runnable.setJsonResultY(jsonResultY);
         runnable.setLock(sessionManager.getLock(session));
         executor.submit(runnable);
+    }
+
+    public void send(WebSocketSession session, JsonResultY jsonResultY, long delay) {
+        if (!session.isOpen()) {
+            sessionManager.remove(session);
+            return;
+        }
+
+        SendMessageRunnable runnable = new SendMessageRunnable();
+        runnable.setMessageManager(this);
+        runnable.setSession(session);
+        runnable.setJsonResultY(jsonResultY);
+        runnable.setLock(sessionManager.getLock(session));
+        executor.schedule(runnable, delay, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -69,6 +85,26 @@ public class MessageManager {
 
         for (WebSocketSession session : roomUsers) {
             send(session, jsonResultY);
+        }
+
+    }
+
+    /**
+     * delay毫秒后给某个房间里的用户发送消息
+     *
+     * @param roomId      roomId
+     * @param jsonResultY jsonResultY
+     */
+    public void sendMessageToRoomUsers(String roomId, JsonResultY jsonResultY, long delay) {
+        Collection<WebSocketSession> roomUsers = sessionManager
+                .getRoomSessions(roomId);
+        if (roomUsers == null) {
+            log.error("给房间id为[{}]里的用户发送消息失败，从roomSessions中没有此房间id的信息");
+            return;
+        }
+
+        for (WebSocketSession session : roomUsers) {
+            send(session, jsonResultY, delay);
         }
 
     }
@@ -110,6 +146,21 @@ public class MessageManager {
             return;
         }
         send(userSession, jsonResultY);
+    }
+
+    /**
+     * delay毫秒后给某个用户发送消息
+     *
+     * @param userId      userId
+     * @param jsonResultY jsonResultY
+     */
+    public void sendMessageByUserId(Integer userId, JsonResultY jsonResultY, long delay) {
+        WebSocketSession userSession = sessionManager.getByUserId(userId);
+        if (userSession == null) {
+            log.error("给userId为[{}]的用户发送消息失败，从userIdSessions中没有id的信息", userId);
+            return;
+        }
+        send(userSession, jsonResultY, delay);
     }
 
     private static class SendMessageRunnable implements Runnable {
