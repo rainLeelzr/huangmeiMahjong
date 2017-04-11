@@ -5,6 +5,7 @@ import com.huangmei.commonhm.manager.operate.CanDoOperate;
 import com.huangmei.commonhm.manager.operate.Operate;
 import com.huangmei.commonhm.model.RoomMember;
 import com.huangmei.commonhm.model.User;
+import com.huangmei.commonhm.model.mahjong.gameData.TouchMahjong;
 import com.huangmei.commonhm.model.mahjong.vo.ClientTouchMahjong;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.MahjongGameData;
@@ -14,6 +15,7 @@ import com.huangmei.commonhm.redis.GameRedis;
 import com.huangmei.commonhm.redis.VersionRedis;
 import com.huangmei.interfaces.monitor.MonitorTask;
 import com.huangmei.interfaces.monitor.clientTouchMahjong.task.callback.success.TouchMahjongSender;
+import com.huangmei.interfaces.monitor.clientTouchMahjong.toucher.GangToucher;
 import com.huangmei.interfaces.monitor.clientTouchMahjong.toucher.Toucher;
 import com.huangmei.interfaces.websocket.MessageManager;
 import org.slf4j.Logger;
@@ -75,6 +77,9 @@ public class ClientTouchMahjongTask implements MonitorTask {
 
                 Long nextVersion = versionRedis.nextVersion(mahjongGameData.getRoomId());
                 mahjongGameData.setVersion(nextVersion);
+
+                // 设置摸到的牌
+                setTouchMahjong(touchMahjong);
 
                 // 摸牌的人的roomMember
                 RoomMember touchMahjongRoomMember = null;
@@ -143,8 +148,6 @@ public class ClientTouchMahjongTask implements MonitorTask {
                 // 保存可操作列表到redis，记录正在等待哪个玩家的什么操作
                 gameRedis.saveWaitingClientOperate(canOperate);
 
-                CanDoOperate waitingClientOperate = gameRedis.getWaitingClientOperate(canOperate.getRoomMember().getRoomId());
-
                 setSuccessCallback(new TouchMahjongSender
                         .Builder()
                         .setClientTouchMahjongs(clientTouchMahjongs)
@@ -161,6 +164,19 @@ public class ClientTouchMahjongTask implements MonitorTask {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void setTouchMahjong(Mahjong touchMahjong) {
+        TouchMahjong touchedMahjong = new TouchMahjong();
+        touchedMahjong.setMahjong(touchMahjong);
+        touchedMahjong.setUserId(user.getId());
+        if (toucher instanceof GangToucher) {
+            touchedMahjong.setType(TouchMahjong.Type.GANG.getId());
+        } else {
+            touchedMahjong.setType(TouchMahjong.Type.COMMON.getId());
+        }
+
+        mahjongGameData.getTouchMahjongs().add(new TouchMahjong());
     }
 
 

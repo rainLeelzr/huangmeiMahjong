@@ -3,6 +3,7 @@ package com.huangmei.commonhm.model.mahjong;
 
 import com.huangmei.commonhm.manager.operate.Operate;
 import com.huangmei.commonhm.model.RoomMember;
+import com.huangmei.commonhm.model.mahjong.gameData.TouchMahjong;
 import com.huangmei.commonhm.util.PidValue;
 import com.huangmei.commonhm.util.mock.MockComboMahjongList;
 import org.apache.commons.lang.math.RandomUtils;
@@ -23,29 +24,34 @@ public class MahjongGameData {
 
     static {
         classMap = new HashMap<>();
+        // MahjongGameData
+        classMap.put("bankerSite", Integer.class);
+        classMap.put("dices", Integer.class);
+        classMap.put("baoMother", Mahjong.class);
+        classMap.put("baoMahjongs", Mahjong.class);
+        classMap.put("baoMahjongMakeUpMahjongs", Mahjong.class);
+        classMap.put("leftCards", Mahjong.class);
+        classMap.put("outCards", OutCard.class);
+        classMap.put("touchMahjongs", TouchMahjong.class);
         classMap.put("personalCardInfos", PersonalCardInfo.class);
+
+        // personalCardInfos
         classMap.put("roomMember", RoomMember.class);
         classMap.put("handCards", Mahjong.class);
         classMap.put("operates", Operate.class);
         classMap.put("touchMahjong", Mahjong.class);
         classMap.put("pengs", Combo.class);
         classMap.put("gangs", Combo.class);
-        classMap.put("mahjongs", Mahjong.class);
 
-        classMap.put("bankerSite", Integer.class);
-        classMap.put("dices", Integer.class);
-        classMap.put("leftCards", Mahjong.class);
-        classMap.put("outCards", OutCard.class);
+        // OutCard
         classMap.put("mahjong", Mahjong.class);
-
-        classMap.put("baoMother", Mahjong.class);
-        classMap.put("baoMahjongs", Mahjong.class);
-        classMap.put("baoMahjongMakeUpMahjongs", Mahjong.class);
 
         // combo
         classMap.put("pidValue", PidValue.class);
         classMap.put("yingRuan", YingRuan.class);
 
+
+        classMap.put("mahjongs", Mahjong.class);
     }
 
     // 庄家的座位号，从1开始
@@ -66,17 +72,18 @@ public class MahjongGameData {
      * 玩家打出的牌
      */
     private List<OutCard> outCards;
-
+    /**
+     * 玩家摸到的牌
+     */
+    private List<TouchMahjong> touchMahjongs;
     /**
      * 宝娘
      */
     private Mahjong baoMother;
-
     /**
      * 宝牌
      */
     private List<Mahjong> baoMahjongs;
-
     /**
      * 宝牌可以变成以下的牌
      */
@@ -136,6 +143,7 @@ public class MahjongGameData {
                 allMahjongs.size() - players * HAND_CARD_NUMBER);
         mahjongGameData.setPersonalCardInfos(handCards);
         mahjongGameData.setLeftCards(leftCards);
+        mahjongGameData.setTouchMahjongs(new ArrayList<TouchMahjong>(1));
 
         // 掷骰
         mahjongGameData.dices = rollDice();
@@ -247,6 +255,14 @@ public class MahjongGameData {
         baoMahjongs.add(Mahjong.THREE_TIAO_4);
         data.setBaoMahjongs(baoMahjongs);
         data.getBaoMahjongMakeUpMahjongs();
+    }
+
+    public List<TouchMahjong> getTouchMahjongs() {
+        return touchMahjongs;
+    }
+
+    public void setTouchMahjongs(List<TouchMahjong> touchMahjongs) {
+        this.touchMahjongs = touchMahjongs;
     }
 
     public Mahjong getBaoMother() {
