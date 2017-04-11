@@ -27,4 +27,6 @@ public interface UserService extends BaseService<Integer, User> {
 	Map<String, Object> tenWins(JSONObject data, User user);
 
     Map<String, Object> getStanding(Room room, User user);
+
+
 }

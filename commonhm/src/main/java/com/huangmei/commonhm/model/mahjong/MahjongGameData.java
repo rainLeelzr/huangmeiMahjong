@@ -222,6 +222,7 @@ public class MahjongGameData {
             leftCards.add(allMahjongs.get(index));
         }
 
+
         // 设定宝娘
         // todome 设定宝娘
         mahjongGameData.setBaoMother(leftCards.get(0));

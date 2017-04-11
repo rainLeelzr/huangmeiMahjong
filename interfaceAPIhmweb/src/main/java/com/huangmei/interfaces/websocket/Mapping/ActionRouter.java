@@ -568,7 +568,7 @@ public class ActionRouter {
         User user = sessionManager.getUser(session.getId());
 
         Map<String, Object> result = userService.prizeDraw(data, user);
-        if (!data.getBoolean("judge")) {
+        if ((User) result.get("user") != null) {
             sessionManager.userUpdate((User) result.get("user"), session);
         }
 
@@ -678,6 +678,24 @@ public class ActionRouter {
                 .setError(CommonError.SYS_SUSSES)
                 .setData(result)
                 .build();
+    }
+
+    @Pid(PidValue.COMMUNICATION)
+    @LoginResource
+    public JsonResultY communication(WebSocketSession session, JSONObject data)
+            throws Exception {
+        User user = sessionManager.getUser(session.getId());
+        Map<String, Object> result = roomService.communication(data, user);
+        result.put("uId", user.getUId());
+        Integer roomId = (Integer) result.get("roomId");
+        result.remove("roomId");
+        JsonResultY jsonResultY = new JsonResultY.Builder()
+                .setPid(PidValue.COMMUNICATION.getPid())
+                .setError(CommonError.SYS_SUSSES)
+                .setData(result)
+                .build();
+        messageManager.sendMessageToRoomUsers(roomId.toString(), jsonResultY);
+        return null;
     }
 
     @Pid(PidValue.TEST)
