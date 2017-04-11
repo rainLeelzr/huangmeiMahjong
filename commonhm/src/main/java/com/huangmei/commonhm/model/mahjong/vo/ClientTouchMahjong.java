@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class ClientTouchMahjong {
 
-    // 需要接收本对象的玩家uId
+    // 可以进行操作的用户uId
     private Integer uId;
 
     /**
