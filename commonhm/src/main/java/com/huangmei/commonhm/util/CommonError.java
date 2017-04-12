@@ -31,6 +31,7 @@ public enum CommonError {
     UN_BIND_PHONE(200009, "未绑定手机", UnBindPhoneException.class),
     NOT_ENOUGH_GAMES(200010, "未完成足够的局数", NotEnoughGamesException.class),
     NOT_STANDS(200011, "玩家在此房间还没有战绩", NotStandsException.class),
+    USER_LACK_HORNS(200012, "喇叭不足", UserLackHornsException.class),
 
     /**
      * 房间

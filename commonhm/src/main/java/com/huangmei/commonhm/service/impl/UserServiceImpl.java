@@ -65,7 +65,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
             user.setCoin(30000);
             // DEBUGING 玩家钻石
             user.setDiamond(1000);
-            user.setHorn(0);
+            user.setHorn(5);
             Integer uId = CommonUtil.createUserCode();
             uId = checkUId(uId);
             user.setUId(uId);
@@ -140,7 +140,8 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
 
     /**
      * 获取用户信息
-     *@param user
+     *
+     * @param user
      * @param data
      * @return
      */
@@ -166,6 +167,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
 
     /**
      * 抽奖
+     *
      * @param data
      * @param user
      * @return
@@ -216,6 +218,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
 
     /**
      * 抽奖实现
+     *
      * @param user
      * @param result
      * @param way
@@ -336,6 +339,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
 
     /**
      * 免费领取金币
+     *
      * @param user
      * @param data
      * @return
@@ -564,6 +568,35 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         } else {
             throw CommonError.ROOM_USER_NOT_IN_ROOM.newException();
         }
+    }
+
+    /**
+     * 使用喇叭全服喊话
+     *
+     * @param data
+     * @param user
+     * @return
+     */
+    @Override
+    public Map<String, Object> hornSpeak(JSONObject data, User user) {
+        Map<String, Object> result = new HashMap<String, Object>(2);
+        String query = (String) data.get("query");
+        String userMsg = (String) data.get("userMsg");
+        if (query != null) {//查询公告
+            //查询公告
+            result.put("administrator", "待开发");
+        } else {//全服喊话
+            if (user.getHorn() >= 1) {
+                user.setHorn(user.getHorn() - 1);
+                userDao.update(user);
+                result.put("user", user);
+                result.put("userMsg", userMsg);
+            } else {
+                throw CommonError.USER_LACK_HORNS.newException();
+            }
+        }
+        return result;
+
     }
 
 
