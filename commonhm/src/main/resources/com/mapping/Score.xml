@@ -5,11 +5,12 @@
 
 	<insert id="save" useGeneratedKeys="true" keyProperty="id" parameterType="com.huangmei.commonhm.model.Score">
 		INSERT INTO TB_SCORE (
-        ID, AN_GANG_TIMES, COIN, DIAN_PAO_TIMES, IS_ZI_MO, JIE_PAO_TIMES, MING_GANG_TIMES, ROOM_ID, SCORE, TIMES, TYPE,
-        USER_ID, WIN_TYPE,CREATED_TIME
+		ID, AN_GANG_TIMES, COIN, DIAN_PAO_USER_ID, IS_ZI_MO, JIE_PAO_USER_ID, MING_GANG_TIMES, ROOM_ID, SCORE,PAO_NUM,
+		TIMES, TYPE,
+		USER_ID, WIN_TYPE,HU_TYPE,CREATED_TIME
 		) VALUES (
-        #{id}, #{anGangTimes}, #{coin}, #{dianPaoTimes}, #{isZiMo}, #{jiePaoTimes}, #{mingGangTimes}, #{roomId},
-        #{score}, #{times}, #{type}, #{userId}, #{winType}, #{createdTime}
+		#{id}, #{anGangTimes}, #{coin}, #{dianPaoUserId}, #{isZiMo}, #{jiePaoUserId}, #{mingGangTimes}, #{roomId},
+		#{score},#{paoNum}, #{times}, #{type}, #{userId}, #{winType},#{huType}, #{createdTime}
 		)
 	</insert>
 
@@ -33,16 +34,18 @@
 		<id property="id" column="ID" />
 		<result property="anGangTimes" column="AN_GANG_TIMES" />
 		<result property="coin" column="COIN" />
-		<result property="dianPaoTimes" column="DIAN_PAO_TIMES" />
+		<result property="dianPaoUserId" column="DIAN_PAO_USER_ID"/>
 		<result property="isZiMo" column="IS_ZI_MO" />
-		<result property="jiePaoTimes" column="JIE_PAO_TIMES" />
+		<result property="jiePaoUserId" column="JIE_PAO_USER_ID"/>
 		<result property="mingGangTimes" column="MING_GANG_TIMES" />
 		<result property="roomId" column="ROOM_ID" />
 		<result property="score" column="SCORE" />
+		<result property="paoNum" column="PAO_NUM"/>
 		<result property="times" column="TIMES" />
 		<result property="type" column="TYPE" />
 		<result property="userId" column="USER_ID" />
 		<result property="winType" column="WIN_TYPE" />
+		<result property="huType" column="HU_TYPE"/>
         <result property="createdTime" column="CREATED_TIME"/>
 	</resultMap>
 
@@ -50,16 +53,18 @@
 		<set>
 			<if test="entity.anGangTimes != null">AN_GANG_TIMES = #{entity.anGangTimes},</if>
 			<if test="entity.coin != null">COIN = #{entity.coin},</if>
-			<if test="entity.dianPaoTimes != null">DIAN_PAO_TIMES = #{entity.dianPaoTimes},</if>
+			<if test="entity.dianPaoUserId != null">DIAN_PAO_USER_ID = #{entity.dianPaoUserId},</if>
 			<if test="entity.isZiMo != null">IS_ZI_MO = #{entity.isZiMo},</if>
-			<if test="entity.jiePaoTimes != null">JIE_PAO_TIMES = #{entity.jiePaoTimes},</if>
+			<if test="entity.jiePaoUserId != null">JIE_PAO_USER_ID = #{entity.jiePaoUserId},</if>
 			<if test="entity.mingGangTimes != null">MING_GANG_TIMES = #{entity.mingGangTimes},</if>
 			<if test="entity.roomId != null">ROOM_ID = #{entity.roomId},</if>
 			<if test="entity.score != null">SCORE = #{entity.score},</if>
+			<if test="entity.paoNum != null">PAO_NUM = #{entity.paoNum},</if>
 			<if test="entity.times != null">TIMES = #{entity.times},</if>
 			<if test="entity.type != null">TYPE = #{entity.type},</if>
 			<if test="entity.userId != null">USER_ID = #{entity.userId},</if>
 			<if test="entity.winType != null">WIN_TYPE = #{entity.winType},</if>
+			<if test="entity.huType != null">HU_TYPE = #{entity.huType},</if>
             <if test="entity.createdTime != null">CREATED_TIME = #{entity.createdTime},</if>
 		</set>
 	</sql>

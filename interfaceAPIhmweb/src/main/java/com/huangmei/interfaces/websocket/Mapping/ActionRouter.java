@@ -18,12 +18,14 @@ import com.huangmei.commonhm.redis.VersionRedis;
 import com.huangmei.commonhm.redis.base.Redis;
 import com.huangmei.commonhm.service.RoomService;
 import com.huangmei.commonhm.service.UserService;
+import com.huangmei.commonhm.service.VoteService;
 import com.huangmei.commonhm.service.impl.GameService;
 import com.huangmei.commonhm.util.*;
 import com.huangmei.interfaces.monitor.MonitorManager;
 import com.huangmei.interfaces.monitor.clientTouchMahjong.task.ClientTouchMahjongTask;
 import com.huangmei.interfaces.monitor.clientTouchMahjong.toucher.CommonToucher;
 import com.huangmei.interfaces.monitor.clientTouchMahjong.toucher.GangToucher;
+import com.huangmei.interfaces.monitor.schedule.DismissRoomVoteTask;
 import com.huangmei.interfaces.websocket.MessageManager;
 import com.huangmei.interfaces.websocket.SessionManager;
 import net.sf.json.JSONObject;
@@ -48,6 +50,8 @@ public class ActionRouter {
 
     @Autowired
     private RoomService roomService;
+    @Autowired
+    private VoteService voteService;
 
     @Autowired
     private GameService gameService;
@@ -529,6 +533,16 @@ public class ActionRouter {
         User user = sessionManager.getUser(session.getId());
         Map<String, Object> result = roomService.dismissRoom(data, user);
         Integer roomId = (Integer) result.get("roomId");
+
+        if (!(Boolean) result.get("result")) {//需要发起投票,开始计时任务
+            //2分钟计时无响应默认同意
+            DismissRoomVoteTask dismissRoomVoteTask = new DismissRoomVoteTask();
+            dismissRoomVoteTask.setRoomService(roomService);
+            dismissRoomVoteTask.setRoomId(roomId);
+
+            monitorManager.schedule(dismissRoomVoteTask, 120 * 1000);
+        }
+
         result.remove("roomId");
         JsonResultY jsonResultY = new JsonResultY.Builder()
                 .setPid(PidValue.DISMISS_ROOM.getPid())
@@ -695,6 +709,39 @@ public class ActionRouter {
                 .setData(result)
                 .build();
         messageManager.sendMessageToRoomUsers(roomId.toString(), jsonResultY);
+        return null;
+    }
+
+    @Pid(PidValue.HORN_SPEAK)
+    @LoginResource
+    public JsonResultY hornSpeak(WebSocketSession session, JSONObject data)
+            throws Exception {
+
+        User user = sessionManager.getUser(session.getId());
+        Map<String, Object> result = userService.hornSpeak(data, user);
+        if ((User) result.get("user") != null) {
+            sessionManager.userUpdate((User) result.get("user"), session);
+        }
+
+        JsonResultY jsonResultY = new JsonResultY.Builder()
+                .setPid(PidValue.HORN_SPEAK.getPid())
+                .setError(CommonError.SYS_SUSSES)
+                .setData(result)
+                .build();
+
+        messageManager.sendMessageByUserId(user.getId(), jsonResultY);
+
+        Map<Object, Object> temp = new HashMap<>();
+        temp.putAll(result);
+        temp.remove("user");
+
+        JsonResultY jr = new JsonResultY.Builder()
+                .setPid(PidValue.HORN_SPEAK.getPid())
+                .setError(CommonError.SYS_SUSSES)
+                .setData(temp)
+                .build();
+
+        messageManager.sendToAllUsers(jr);
         return null;
     }
 

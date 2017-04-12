@@ -10,19 +10,17 @@ public class Score implements Entity {
     /**  */
     protected Integer anGangTimes;
 
-    /**
-     * 输赢的金币数
-     */
+    /**  */
     protected Integer coin;
 
-    /** 点炮 */
-    protected Integer dianPaoTimes;
+    /**  */
+    protected Integer dianPaoUserId;
 
     /**  */
     protected Integer isZiMo;
 
     /**  */
-    protected Integer jiePaoTimes;
+    protected Integer jiePaoUserId;
 
     /**  */
     protected Integer mingGangTimes;
@@ -30,28 +28,32 @@ public class Score implements Entity {
     /**  */
     protected Integer roomId;
 
-    /**
-     * 炮数
-     */
+    /** 分数 */
     protected Integer score;
+
+    /** 炮数 */
+    protected Integer paoNum;
 
     /**
      * 局数
      */
     protected Integer times;
 
-    /**
-     * 金币房、好友房
-     */
+    /** 金币房、好友房 */
     protected Integer type;
 
     /**  */
     protected Integer userId;
 
     /**
-     * 胡牌牌型
+     * 对局状况
      */
     protected Integer winType;
+
+    /**
+     * 胡牌牌型
+     */
+    protected Integer huType;
 
     protected java.util.Date createdTime;
 
@@ -79,12 +81,12 @@ public class Score implements Entity {
         this.coin = coin;
     }
 
-    public Integer getDianPaoTimes() {
-        return dianPaoTimes;
+    public Integer getDianPaoUserId() {
+        return dianPaoUserId;
     }
 
-    public void setDianPaoTimes(Integer dianPaoTimes) {
-        this.dianPaoTimes = dianPaoTimes;
+    public void setDianPaoUserId(Integer dianPaoUserId) {
+        this.dianPaoUserId = dianPaoUserId;
     }
 
     public Integer getIsZiMo() {
@@ -95,12 +97,12 @@ public class Score implements Entity {
         this.isZiMo = isZiMo;
     }
 
-    public Integer getJiePaoTimes() {
-        return jiePaoTimes;
+    public Integer getJiePaoUserId() {
+        return jiePaoUserId;
     }
 
-    public void setJiePaoTimes(Integer jiePaoTimes) {
-        this.jiePaoTimes = jiePaoTimes;
+    public void setJiePaoUserId(Integer jiePaoUserId) {
+        this.jiePaoUserId = jiePaoUserId;
     }
 
     public Integer getMingGangTimes() {
@@ -121,6 +123,14 @@ public class Score implements Entity {
 
     public Integer getScore() {
         return score;
+    }
+
+    public Integer getPaoNum() {
+        return paoNum;
+    }
+
+    public void setPaoNum(Integer paoNum) {
+        this.paoNum = paoNum;
     }
 
     public void setScore(Integer score) {
@@ -159,6 +169,14 @@ public class Score implements Entity {
         this.winType = winType;
     }
 
+    public Integer getHuType() {
+        return huType;
+    }
+
+    public void setHuType(Integer huType) {
+        this.huType = huType;
+    }
+
     public java.util.Date getCreatedTime() {
         return createdTime;
     }
@@ -173,16 +191,18 @@ public class Score implements Entity {
         builder.append("id = ").append(id).append(", ");
         builder.append("anGangTimes = ").append(anGangTimes).append(", ");
         builder.append("coin = ").append(coin).append(", ");
-        builder.append("dianPaoTimes = ").append(dianPaoTimes).append(", ");
+        builder.append("dianPaoUserId = ").append(dianPaoUserId).append(", ");
         builder.append("isZiMo = ").append(isZiMo).append(", ");
-        builder.append("jiePaoTimes = ").append(jiePaoTimes).append(", ");
+        builder.append("jiePaoUserId = ").append(jiePaoUserId).append(", ");
         builder.append("mingGangTimes = ").append(mingGangTimes).append(", ");
         builder.append("roomId = ").append(roomId).append(", ");
         builder.append("score = ").append(score).append(", ");
+        builder.append("paoNum = ").append(paoNum).append(", ");
         builder.append("times = ").append(times).append(", ");
         builder.append("type = ").append(type).append(", ");
         builder.append("userId = ").append(userId).append(", ");
-        builder.append("winType = ").append(winType);
+        builder.append("winType = ").append(winType).append(", ");
+        builder.append("huType = ").append(huType).append(", ");
         builder.append("createdTime = ").append(createdTime).append(", ");
         return builder.toString();
     }

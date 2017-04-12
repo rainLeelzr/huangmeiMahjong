@@ -29,4 +29,5 @@ public interface UserService extends BaseService<Integer, User> {
     Map<String, Object> getStanding(Room room, User user);
 
 
+    Map<String, Object> hornSpeak(JSONObject data, User user);
 }
