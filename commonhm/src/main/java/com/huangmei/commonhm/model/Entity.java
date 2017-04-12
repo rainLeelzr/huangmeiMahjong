@@ -847,16 +847,16 @@ public interface Entity extends Serializable {
             this.addCriterion(criterion.setField("coin"));
         }
 
-        public void setDianPaoTimes(Criterion criterion) {
-            this.addCriterion(criterion.setField("dian_pao_times"));
+        public void setDianPaoUserId(Criterion criterion) {
+            this.addCriterion(criterion.setField("dian_pao_userId"));
         }
 
         public void setIsZiMo(Criterion criterion) {
             this.addCriterion(criterion.setField("is_zi_mo"));
         }
 
-        public void setJiePaoTimes(Criterion criterion) {
-            this.addCriterion(criterion.setField("jie_pao_times"));
+        public void setJiePaoUserId(Criterion criterion) {
+            this.addCriterion(criterion.setField("jie_pao_userId"));
         }
 
         public void setMingGangTimes(Criterion criterion) {
@@ -869,6 +869,10 @@ public interface Entity extends Serializable {
 
         public void setScore(Criterion criterion) {
             this.addCriterion(criterion.setField("score"));
+        }
+
+        public void setPaoNum(Criterion criterion) {
+            this.addCriterion(criterion.setField("paoNum"));
         }
 
         public void setTimes(Criterion criterion) {
@@ -885,6 +889,10 @@ public interface Entity extends Serializable {
 
         public void setWinType(Criterion criterion) {
             this.addCriterion(criterion.setField("win_type"));
+        }
+
+        public void setHuType(Criterion criterion) {
+            this.addCriterion(criterion.setField("hu_type"));
         }
 
         public void setCreatedTime(Criterion criterion) {
