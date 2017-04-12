@@ -28,9 +28,10 @@ public class Score implements Entity {
     /**  */
     protected Integer roomId;
 
-    /**  */
+    /** 分数 */
     protected Integer score;
-    /**  */
+
+    /** 炮数 */
     protected Integer paoNum;
 
     /**
@@ -38,7 +39,7 @@ public class Score implements Entity {
      */
     protected Integer times;
 
-    /**  */
+    /** 金币房、好友房 */
     protected Integer type;
 
     /**  */
@@ -234,6 +235,32 @@ public class Score implements Entity {
             return false;
         }
         return true;
+    }
+
+    public static enum Type {
+        COIN_ROOM(1, "金币房"),
+        FRIEND_ROOM(2, "竞技房");
+
+        private Integer id;
+        private String name;
+
+        Type(Integer id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+    }
+
+    public static enum WinType {
+        NONE(0, "没有胡牌"),
+        FRIEND_ROOM(2, "竞技房");
+
+        private Integer id;
+        private String name;
+
+        WinType(Integer id, String name) {
+            this.id = id;
+            this.name = name;
+        }
     }
 
 }

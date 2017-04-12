@@ -823,6 +823,7 @@ public class GameService {
             }
 
 
+            //score.setCoin();
             scores.add(score);
         }
 
