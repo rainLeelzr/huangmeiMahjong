@@ -356,34 +356,55 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         Long count = tranRecordDao.countForPrizeDraw(tr);
 
         if (query != null) {//表示查询当前用户的领取情况
-            result.put("count", count);
             if (count > 0) {
+                result.put("count", count);
                 TranRecord tranRecord = tranRecordDao.selectRecent(tr);
                 result.put("lastDrawTime", tranRecord.getTranTimes());
                 result.put("now", new Date());
             }
-
-        } else {
-            //每两小时领取一次,需要计时
-
-            if (count < 5) {//满足领取金币的资格
-                if (count < 4) {
-                    user.setCoin(user.getCoin() + 2000);
-                } else {//当天第5次
-                    user.setCoin(user.getCoin() + 2000);
-                    user.setDiamond(user.getDiamond() + 1);
-                    createRecord(user, way, TranRecord.itemType.DIAMOND.getCode(), 1);
+        } else {//领取金币
+            if (count > 0) {//表示今天有领取记录
+                TranRecord tranRecord = tranRecordDao.selectRecent(tr);
+                //每两小时领取一次,需要计时
+                if (new Date().getTime() - tranRecord.getTranTimes().getTime() >= 3600 * 2 * 1000) {
+                    result = getCoins(user, result, way, count);
+                } else {
+                    throw CommonError.NOT_ABLE_GET_COINS.newException();
                 }
-                userDao.update(user);
-                //交易记录
-                createRecord(user, way, TranRecord.itemType.COIN.getCode(), 2000);
-                result.put("user", user);
-                result.put("count", count + 1);
-            } else {//不满足领取金币的资格
-                throw CommonError.ALREADY_GET_COINS.newException();
+            } else {//当天第一次领取
+                result = getCoins(user, result, way, count);
             }
+            result.put("count", count + 1);
         }
         return result;
+    }
+
+    /**
+     * 领取金币
+     *
+     * @param user
+     * @param result
+     * @param way
+     * @param count
+     */
+    private Map<String, Object> getCoins(User user, Map<String, Object> result, Integer way, Long count) {
+        if (count < 5) {//满足领取金币的资格
+            if (count < 4) {
+                user.setCoin(user.getCoin() + 2000);
+            } else {//当天第5次
+                user.setCoin(user.getCoin() + 2000);
+                user.setDiamond(user.getDiamond() + 1);
+                createRecord(user, way, TranRecord.itemType.DIAMOND.getCode(), 1);
+            }
+            userDao.update(user);
+            //交易记录
+            createRecord(user, way, TranRecord.itemType.COIN.getCode(), 2000);
+            result.put("user", user);
+            result.put("count", count + 1);
+            return result;
+        } else {//不满足领取金币的资格
+            throw CommonError.ALREADY_GET_COINS.newException();
+        }
     }
 
     /**

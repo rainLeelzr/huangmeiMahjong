@@ -32,6 +32,7 @@ public enum CommonError {
     NOT_ENOUGH_GAMES(200010, "未完成足够的局数", NotEnoughGamesException.class),
     NOT_STANDS(200011, "玩家在此房间还没有战绩", NotStandsException.class),
     USER_LACK_HORNS(200012, "喇叭不足", UserLackHornsException.class),
+    NOT_ABLE_GET_COINS(200013, "距离上次领取金币还没超过两小时", NotAbleGetCoinsException.class),
 
     /**
      * 房间

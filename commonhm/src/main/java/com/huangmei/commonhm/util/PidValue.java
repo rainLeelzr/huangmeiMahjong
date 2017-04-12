@@ -67,16 +67,16 @@ public enum PidValue {
      * 消息推送
      */
     JOIN_ROOM_MESSAGE(4000, "加入房间消息推送"),
-    GAME_START(4008, "游戏开始消息推送"),
     FIRST_PUT_OUT_ALL_CARD(4001, "游戏开始发牌消息推送"),
     CLIENT_TOUCH_MAHJONG(4002, "发一张牌给客户端消息推送"),
     OTHER_USER_PLAY_A_MAHJONG(4003, "玩家打牌广播"),
     GANG_BROADCAST(4004, "玩家杠广播"),
     CLIENT_OPERATE(4005, "客户端吃胡/明杠/碰/过消息推送"),
     PENG_BROADCAST(4006, "玩家碰广播"),
+    GAME_START(4008, "游戏开始消息推送"),
+    HORN_SPEAK(4009, "全服喊话"),
     //QIANG_GANG(4007, "抢杠消息推送");
-    COMMUNICATION(4008, "聊天推送"),
-    HORN_SPEAK(4009, "全服喊话");
+    COMMUNICATION(4010, "聊天推送");
 
     private int pid;
 
