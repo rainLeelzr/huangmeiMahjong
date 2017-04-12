@@ -474,6 +474,11 @@ public interface Entity extends Serializable {
                 if (entity != null) {
                     primaryKey.value = ((AdminUser) entity).getId();
                 }
+            } else if (entityClass == Notice.class) {
+                primaryKey.name = "id";
+                if (entity != null) {
+                    primaryKey.value = ((Notice) entity).getId();
+                }
             } else if (entityClass == Room.class) {
                 primaryKey.name = "id";
                 if (entity != null) {
@@ -517,6 +522,8 @@ public interface Entity extends Serializable {
                 return;
             } else if (entityClass == AdminUser.class) {
                 ((AdminUser) obj).setId((Integer) value);
+            } else if (entityClass == Notice.class) {
+                ((Notice) obj).setId((Integer) value);
             } else if (entityClass == Room.class) {
                 ((Room) obj).setId((Integer) value);
             } else if (entityClass == RoomMember.class) {
@@ -740,6 +747,26 @@ public interface Entity extends Serializable {
 
         public void setUserName(Criterion criterion) {
             this.addCriterion(criterion.setField("user_name"));
+        }
+
+    }
+
+    public static class NoticeCriteria extends SimpleCriteria {
+
+        public void setId(Criterion criterion) {
+            this.addCriterion(criterion.setField("id"));
+        }
+
+        public void setContent(Criterion criterion) {
+            this.addCriterion(criterion.setField("content"));
+        }
+
+        public void setCreateTime(Criterion criterion) {
+            this.addCriterion(criterion.setField("create_time"));
+        }
+
+        public void setUserId(Criterion criterion) {
+            this.addCriterion(criterion.setField("user_id"));
         }
 
     }

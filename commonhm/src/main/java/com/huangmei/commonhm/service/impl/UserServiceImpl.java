@@ -1,9 +1,6 @@
 package com.huangmei.commonhm.service.impl;
 
-import com.huangmei.commonhm.dao.RoomMemberDao;
-import com.huangmei.commonhm.dao.ScoreDao;
-import com.huangmei.commonhm.dao.TranRecordDao;
-import com.huangmei.commonhm.dao.UserDao;
+import com.huangmei.commonhm.dao.*;
 import com.huangmei.commonhm.model.*;
 import com.huangmei.commonhm.service.RoomService;
 import com.huangmei.commonhm.service.UserService;
@@ -27,6 +24,8 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
     private ScoreDao scoreDao;
     @Autowired
     private TranRecordDao tranRecordDao;
+    @Autowired
+    private NoticeDao noticeDao;
 
     @Autowired
     private RoomService roomService;
@@ -147,14 +146,23 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
      */
     @Override
     public Map<String, Object> getUser(JSONObject data, User user) {
-        Map<String, Object> result = new HashMap<String, Object>(3);
+        Map<String, Object> result = new HashMap<String, Object>(6);
         if (user != null) {
             result.put("user", user);
+            /*Integer huType = scoreDao.selectBestHuType(user.getId());
+            for (Room.start value : Room.start.values()) {
+                if (value.getCode()==huType){
+                    result.put("bestHuType",value.getName());
+                     break;
+                }
+            }*/
+
             Entity.ScoreCriteria scoreCriteria = new Entity.ScoreCriteria();
             scoreCriteria.setUserId(Entity.Value.eq(user.getId()));
             long count = scoreDao.selectCount(scoreCriteria);//总局数
             scoreCriteria.setWinType(Entity.Value.ne(0));
             long win_count = scoreDao.selectCount(scoreCriteria);//胜利局数
+
             result.put("win", win_count);
             result.put("lose", count - win_count);
             return result;
@@ -601,17 +609,39 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
     @Override
     public Map<String, Object> hornSpeak(JSONObject data, User user) {
         Map<String, Object> result = new HashMap<String, Object>(2);
+        List<String> strArrays = new ArrayList();
         String query = (String) data.get("query");
         String userMsg = (String) data.get("userMsg");
         if (query != null) {//查询公告
-            //查询公告
+            //查询系统公告
             result.put("administrator", "待开发");
+            //查询用户内容
+            List<Notice> notices = noticeDao.selectAll();
+            if (notices.size() > 0) {
+                for (Notice notice : notices) {
+                    if (new Date().getTime() - notice.getCreateTime().getTime() < 600 * 1000) {//10分钟内需要继续滚动喊话
+                        User u = getUserByUserId(notice.getUserId());
+                        String temp = u.getNickName() + ":" + notice.getContent();
+                        strArrays.add(temp);
+                    } else {
+                        noticeDao.delete(notice.getId());
+                    }
+                }
+            }
+            result.put("userMsg", strArrays);
         } else {//全服喊话
             if (user.getHorn() >= 1) {
                 user.setHorn(user.getHorn() - 1);
                 userDao.update(user);
+                //储存用户喊话内容
+                Notice notice = new Notice();
+                notice.setUserId(user.getId());
+                notice.setContent(userMsg);
+                notice.setCreateTime(new Date());
+                noticeDao.save(notice);
+
                 result.put("user", user);
-                result.put("userMsg", userMsg);
+                result.put("userMsg", user.getNickName() + ":" + userMsg);
             } else {
                 throw CommonError.USER_LACK_HORNS.newException();
             }

@@ -77,6 +77,7 @@ public class Room implements Entity {
             this.name = name;
         }
     }
+
     public static enum start {
         UNSTART(1, "未开始游戏"),
         STARTED(2, "已开始游戏");
@@ -129,7 +130,7 @@ public class Room implements Entity {
     protected Integer state;
 
     /**  */
-    protected String times;
+    protected Integer times;
 
     /**  */
     protected Integer players;
@@ -217,11 +218,11 @@ public class Room implements Entity {
         this.state = state;
     }
 
-    public String getTimes() {
+    public Integer getTimes() {
         return times;
     }
 
-    public void setTimes(String times) {
+    public void setTimes(Integer times) {
         this.times = times;
     }
 

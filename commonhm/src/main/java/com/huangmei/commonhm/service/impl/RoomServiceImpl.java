@@ -49,7 +49,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
     public Map<String, Object> createRoom(JSONObject data) {
 
         Map<String, Object> result = new HashMap<String, Object>(3);
-        String times = (String) data.get("times");
+        Integer times = (Integer) data.get("times");
         String uId = (String) data.get("uId");
         Integer multiple = (Integer) data.get("multiple");
         Integer payType = (Integer) data.get("payType");
@@ -124,7 +124,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
         return result;
     }
 
-    private Map<String, Object> createFriendRoom(String times, Integer diamond, Integer payType, Room room, Map<String, Object> result) {
+    private Map<String, Object> createFriendRoom(Integer times, Integer diamond, Integer payType, Room room, Map<String, Object> result) {
         room.setDiamond(diamond);
         room.setPayType(payType);
         room.setTimes(times);

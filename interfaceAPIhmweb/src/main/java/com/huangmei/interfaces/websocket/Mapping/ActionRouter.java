@@ -721,28 +721,34 @@ public class ActionRouter {
         Map<String, Object> result = userService.hornSpeak(data, user);
         if ((User) result.get("user") != null) {
             sessionManager.userUpdate((User) result.get("user"), session);
+            JsonResultY jsonResultY = new JsonResultY.Builder()
+                    .setPid(PidValue.HORN_SPEAK.getPid())
+                    .setError(CommonError.SYS_SUSSES)
+                    .setData(result)
+                    .build();
+
+            messageManager.sendMessageByUserId(user.getId(), jsonResultY);
+
+            Map<Object, Object> temp = new HashMap<>();
+            temp.putAll(result);
+            temp.remove("user");
+
+            JsonResultY jr = new JsonResultY.Builder()
+                    .setPid(PidValue.HORN_SPEAK.getPid())
+                    .setError(CommonError.SYS_SUSSES)
+                    .setData(temp)
+                    .build();
+
+            messageManager.sendToAllUsers(jr);
+            return null;
+        } else {
+            return new JsonResultY.Builder()
+                    .setPid(PidValue.HORN_SPEAK.getPid())
+                    .setError(CommonError.SYS_SUSSES)
+                    .setData(result)
+                    .build();
         }
 
-        JsonResultY jsonResultY = new JsonResultY.Builder()
-                .setPid(PidValue.HORN_SPEAK.getPid())
-                .setError(CommonError.SYS_SUSSES)
-                .setData(result)
-                .build();
-
-        messageManager.sendMessageByUserId(user.getId(), jsonResultY);
-
-        Map<Object, Object> temp = new HashMap<>();
-        temp.putAll(result);
-        temp.remove("user");
-
-        JsonResultY jr = new JsonResultY.Builder()
-                .setPid(PidValue.HORN_SPEAK.getPid())
-                .setError(CommonError.SYS_SUSSES)
-                .setData(temp)
-                .build();
-
-        messageManager.sendToAllUsers(jr);
-        return null;
     }
 
     @Pid(PidValue.TEST)
