@@ -1,7 +1,6 @@
 package com.huangmei.commonhm.model.mahjong.vo;
 
 import com.huangmei.commonhm.model.Score;
-import com.huangmei.commonhm.util.CommonError;
 
 import java.util.List;
 
@@ -49,11 +48,9 @@ public class SingleUserScoreVo {
             return State.ZI_MO.getId();
         } else if (Score.WinType.JIE_PAO.getId().equals(winType)) {
             return State.JIE_PAO.getId();
-        } else if (Score.WinType.DIAN_PAO.getId().equals(winType)
-                || Score.WinType.OTHER_USER_ZI_MO.getId().equals(winType)) {
+        } else {
             return State.LOSE.getId();
         }
-        throw CommonError.SYS_PARAM_ERROR.newException();
     }
 
     public String getNickName() {

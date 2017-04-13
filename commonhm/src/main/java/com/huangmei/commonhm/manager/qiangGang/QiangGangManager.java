@@ -11,9 +11,7 @@ import com.huangmei.commonhm.model.mahjong.MahjongGameData;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * 自己明杠，扫描其他玩家有没有抢杠
@@ -31,12 +29,15 @@ public class QiangGangManager extends AbstractManager implements InitializingBea
     public List<CanDoOperate> scan(MahjongGameData mahjongGameData, Mahjong putOutMahjong, User user) throws IllegalAccessException, InstantiationException {
         List<CanDoOperate> canDoOperates = super.scan(mahjongGameData, putOutMahjong, user);
         if (canDoOperates.size() > 0) {
-            // 将碰碰胡、七对胡、平胡的操作转换为抢大明杠胡
+            // 将碰碰胡、七对胡、平胡的操作转换为抢杠胡
             CanDoOperate canDoOperate = new CanDoOperate();
             canDoOperate.setRoomMember(canDoOperates.get(0).getRoomMember());
             canDoOperate.setSpecialUserId(canDoOperates.get(0).getSpecialUserId());
             canDoOperate.setSpecialMahjong(canDoOperates.get(0).getSpecialMahjong());
-            canDoOperate.setOperates(Collections.singleton(Operate.QIANG_DA_MING_GANG_HU));
+
+            Set<Operate> operates = new TreeSet<>();
+            operates.add(Operate.QIANG_GANG_HU);
+            canDoOperate.setOperates(operates);
 
             canDoOperates = new ArrayList<>(1);
             canDoOperates.add(canDoOperate);

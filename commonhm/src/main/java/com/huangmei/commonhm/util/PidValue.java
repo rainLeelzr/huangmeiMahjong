@@ -60,6 +60,7 @@ public enum PidValue {
 
     QIANG_DA_MING_GANG_HU(3113, "抢大明杠胡"),
     QIANG_JIA_GANG_HU(3114, "抢加杠胡"),
+    QIANG_GANG_HU(3115, "抢杠胡"),
 
     GUO(3200, "过"),
 
