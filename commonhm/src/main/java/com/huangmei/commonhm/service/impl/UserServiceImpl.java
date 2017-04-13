@@ -2,11 +2,11 @@ package com.huangmei.commonhm.service.impl;
 
 import com.huangmei.commonhm.dao.*;
 import com.huangmei.commonhm.model.*;
+import com.huangmei.commonhm.model.vo.ScoreVo;
 import com.huangmei.commonhm.service.RoomService;
 import com.huangmei.commonhm.service.UserService;
 import com.huangmei.commonhm.util.CommonError;
 import com.huangmei.commonhm.util.CommonUtil;
-import com.huangmei.commonhm.model.vo.ScoreVo;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -149,22 +149,27 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         Map<String, Object> result = new HashMap<String, Object>(6);
         if (user != null) {
             result.put("user", user);
-            /*Integer huType = scoreDao.selectBestHuType(user.getId());
-            for (Room.start value : Room.start.values()) {
-                if (value.getCode()==huType){
-                    result.put("bestHuType",value.getName());
-                     break;
+            Integer huType = scoreDao.selectBestHuType(user.getId());
+            if (huType != null) {
+                for (Score.HuType value : Score.HuType.values()) {
+                    if (value.getId().equals(huType)) {
+                        result.put("bestHuType", value.getName());
+                        break;
+                    }
                 }
-            }*/
+            } else {
+                result.put("bestHuType", "");
+            }
 
             Entity.ScoreCriteria scoreCriteria = new Entity.ScoreCriteria();
             scoreCriteria.setUserId(Entity.Value.eq(user.getId()));
             long count = scoreDao.selectCount(scoreCriteria);//总局数
-            scoreCriteria.setWinType(Entity.Value.ne(0));
-            long win_count = scoreDao.selectCount(scoreCriteria);//胜利局数
+            scoreCriteria.setWinType(Entity.Value.ne(2));
+            scoreCriteria.setWinType(Entity.Value.ne(4));
+            long lose_count = scoreDao.selectCount(scoreCriteria);//输局总数
 
-            result.put("win", win_count);
-            result.put("lose", count - win_count);
+            result.put("lose", lose_count);
+            result.put("win", count - lose_count);
             return result;
 
         } else {
@@ -612,8 +617,8 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         List<String> strArrays = new ArrayList();
         String query = (String) data.get("query");
         String userMsg = (String) data.get("userMsg");
-        if (query != null) {//查询公告
-            //查询系统公告
+        if (query != null) {//查询滚动公告
+            //查询系统滚动公告
             result.put("administrator", "待开发");
             //查询用户内容
             List<Notice> notices = noticeDao.selectAll();
@@ -648,6 +653,24 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         }
         return result;
 
+    }
+
+    /**
+     * 获取公告栏
+     *
+     * @param data
+     * @param user
+     * @return
+     */
+    @Override
+    public Map<String, Object> systemNotice(JSONObject data, User user) {
+        Map<String, Object> result = new HashMap<String, Object>(2);
+        //查询公告栏
+
+        result.put("image1", "xxxxxxxxxxxxxxxxxxx");
+        result.put("text2", "cccccccccccc");
+        result.put("text3", "222");
+        return result;
     }
 
 

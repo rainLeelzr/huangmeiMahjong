@@ -17,7 +17,22 @@ public class ScoreDaoImpl extends BaseDaoImpl<Integer, Score> implements ScoreDa
     }
 
     @Override
-    public Integer findLastWinnerByRoomId(Integer id) {
-        return null;
+    public Integer findLastWinnerByRoomId(Score score) {
+        Score s = sqlSessionTemplate.selectOne(
+                statement("selectLastWinner"),
+                score
+        );
+        if (s == null) {
+            if (score.getTimes() > 1) {
+                score.setTimes(score.getTimes() - 1);
+                return findLastWinnerByRoomId(score);
+            } else {
+                return null;
+            }
+        }
+
+        return s.getUserId();
     }
+
+
 }

@@ -72,7 +72,7 @@
 </body>
 <script type="text/javascript">
 	function search(){
-		$("#submit-form").submit();
+        $("#submit-form").submit();
 	}
 	var del = function(requesturl, id){
 		bootbox.confirm("你确定删除吗?", function (result) {

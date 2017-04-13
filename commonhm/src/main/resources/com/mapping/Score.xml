@@ -36,8 +36,12 @@
         <include refid="OrderbySQL"/>
         <include refid="LimitSQL"/>
     </select>
-    <select id="selectBestHuType" parameterType="com.huangmei.commonhm.model.Score" resultType="java.lang.Integer">
+    <select id="selectBestHuType" resultType="java.lang.Integer">
 		SELECT MAX(hu_type) FROM tb_score WHERE user_id =#{userId};
+    </select>
+
+    <select id="selectLastWinner" parameterType="com.huangmei.commonhm.model.Score" resultMap="ScoreResultMap">
+		SELECT * FROM tb_score WHERE room_id =#{roomId} AND (win_type=2 OR win_type=4) AND times=#{times};
     </select>
     <resultMap id="ScoreResultMap" type="com.huangmei.commonhm.model.Score">
         <id property="id" column="ID"/>

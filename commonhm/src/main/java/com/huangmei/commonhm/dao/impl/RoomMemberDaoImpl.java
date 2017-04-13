@@ -33,11 +33,5 @@ public class RoomMemberDaoImpl extends BaseDaoImpl<Integer, RoomMember> implemen
                 roomMember
         );
     }
-    @Override
-    public List<RoomMember> selectForDismiss(RoomMember roomMember) {
-        return sqlSessionTemplate.selectList(
-                statement("selectForDismiss"),
-                roomMember
-        );
-    }
+
 }

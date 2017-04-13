@@ -30,4 +30,6 @@ public interface UserService extends BaseService<Integer, User> {
 
 
     Map<String, Object> hornSpeak(JSONObject data, User user);
+
+    Map<String, Object> systemNotice(JSONObject data, User user);
 }
