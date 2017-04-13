@@ -728,6 +728,28 @@ public class ActionRouter {
 
     }
 
+    @Pid(PidValue.SYSTEM_NOTICE)
+    @LoginResource
+    public JsonResultY systemNotice(WebSocketSession session, JSONObject data)
+            throws Exception {
+
+        User user = sessionManager.getUser(session.getId());
+        Map<String, Object> result = userService.systemNotice(data, user);
+        if ((User) result.get("user") != null) {
+            sessionManager.userUpdate((User) result.get("user"), session);
+        }
+
+        JsonResultY jr = new JsonResultY.Builder()
+                .setPid(PidValue.SYSTEM_NOTICE.getPid())
+                .setError(CommonError.SYS_SUSSES)
+                .setData(result)
+                .build();
+
+        messageManager.sendToAllUsers(jr);
+        return null;
+
+    }
+
     @Pid(PidValue.TEST)
     public JsonResultY test(WebSocketSession session, JSONObject data)
             throws Exception {

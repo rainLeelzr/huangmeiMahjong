@@ -91,7 +91,8 @@ public class GameService {
      *
      * @param roomId      玩家所在的房间id
      * @param userId      玩家id
-     * @param toDoOperate 玩家需要执行的操作
+     * @param baseOperate
+     * 玩家需要执行的操作
      */
     private void canOperate(Integer roomId, Integer userId, BaseOperate baseOperate) {
         // 取出等待客户端操作对象waitingClientOperate
@@ -140,8 +141,11 @@ public class GameService {
             nextTimes = 1;
         } else {
             // 获取上次胡牌的玩家，如果没有胡牌的玩家，则庄家座位为1
-            //Integer lastWinnerUserId = scoreDao.findLastWinnerByRoomId(room.getId());
-            Integer lastWinnerUserId = lastMahjongGameData.getPersonalCardInfos().get(0).getRoomMember().getUserId();
+            Score score = new Score();
+            score.setRoomId(room.getId());
+            score.setTimes(lastMahjongGameData.getCurrentTimes());
+            Integer lastWinnerUserId = scoreDao.findLastWinnerByRoomId(score);
+            //Integer lastWinnerUserId = lastMahjongGameData.getPersonalCardInfos().get(0).getRoomMember().getUserId();
             if (lastWinnerUserId != null) {
                 for (PersonalCardInfo personalCardInfo : lastMahjongGameData.getPersonalCardInfos()) {
                     RoomMember roomMember = personalCardInfo.getRoomMember();

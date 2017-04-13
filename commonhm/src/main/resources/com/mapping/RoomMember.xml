@@ -45,9 +45,6 @@
     <select id="selectForStart" parameterType="com.huangmei.commonhm.model.RoomMember" resultMap="RoomMemberResultMap">
 		select * from tb_room_member where room_id=#{roomId} and state = #{state};
 	</select>
-    <select id="selectForDismiss" parameterType="com.huangmei.commonhm.model.RoomMember" resultMap="RoomMemberResultMap">
-		select * from tb_room_member where room_id=#{roomId} and state = #{state} and leave_time IS NULL ;
-	</select>
 
 
     <resultMap id="RoomMemberResultMap" type="com.huangmei.commonhm.model.RoomMember">
