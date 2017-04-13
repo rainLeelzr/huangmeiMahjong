@@ -1,6 +1,8 @@
 package com.huangmei.commonhm.service.impl;
 
+import com.huangmei.commonhm.dao.RoomDao;
 import com.huangmei.commonhm.dao.RoomMemberDao;
+import com.huangmei.commonhm.dao.ScoreDao;
 import com.huangmei.commonhm.manager.getACard.GetACardManager;
 import com.huangmei.commonhm.manager.operate.BaseOperate;
 import com.huangmei.commonhm.manager.operate.CanDoOperate;
@@ -33,7 +35,7 @@ import java.util.*;
 @Service
 public class GameService {
 
-    public static final String FIRST_PUT_OUT_CARD_KEY = "firstPutOutCard";
+    public static final String PUT_OUT_HANDCARD_KEY = "putOutHandCard";
     private static final Logger log = LoggerFactory.getLogger(GameService.class);
     @Autowired
     private GameRedis gameRedis;
@@ -52,6 +54,12 @@ public class GameService {
 
     @Autowired
     private RoomMemberDao roomMemberDao;
+
+    @Autowired
+    private RoomDao roomDao;
+
+    @Autowired
+    private ScoreDao scoreDao;
 
     @Autowired
     private RoomRedis roomRedis;
@@ -103,7 +111,7 @@ public class GameService {
      * 初始化数据包括：骰子的点数、每个人的手牌、剩余的牌等信息。
      * 一局游戏开始时，生成麻将的初始数据。
      */
-    public Map<String, Object> firstPutOutCard(
+    public Map<String, Object> putOutHandCard(
             Room room, List<RoomMember> roomMembers)
             throws InstantiationException, IllegalAccessException {
 
@@ -118,15 +126,44 @@ public class GameService {
         Map<String, Object> result = new HashMap<>(6);
 
         int players = room.getPlayers();
-        int bankerSite = 1;
+        int bankerSite = 0;
+        int nextTimes;//当前是需要开始游戏的第几局
+
+        // 判断是否房间第一局发牌
+        MahjongGameData lastMahjongGameData = gameRedis.getMahjongGameData(room.getId());
+        if (lastMahjongGameData == null) {
+            bankerSite = 1;
+            nextTimes = 1;
+        } else {
+            // 获取上次胡牌的玩家，如果没有胡牌的玩家，则庄家座位为1
+            //Integer lastWinnerUserId = scoreDao.findLastWinnerByRoomId(room.getId());
+            Integer lastWinnerUserId = lastMahjongGameData.getPersonalCardInfos().get(0).getRoomMember().getUserId();
+            if (lastWinnerUserId != null) {
+                for (PersonalCardInfo personalCardInfo : lastMahjongGameData.getPersonalCardInfos()) {
+                    RoomMember roomMember = personalCardInfo.getRoomMember();
+                    if (roomMember.getUserId().equals(lastWinnerUserId)) {
+                        bankerSite = 1;
+                    }
+                }
+                if (bankerSite == 0) {
+                    throw CommonError.REDIS_GAME_DATA_ERROR.newException();
+                }
+            } else {
+                bankerSite = 1;
+            }
+
+            nextTimes = lastMahjongGameData.getCurrentTimes() + 1;
+        }
 
         //先设置为userId，在api层转换为uId
         Integer bankerUId = roomMembers.get(bankerSite - 1).getUserId();
 
         // 初始化一局麻将的数据
-        MahjongGameData mahjongGameData = MahjongGameData.initData(players, bankerSite);
+        MahjongGameData mahjongGameData = MahjongGameData.initData(players, bankerSite, nextTimes);
         log.debug("初始化一局麻将的数据:{}", JsonUtil.toJson(mahjongGameData));
 
+        mahjongGameData.setRoomType(room.getType());
+        mahjongGameData.setTimes(room.getTimes());
 
         // 获取新版本号
         Long version = versionRedis.nextVersion(room.getId());
@@ -171,7 +208,7 @@ public class GameService {
             firstPutOutCards.add(fpc);
         }
 
-        result.put(FIRST_PUT_OUT_CARD_KEY, firstPutOutCards);
+        result.put(PUT_OUT_HANDCARD_KEY, firstPutOutCards);
         result.put(GameStartVo.class.getSimpleName(), gameStartVo);
 
         // 麻将数据存redis
@@ -771,16 +808,18 @@ public class GameService {
     /**
      * 赢自摸处理逻辑
      */
-    public void yingZiMo(Room room, User user) throws InstantiationException, IllegalAccessException {
+    public Object[] yingZiMo(Room room, User user) throws InstantiationException, IllegalAccessException {
         canOperate(room.getId(), user.getId(), BaseOperate.HU);
 
         // 取出麻将数据对象
         MahjongGameData mahjongGameData = gameRedis.getMahjongGameData(room.getId());
 
+        Mahjong specialMahjong = mahjongGameData.getTouchMahjongs().get(mahjongGameData.getTouchMahjongs().size() - 1).getMahjong();
+
         // 获取胡牌类型
         List<CanDoOperate> canOperates = yingHuManager.scan(
                 mahjongGameData,
-                mahjongGameData.getTouchMahjongs().get(mahjongGameData.getTouchMahjongs().size() - 1).getMahjong(),
+                specialMahjong,
                 user
         );
 
@@ -798,6 +837,9 @@ public class GameService {
             score.setRoomId(room.getId());
             score.setUserId(personalCardInfo.getRoomMember().getUserId());
             score.setCreatedTime(now);
+            score.setType(room.getType());
+            score.setTimes(mahjongGameData.getCurrentTimes());
+
 
             boolean isWinner = personalCardInfo.getRoomMember().getUserId().equals(user.getId());
 
@@ -817,16 +859,202 @@ public class GameService {
             score.setMingGangTimes(mingGangTimes);
 
             if (isWinner) {
-                score.setIsZiMo(1);
+                score.setIsZiMo(Score.IsZiMo.ZI_MO.getId());
+                score.setWinType(Score.WinType.ZI_MO.getId());
+
+                // 设置胡牌类型
+                Operate operate = null;
+                for (Operate temp : canOperates.get(0).getOperates()) {
+                    operate = temp;
+                    break;
+                }
+
+                Score.HuType huType = Score.HuType.parse(operate);
+                score.setHuType(huType.getId());
+
+                // 计算总炮数
+                calculatePaoNum(
+                        mahjongGameData,
+                        personalCardInfo,
+                        huType,
+                        false,
+                        true,
+                        room.getMultiple(),
+                        score);
             } else {
-                score.setIsZiMo(0);
+                score.setIsZiMo(Score.IsZiMo.NOT_ZI_MO.getId());
+                score.setScore(0);
+                score.setPaoNum(0);
+                score.setCoin(0);
+                score.setWinType(Score.WinType.OTHER_USER_ZI_MO.getId());
             }
 
-
-            //score.setCoin();
             scores.add(score);
         }
 
+        for (Score score : scores) {
+            scoreDao.save(score);
+        }
+
+        //金币房所有玩家变成待准备状态，房间状态改为待开始
+        //好友房在没有达到局数上限时，所有玩家变成待准备状态，房间状态改为待开始
+        if (mahjongGameData.getRoomType().equals(Room.type.COINS_ROOM)
+                || mahjongGameData.getCurrentTimes() < mahjongGameData.getTimes()) {
+            room.setState(Room.state.wait.getCode());
+            roomDao.update(room);
+
+            for (PersonalCardInfo personalCardInfo : mahjongGameData.getPersonalCardInfos()) {
+                // roomMember改为游戏中
+                personalCardInfo.getRoomMember().setState(Room.state.wait.getCode());
+                roomRedis.editRoom(personalCardInfo.getRoomMember());
+                roomRedis.joinRoom(personalCardInfo.getRoomMember());
+
+                RoomMember temp = new RoomMember();
+                temp.setId(personalCardInfo.getRoomMember().getId());
+                temp.setState(Room.state.wait.getCode());
+                roomMemberDao.update(temp);
+            }
+        }
+        return new Object[]{scores, mahjongGameData, specialMahjong};
+    }
+
+    /**
+     * 计算总炮数
+     *
+     * @param mahjongGameData  mahjongGameData
+     * @param personalCardInfo personalCardInfo
+     * @param huType           huType
+     * @param isQiangGang      是否抢杠
+     * @param isYingHu         是否硬胡
+     * @param multiple         倍数/底分
+     * @param score            分数对象
+     */
+    private void calculatePaoNum(MahjongGameData mahjongGameData,
+                                 PersonalCardInfo personalCardInfo,
+                                 Score.HuType huType,
+                                 boolean isQiangGang,
+                                 boolean isYingHu,
+                                 Integer multiple,
+                                 Score score) {
+        int totalPaoNum = 0;
+        // 胡牌形式
+        totalPaoNum += huType.getPaoNum();
+
+        //算炮规则一：
+        //自摸
+        if (score.getIsZiMo().equals(Score.IsZiMo.ZI_MO.getId())) {
+            totalPaoNum += 1;
+        }
+        //胡牌
+        totalPaoNum += 1;
+        //门前清1炮
+        if (personalCardInfo.getPengs().isEmpty()) {
+            List<Combo> gangs = personalCardInfo.getGangs();
+            if (gangs.isEmpty()) {
+                totalPaoNum += 1;
+            } else {
+                boolean isAllAnGang = true;
+                for (Combo gang : gangs) {
+                    if (gang.getPidValue() != PidValue.YING_AN_GANG) {
+                        isAllAnGang = false;
+                        break;
+                    }
+                }
+                if (isAllAnGang) {
+                    totalPaoNum += 1;
+                }
+            }
+        }
+
+        //算炮规则二：
+        //碰中，白板1炮
+        List<Combo> pengs = personalCardInfo.getPengs();
+        for (Combo peng : pengs) {
+            if (peng.getMahjongs().get(0).getNumber().equals(Mahjong.HONG_ZHONG_1.getNumber())
+                    || peng.getMahjongs().get(0).getNumber().equals(Mahjong.BAI_BAN_1.getNumber())) {
+                totalPaoNum += 1;
+                break;
+            }
+        }
+        //发财、四个癞子、三个白板未碰、三个红中未碰
+        int baoMahjongCount = 0;
+        int faiCaiCount = 0;
+        int baiBanCount = 0;
+        int hongZhongCount = 0;
+        for (Mahjong mahjong : personalCardInfo.getHandCards()) {
+            if (mahjong.getNumber().equals(Mahjong.FA_CAI_1.getNumber())) {
+                faiCaiCount++;
+            } else if (mahjong.getNumber().equals(mahjongGameData.getBaoMahjongs().get(0).getNumber())) {
+                baoMahjongCount++;
+            } else if (mahjong.getNumber().equals(Mahjong.BAI_BAN_1.getNumber())) {
+                baiBanCount++;
+            } else if (mahjong.getNumber().equals(Mahjong.HONG_ZHONG_1.getNumber())) {
+                hongZhongCount++;
+            }
+        }
+        if (baoMahjongCount == 4) {
+            totalPaoNum += 10;
+        }
+        switch (faiCaiCount) {
+            case 1:
+                totalPaoNum += 1;
+                break;
+            case 2:
+                totalPaoNum += 2;
+                break;
+            case 3:
+                totalPaoNum += 6;
+                break;
+            case 4:
+                totalPaoNum += 10;
+                break;
+        }
+        if (baiBanCount >= 3) {
+            totalPaoNum += 2;
+        }
+        if (hongZhongCount >= 3) {
+            totalPaoNum += 2;
+        }
+
+        // 暗杠、中，白暗杠、明杠、中，白明杠
+        List<Combo> gangs = personalCardInfo.getGangs();
+        for (Combo gang : gangs) {
+            if (gang.getPidValue() == PidValue.YING_DA_MING_GANG
+                    || gang.getPidValue() == PidValue.YING_JIA_GANG) {
+                if (gang.getMahjongs().get(0).getNumber().equals(Mahjong.HONG_ZHONG_1.getNumber())
+                        || gang.getMahjongs().get(0).getNumber().equals(Mahjong.BAI_BAN_1.getNumber())) {
+                    totalPaoNum += 3;
+                } else {
+                    totalPaoNum += 1;
+                }
+            } else if (gang.getPidValue() == PidValue.YING_AN_GANG) {
+                if (gang.getMahjongs().get(0).getNumber().equals(Mahjong.HONG_ZHONG_1.getNumber())
+                        || gang.getMahjongs().get(0).getNumber().equals(Mahjong.BAI_BAN_1.getNumber())) {
+                    totalPaoNum += 4;
+                } else {
+                    totalPaoNum += 2;
+                }
+            }
+        }
+
+        //抢杠
+        if (isQiangGang) {
+            totalPaoNum += 5;
+        }
+
+
+        //硬胡炮数翻倍
+        if (isYingHu) {
+            totalPaoNum *= 2;
+        }
+
+        // todome 单吊
+        // todome 卡牌
+
+        //设置最终得分
+        score.setPaoNum(totalPaoNum);
+        score.setScore(totalPaoNum * multiple);
+        score.setCoin(score.getScore());
 
     }
 }

@@ -62,7 +62,7 @@ public class GetACardTest extends AbstractTestClass {
         }
 
         // 第一次发牌
-        //gameService.firstPutOutCard(room, roomMembers);
+        //gameService.putOutHandCard(room, roomMembers);
 
         // 第一个人出牌
         //Long version = versionRedis.nextVersion(room.getId());
@@ -136,7 +136,7 @@ public class GetACardTest extends AbstractTestClass {
         }
 
         // 第一次发牌
-        //gameService.firstPutOutCard(room, roomMembers);
+        //gameService.putOutHandCard(room, roomMembers);
 
         // 第一个人出牌
         //Long version = versionRedis.nextVersion(room.getId());
@@ -371,7 +371,7 @@ public class GetACardTest extends AbstractTestClass {
         }
 
         // 第一次发牌
-        //gameService.firstPutOutCard(room, roomMembers);
+        //gameService.putOutHandCard(room, roomMembers);
 
         // 第一个人出牌
         //Long version = versionRedis.nextVersion(room.getId());
@@ -526,7 +526,7 @@ public class GetACardTest extends AbstractTestClass {
         }
 
         // 第一次发牌
-        //gameService.firstPutOutCard(room, roomMembers);
+        //gameService.putOutHandCard(room, roomMembers);
 
         // 第一个人出牌
         //Long version = versionRedis.nextVersion(room.getId());
@@ -681,7 +681,7 @@ public class GetACardTest extends AbstractTestClass {
         }
 
         // 第一次发牌
-        //gameService.firstPutOutCard(room, roomMembers);
+        //gameService.putOutHandCard(room, roomMembers);
 
         // 第一个人出牌
         //Long version = versionRedis.nextVersion(room.getId());
@@ -835,7 +835,7 @@ public class GetACardTest extends AbstractTestClass {
         }
 
         // 第一次发牌
-        //gameService.firstPutOutCard(room, roomMembers);
+        //gameService.putOutHandCard(room, roomMembers);
 
         // 第一个人出牌
         //Long version = versionRedis.nextVersion(room.getId());
@@ -989,7 +989,7 @@ public class GetACardTest extends AbstractTestClass {
         }
 
         // 第一次发牌
-        //gameService.firstPutOutCard(room, roomMembers);
+        //gameService.putOutHandCard(room, roomMembers);
 
         // 第一个人出牌
         //Long version = versionRedis.nextVersion(room.getId());
@@ -1143,7 +1143,7 @@ public class GetACardTest extends AbstractTestClass {
         }
 
         // 第一次发牌
-        //gameService.firstPutOutCard(room, roomMembers);
+        //gameService.putOutHandCard(room, roomMembers);
 
         // 第一个人出牌
         //Long version = versionRedis.nextVersion(room.getId());
@@ -1309,7 +1309,7 @@ public class GetACardTest extends AbstractTestClass {
         }
 
         // 第一次发牌
-        //gameService.firstPutOutCard(room, roomMembers);
+        //gameService.putOutHandCard(room, roomMembers);
 
         // 第一个人出牌
         //Long version = versionRedis.nextVersion(room.getId());

@@ -15,4 +15,9 @@ public class ScoreDaoImpl extends BaseDaoImpl<Integer, Score> implements ScoreDa
                 userId
         );
     }
+
+    @Override
+    public Integer findLastWinnerByRoomId(Integer id) {
+        return null;
+    }
 }

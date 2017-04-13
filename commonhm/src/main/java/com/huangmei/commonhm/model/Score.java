@@ -1,5 +1,8 @@
 package com.huangmei.commonhm.model;
 
+import com.huangmei.commonhm.manager.operate.Operate;
+import com.huangmei.commonhm.util.CommonError;
+
 public class Score implements Entity {
 
     private static final long serialVersionUID = 1L;
@@ -13,13 +16,17 @@ public class Score implements Entity {
     /**  */
     protected Integer coin;
 
-    /**  */
+    /**
+     * 点炮的用户id
+     */
     protected Integer dianPaoUserId;
 
     /**  */
     protected Integer isZiMo;
 
-    /**  */
+    /**
+     * 接炮的用户id
+     */
     protected Integer jiePaoUserId;
 
     /**  */
@@ -28,10 +35,14 @@ public class Score implements Entity {
     /**  */
     protected Integer roomId;
 
-    /** 分数 */
+    /**
+     * 分数
+     */
     protected Integer score;
 
-    /** 炮数 */
+    /**
+     * 炮数
+     */
     protected Integer paoNum;
 
     /**
@@ -39,7 +50,9 @@ public class Score implements Entity {
      */
     protected Integer times;
 
-    /** 金币房、好友房 */
+    /**
+     * 金币房、好友房
+     */
     protected Integer type;
 
     /**  */
@@ -125,16 +138,16 @@ public class Score implements Entity {
         return score;
     }
 
+    public void setScore(Integer score) {
+        this.score = score;
+    }
+
     public Integer getPaoNum() {
         return paoNum;
     }
 
     public void setPaoNum(Integer paoNum) {
         this.paoNum = paoNum;
-    }
-
-    public void setScore(Integer score) {
-        this.score = score;
     }
 
     public Integer getTimes() {
@@ -237,22 +250,12 @@ public class Score implements Entity {
         return true;
     }
 
-    public static enum Type {
-        COIN_ROOM(1, "金币房"),
-        FRIEND_ROOM(2, "竞技房");
-
-        private Integer id;
-        private String name;
-
-        Type(Integer id, String name) {
-            this.id = id;
-            this.name = name;
-        }
-    }
-
-    public static enum WinType {
-        NONE(0, "没有胡牌"),
-        FRIEND_ROOM(2, "竞技房");
+    public enum WinType {
+        NONE(1, "没有胡牌,不用输分"),
+        ZI_MO(2, "自摸"),
+        DIAN_PAO(3, "点炮"),
+        JIE_PAO(4, "接炮"),
+        OTHER_USER_ZI_MO(5, "别家自摸");
 
         private Integer id;
         private String name;
@@ -261,6 +264,122 @@ public class Score implements Entity {
             this.id = id;
             this.name = name;
         }
+
+        public Integer getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
     }
+
+    public enum HuType {
+        PING_HU(1, 0, "平胡"),
+        PING_HU_GANG_SHANG_HUA(2, 5, "平胡杠上开花"),
+        PENG_PENG_HU(3, 10, "碰碰胡"),
+        QI_DUI(4, 10, "七对"),
+        QING_YI_SE(5, 15, "清一色"),
+        PENG_PENG_HU_GANG_SHANG_HUA(6, 15, "碰碰胡杠上开花"),
+        QI_DUI_GANG_SHANG_HUA(7, 15, "七对杠上开花"),
+        QING_YI_SE_GANG_SHANG_HUA(8, 20, "清一色杠上开花"),
+        QING_YI_SE_PENG_PENG_HU(9, 25, "清一色碰碰胡"),
+        QING_YI_SE_QI_DUI(10, 25, "清一色七对"),
+        QING_YI_SE_PENG_PENG_HU_GANG_SHANG_HUA(11, 30, "清一色碰碰胡杠上开花"),
+        QING_YI_SE_QI_DUI_GANG_SHANG_HUA(12, 30, "清一色七对杠上开花");
+
+        private Integer id;
+        private Integer paoNum;
+        private String name;
+
+        HuType(Integer id, Integer paoNum, String name) {
+            this.id = id;
+            this.paoNum = paoNum;
+            this.name = name;
+        }
+
+        public static HuType parse(Operate operate) {
+            if (operate == null) {
+                throw CommonError.SYS_PARAM_ERROR.newException();
+            }
+
+            HuType result = null;
+            switch (operate) {
+                case ZI_MO_YING_PENG_PENG_HU:
+                    result = PENG_PENG_HU;
+                    break;
+                case ZI_MO_RUAN_PENG_PENG_HU:
+                    result = PENG_PENG_HU;
+                    break;
+                case ZI_MO_YING_QI_DUI_HU:
+                    result = QI_DUI;
+                    break;
+                case ZI_MO_RUAN_QI_DUI_HU:
+                    result = QI_DUI;
+                    break;
+                case ZI_MO_YING_PING_HU:
+                    result = PING_HU;
+                    break;
+                case ZI_MO_RUAN_PING_HU:
+                    result = PING_HU;
+                    break;
+                case CHI_YING_PENG_PENG_HU:
+                    result = PENG_PENG_HU;
+                    break;
+                case CHI_RUAN_PENG_PENG_HU:
+                    result = PENG_PENG_HU;
+                    break;
+                case CHI_YING_QI_DUI_HU:
+                    result = QI_DUI;
+                    break;
+                case CHI_RUAN_QI_DUI_HU:
+                    result = QI_DUI;
+                    break;
+                case CHI_YING_PING_HU:
+                    result = PING_HU;
+                    break;
+                case CHI_RUAN_PING_HU:
+                    result = PING_HU;
+                    break;
+                default:
+                    throw CommonError.SYS_PARAM_ERROR.newException();
+            }
+            return result;
+        }
+
+        public Integer getPaoNum() {
+            return paoNum;
+        }
+
+        public Integer getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+
+    public enum IsZiMo {
+        ZI_MO(1, "自摸"),
+        NOT_ZI_MO(2, "非自摸");
+
+        private Integer id;
+        private String name;
+
+        IsZiMo(Integer id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public Integer getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+
 
 }

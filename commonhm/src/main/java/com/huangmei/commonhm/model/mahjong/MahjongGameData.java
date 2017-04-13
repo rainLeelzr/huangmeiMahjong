@@ -60,6 +60,15 @@ public class MahjongGameData {
     // 骰子
     private Integer[] dices;
 
+    // 房间类型
+    private Integer roomType;
+
+    // 总局数
+    private Integer times;
+
+    // 当前局数
+    private Integer currentTimes;
+
     //n个人的手牌，玩家的座位与list下标对应，第一个玩家下标为0
     private List<PersonalCardInfo> personalCardInfos;
 
@@ -72,6 +81,7 @@ public class MahjongGameData {
      * 玩家打出的牌
      */
     private List<OutCard> outCards;
+
     /**
      * 玩家摸到的牌
      */
@@ -80,14 +90,17 @@ public class MahjongGameData {
      * 宝娘
      */
     private Mahjong baoMother;
+
     /**
      * 宝牌
      */
     private List<Mahjong> baoMahjongs;
+
     /**
      * 宝牌可以变成以下的牌
      */
     private List<Mahjong> baoMahjongMakeUpMahjongs;
+
     /**
      * 消息版本号
      */
@@ -102,7 +115,7 @@ public class MahjongGameData {
      * @param players    玩家人数，决定分多少副手牌
      * @param bankerSite 庄家的座位号，从1开始。庄家会多摸一张牌
      */
-    public static MahjongGameData initData(int players, int bankerSite) {
+    public static MahjongGameData initData(int players, int bankerSite, int currentTimes) {
         // 获取所有麻将牌
         //List<Mahjong> allMahjongs = Mahjong.getAllMahjongs();
         // DEBUGING 生成指定麻将列表
@@ -145,6 +158,7 @@ public class MahjongGameData {
         mahjongGameData.setPersonalCardInfos(handCards);
         mahjongGameData.setLeftCards(leftCards);
         mahjongGameData.setTouchMahjongs(new ArrayList<TouchMahjong>(1));
+        mahjongGameData.setCurrentTimes(currentTimes);
 
         // 掷骰
         mahjongGameData.dices = rollDice();
@@ -257,6 +271,30 @@ public class MahjongGameData {
         baoMahjongs.add(Mahjong.THREE_TIAO_4);
         data.setBaoMahjongs(baoMahjongs);
         data.getBaoMahjongMakeUpMahjongs();
+    }
+
+    public Integer getRoomType() {
+        return roomType;
+    }
+
+    public void setRoomType(Integer roomType) {
+        this.roomType = roomType;
+    }
+
+    public Integer getTimes() {
+        return times;
+    }
+
+    public void setTimes(Integer times) {
+        this.times = times;
+    }
+
+    public Integer getCurrentTimes() {
+        return currentTimes;
+    }
+
+    public void setCurrentTimes(Integer currentTimes) {
+        this.currentTimes = currentTimes;
     }
 
     public List<TouchMahjong> getTouchMahjongs() {

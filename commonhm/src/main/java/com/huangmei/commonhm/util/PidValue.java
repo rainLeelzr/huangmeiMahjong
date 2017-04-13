@@ -76,7 +76,8 @@ public enum PidValue {
     GAME_START(4008, "游戏开始消息推送"),
     HORN_SPEAK(4009, "全服喊话"),
     //QIANG_GANG(4007, "抢杠消息推送");
-    COMMUNICATION(4010, "聊天推送");
+    COMMUNICATION(4010, "聊天推送"),
+    SINGLE_SCORE(4011, "单局结算广播");
 
     private int pid;
 

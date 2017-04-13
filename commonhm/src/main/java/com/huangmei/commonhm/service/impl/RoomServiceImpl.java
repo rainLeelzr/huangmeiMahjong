@@ -515,7 +515,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                     room.setStart(Room.start.STARTED.getCode());
                     room.setState(Room.state.PLAYING.getCode());
                     roomDao.update(room);
-                    Map<String, Object> mahjongGameData = gameService.firstPutOutCard(room, roomMembers);
+                    Map<String, Object> mahjongGameData = gameService.putOutHandCard(room, roomMembers);
                     result.putAll(mahjongGameData);
                     type = 2;
                 } else {
