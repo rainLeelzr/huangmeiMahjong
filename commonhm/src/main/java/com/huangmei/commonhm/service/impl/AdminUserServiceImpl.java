@@ -31,8 +31,8 @@ public class AdminUserServiceImpl extends BaseServiceImpl<Integer, AdminUser> im
 		
 		AdminUserCriteria criteria = new AdminUserCriteria();
 		criteria.setUserName(Value.eq(passport));
-        criteria.setPassword(Value.eq(password));//CryptUtil.md5(password)
-        AdminUser admin = selectOne(criteria);
+		criteria.setPassword(Value.eq(CryptUtil.md5(password)));//CryptUtil.md5(password)
+		AdminUser admin = selectOne(criteria);
 		if (admin == null) {
 			result.addErrorCode(ErrorCode.CUSTOM_USER_PWD_ERROR);
 			return result;
