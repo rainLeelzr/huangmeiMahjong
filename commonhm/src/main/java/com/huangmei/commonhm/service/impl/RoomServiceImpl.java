@@ -287,58 +287,64 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
      */
     @Override
     public Map<String, Object> outRoom(JSONObject data, User user) {
-        Map<String, Object> result = new HashMap<>(2);
-
-        Integer roomCode = (Integer) data.get("roomCode");
-
-
-        if (user != null) {
-            RoomMember roomMember = checkInRoom(user.getId());
-            if (roomMember != null) {//需要在房间中才能退出房间
-                Room room = getRoomByRoomCode(roomCode);
-
-                if (room != null) {
-                    Long count = roomRedis.getRoomMemberCount(room.getId().toString());
-                    if (count > 1) {//房间人数大于1人时,退出房间后房间状态为待开始状态
-                        room.setState(Room.state.wait.getCode());
-                    } else {//房间只剩下1个人时,退出房间后房间状态为解散状态
-                        room.setState(Room.state.DISMISS.getCode());
-                        room.setLastLoginTime(new Date());
-                        roomRedis.dismissRoom(room);
-                    }
-                    roomDao.update(room);
-                } else {
-                    throw CommonError.ROOM_NOT_EXIST.newException();
-                }
-                roomRedis.editRoom(roomMember);//移除redis中的房间成员
-
-                //座位顺序比退出玩家位置大的玩家都需要退后一位
-                Set<RoomMember> roomMembers = roomRedis.getRoomMembers(room.getId().toString());
-                for (RoomMember member : roomMembers) {
-                    if (member.getSeat() > roomMember.getSeat()) {
-                        roomRedis.editRoom(member);
-                        member.setSeat(member.getSeat() - 1);
-                        roomMemberDao.update(member);
-                        roomRedis.joinRoom(member);//更新redis中的房间用户信息
-                    }
-
-                }
-
-                roomMember.setState(RoomMember.state.OUT_ROOM.getCode());
-                roomMember.setSeat(-1);
-                roomMember.setLeaveTime(new Date());
-                roomMemberDao.update(roomMember);
-
-                result.put("roomId", room.getId());
-                result.put("result", true);
-                return result;
-            } else {
-                throw CommonError.ROOM_USER_NOT_IN_ROOM.newException();
-            }
-        } else {
+        if (user == null) {
             throw CommonError.USER_NOT_EXIST.newException();
         }
 
+        Integer roomCode = (Integer) data.get("roomCode");
+        return outRoom(roomCode, user.getId());
+    }
+
+    /**
+     * 退出房间
+     *
+     * @param data
+     * @return
+     */
+    public Map<String, Object> outRoom(Integer roomCode, Integer userId) {
+        Map<String, Object> result = new HashMap<>(2);
+
+        RoomMember roomMember = checkInRoom(userId);
+        if (roomMember != null) {//需要在房间中才能退出房间
+            Room room = getRoomByRoomCode(roomCode);
+
+            if (room != null) {
+                Long count = roomRedis.getRoomMemberCount(room.getId().toString());
+                if (count > 1) {//房间人数大于1人时,退出房间后房间状态为待开始状态
+                    room.setState(Room.state.wait.getCode());
+                } else {//房间只剩下1个人时,退出房间后房间状态为解散状态
+                    room.setState(Room.state.DISMISS.getCode());
+                    room.setLastLoginTime(new Date());
+                    roomRedis.dismissRoom(room);
+                }
+                roomDao.update(room);
+            } else {
+                throw CommonError.ROOM_NOT_EXIST.newException();
+            }
+            roomRedis.editRoom(roomMember);//移除redis中的房间成员
+
+            //座位顺序比退出玩家位置大的玩家都需要退后一位
+            Set<RoomMember> roomMembers = roomRedis.getRoomMembers(room.getId().toString());
+            for (RoomMember member : roomMembers) {
+                if (member.getSeat() > roomMember.getSeat()) {
+                    roomRedis.editRoom(member);
+                    member.setSeat(member.getSeat() - 1);
+                    roomMemberDao.update(member);
+                    roomRedis.joinRoom(member);//更新redis中的房间用户信息
+                }
+            }
+
+            roomMember.setState(RoomMember.state.OUT_ROOM.getCode());
+            roomMember.setSeat(-1);
+            roomMember.setLeaveTime(new Date());
+            roomMemberDao.update(roomMember);
+
+            result.put("roomId", room.getId());
+            result.put("result", true);
+            return result;
+        } else {
+            throw CommonError.ROOM_USER_NOT_IN_ROOM.newException();
+        }
     }
 
     /**

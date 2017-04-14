@@ -22,9 +22,11 @@ import com.huangmei.commonhm.model.mahjong.vo.PlayedMahjong;
 import com.huangmei.commonhm.redis.GameRedis;
 import com.huangmei.commonhm.redis.RoomRedis;
 import com.huangmei.commonhm.redis.VersionRedis;
+import com.huangmei.commonhm.service.RoomService;
 import com.huangmei.commonhm.util.CommonError;
 import com.huangmei.commonhm.util.JsonUtil;
 import com.huangmei.commonhm.util.PidValue;
+import net.sf.json.JSONObject;
 import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +70,9 @@ public class GameService {
     @Autowired
     private RoomRedis roomRedis;
 
+    @Autowired
+    private RoomService roomService;
+
     /**
      * 判断玩家有没有执行操作的权利
      *
@@ -91,8 +96,7 @@ public class GameService {
      *
      * @param roomId      玩家所在的房间id
      * @param userId      玩家id
-     * @param baseOperate
-     * 玩家需要执行的操作
+     * @param baseOperate 玩家需要执行的操作
      */
     private void canOperate(Integer roomId, Integer userId, BaseOperate baseOperate) {
         // 取出等待客户端操作对象waitingClientOperate
@@ -783,12 +787,10 @@ public class GameService {
 
         if (nextCanDoOperate != null) {
             gameRedis.saveWaitingClientOperate(nextCanDoOperate);
-
         }
 
         // 取出麻将数据对象
         MahjongGameData mahjongGameData = gameRedis.getMahjongGameData(room.getId());
-
 
         return new Object[]{nextCanDoOperate, waitingClientOperate, mahjongGameData};
 
@@ -816,70 +818,7 @@ public class GameService {
             throw CommonError.SYS_PARAM_ERROR.newException();
         }
 
-        Date now = new Date();
-
-        List<Score> scores = new ArrayList<>(mahjongGameData.getPersonalCardInfos().size());
-
-        for (int i = 0; i < mahjongGameData.getPersonalCardInfos().size(); i++) {
-            PersonalCardInfo personalCardInfo = mahjongGameData.getPersonalCardInfos().get(i);
-            Score score = new Score();
-            score.setRoomId(room.getId());
-            score.setUserId(personalCardInfo.getRoomMember().getUserId());
-            score.setCreatedTime(now);
-            score.setType(room.getType());
-            score.setTimes(mahjongGameData.getCurrentTimes());
-
-
-            boolean isWinner = personalCardInfo.getRoomMember().getUserId().equals(user.getId());
-
-            // 杠数量
-            int anGangTimes = 0;
-            int mingGangTimes = 0;
-            List<Combo> gangCombos = personalCardInfo.getGangs();
-            for (Combo gangCombo : gangCombos) {
-                if (gangCombo.getPidValue() == PidValue.YING_AN_GANG) {
-                    anGangTimes++;
-                } else if (gangCombo.getPidValue() == PidValue.YING_DA_MING_GANG
-                        || gangCombo.getPidValue() == PidValue.YING_JIA_GANG) {
-                    mingGangTimes++;
-                }
-            }
-            score.setAnGangTimes(anGangTimes);
-            score.setMingGangTimes(mingGangTimes);
-
-            if (isWinner) {
-                score.setIsZiMo(Score.IsZiMo.ZI_MO.getId());
-                score.setWinType(Score.WinType.ZI_MO.getId());
-
-                // 设置胡牌类型
-                Operate operate = null;
-                for (Operate temp : canOperates.get(0).getOperates()) {
-                    operate = temp;
-                    break;
-                }
-
-                Score.HuType huType = Score.HuType.parse(operate);
-                score.setHuType(huType.getId());
-
-                // 计算总炮数
-                calculatePaoNum(
-                        mahjongGameData,
-                        personalCardInfo,
-                        huType,
-                        false,
-                        true,
-                        room.getMultiple(),
-                        score);
-            } else {
-                score.setIsZiMo(Score.IsZiMo.NOT_ZI_MO.getId());
-                score.setScore(0);
-                score.setPaoNum(0);
-                score.setCoin(0);
-                score.setWinType(Score.WinType.OTHER_USER_ZI_MO.getId());
-            }
-
-            scores.add(score);
-        }
+        List<Score> scores = genScores4Game(mahjongGameData, room, canOperates.get(0));
 
         for (Score score : scores) {
             scoreDao.save(score);
@@ -1259,6 +1198,11 @@ public class GameService {
                 temp.setState(Room.state.wait.getCode());
                 roomMemberDao.update(temp);
             }
+        } else {
+            // 退出房间、总结算
+            for (Score score : scores) {
+                roomService.outRoom(room.getRoomCode(), score.getUserId());
+            }
         }
         return new Object[]{scores, mahjongGameData, specialMahjong};
     }
@@ -1369,6 +1313,19 @@ public class GameService {
             scoreDao.save(score);
         }
 
+        // 清除被抢杠用户的杠
+        PersonalCardInfo gangUserCardInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), gangUser);
+        List<Combo> gangs = gangUserCardInfo.getGangs();
+        Iterator<Combo> iterator = gangs.iterator();
+        while (iterator.hasNext()) {
+            Combo next = iterator.next();
+            if (next.getMahjongs().get(0).getNumber().equals(qiangGangMahjong.getNumber())) {
+                iterator.remove();
+                break;
+            }
+        }
+        gameRedis.saveMahjongGameData(mahjongGameData);
+
         //金币房所有玩家变成待准备状态，房间状态改为待开始
         //好友房在没有达到局数上限时，所有玩家变成待准备状态，房间状态改为待开始
         if (mahjongGameData.getRoomType().equals(Room.type.COINS_ROOM)
@@ -1389,6 +1346,77 @@ public class GameService {
             }
         }
         return new Object[]{scores, mahjongGameData, specialMahjong};
+    }
+
+    private List<Score> genScores4Game(
+            MahjongGameData mahjongGameData,
+            Room room,
+            CanDoOperate canOperate) {
+        List<Score> scores = new ArrayList<>(mahjongGameData.getPersonalCardInfos().size());
+
+        Date now = new Date();
+
+        for (int i = 0; i < mahjongGameData.getPersonalCardInfos().size(); i++) {
+            PersonalCardInfo personalCardInfo = mahjongGameData.getPersonalCardInfos().get(i);
+            Score score = new Score();
+            score.setRoomId(room.getId());
+            score.setUserId(personalCardInfo.getRoomMember().getUserId());
+            score.setCreatedTime(now);
+            score.setType(room.getType());
+            score.setTimes(mahjongGameData.getCurrentTimes());
+
+            boolean isWinner = personalCardInfo.getRoomMember().getUserId().equals(user.getId());
+
+            // 杠数量
+            int anGangTimes = 0;
+            int mingGangTimes = 0;
+            List<Combo> gangCombos = personalCardInfo.getGangs();
+            for (Combo gangCombo : gangCombos) {
+                if (gangCombo.getPidValue() == PidValue.YING_AN_GANG) {
+                    anGangTimes++;
+                } else if (gangCombo.getPidValue() == PidValue.YING_DA_MING_GANG
+                        || gangCombo.getPidValue() == PidValue.YING_JIA_GANG) {
+                    mingGangTimes++;
+                }
+            }
+            score.setAnGangTimes(anGangTimes);
+            score.setMingGangTimes(mingGangTimes);
+
+            if (isWinner) {
+                score.setIsZiMo(Score.IsZiMo.ZI_MO.getId());
+                score.setWinType(Score.WinType.ZI_MO.getId());
+
+                // 设置胡牌类型
+                Operate operate = null;
+                for (Operate temp : canOperate.getOperates()) {
+                    operate = temp;
+                    break;
+                }
+
+                Score.HuType huType = Score.HuType.parse(operate);
+                score.setHuType(huType.getId());
+
+                // 计算总炮数
+                calculatePaoNum(
+                        mahjongGameData,
+                        personalCardInfo,
+                        huType,
+                        false,
+                        true,
+                        room.getMultiple(),
+                        score);
+            } else {
+                score.setIsZiMo(Score.IsZiMo.NOT_ZI_MO.getId());
+                score.setScore(0);
+                score.setPaoNum(0);
+                score.setCoin(0);
+                score.setWinType(Score.WinType.OTHER_USER_ZI_MO.getId());
+            }
+
+            scores.add(score);
+        }
+
+        return scores;
     }
 
     /**

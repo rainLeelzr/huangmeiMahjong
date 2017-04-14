@@ -1550,7 +1550,10 @@ public class ActionRouter {
                         .build());
 
         // todome 总结算广播
-
+        if (mahjongGameData.getRoomType().equals(Room.type.FRIENDS_ROOM)
+                && mahjongGameData.getCurrentTimes().equals(mahjongGameData.getTimes())) {
+            
+        }
 
         return null;
     }
