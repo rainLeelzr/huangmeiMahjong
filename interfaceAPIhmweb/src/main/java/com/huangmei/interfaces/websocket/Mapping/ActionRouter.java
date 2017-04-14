@@ -881,6 +881,12 @@ public class ActionRouter {
                             getUserByUserId(
                                     personalCardInfo.getRoomMember().getUserId()
                             ).getUId(),
+                            user.getUId(),
+                            mahjongGameData
+                                    .getTouchMahjongs()
+                                    .get(mahjongGameData.getTouchMahjongs().size() - 1)
+                                    .getMahjong()
+                                    .getId(),
                             toBeGangMahjongIds,
                             user.getUId(),
                             PidValue.YING_AN_GANG.getPid(),
@@ -947,6 +953,8 @@ public class ActionRouter {
                             getUserByUserId(
                                     personalCardInfo.getRoomMember().getUserId()
                             ).getUId(),
+                            user.getUId(),
+                            toBeJiaGangMahjongId,
                             Mahjong.parseToIds(jiaGangCombo.mahjongs),
                             user.getUId(),
                             PidValue.YING_AN_GANG.getPid(),
@@ -980,7 +988,6 @@ public class ActionRouter {
      * @param mahjongGameData 游戏数据
      * @param mahjong         别人打出或自己摸到的麻将
      * @param user            需要大明杠或者加杠的玩家
-     * @param isYing          是否硬抢杠胡
      */
     private void scanAnyUserQiangGangHandler(MahjongGameData mahjongGameData, Mahjong mahjong, User user) throws InstantiationException, IllegalAccessException {
         // 判断其他玩家有没有抢杠
@@ -1043,6 +1050,13 @@ public class ActionRouter {
                             getUserByUserId(
                                     personalCardInfo.getRoomMember().getUserId()
                             ).getUId(),
+                            getUserByUserId(mahjongGameData
+                                    .getOutCards()
+                                    .get(mahjongGameData.getOutCards().size() - 1)
+                                    .getRoomMember()
+                                    .getUserId()
+                            ).getUId(),
+                            toBeYingDaMingGangMahjongId.get(3),
                             Mahjong.parseToIds(yingDaMingGangCombo.mahjongs),
                             user.getUId(),
                             PidValue.YING_DA_MING_GANG.getPid(),
@@ -1552,7 +1566,7 @@ public class ActionRouter {
         // todome 总结算广播
         if (mahjongGameData.getRoomType().equals(Room.type.FRIENDS_ROOM)
                 && mahjongGameData.getCurrentTimes().equals(mahjongGameData.getTimes())) {
-            
+
         }
 
         return null;
