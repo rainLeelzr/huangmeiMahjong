@@ -818,7 +818,7 @@ public class GameService {
             throw CommonError.SYS_PARAM_ERROR.newException();
         }
 
-        List<Score> scores = genScores4Game(mahjongGameData, room, canOperates.get(0));
+        List<Score> scores = genScores4Game(mahjongGameData, room, user, canOperates.get(0));
 
         for (Score score : scores) {
             scoreDao.save(score);
@@ -1351,6 +1351,7 @@ public class GameService {
     private List<Score> genScores4Game(
             MahjongGameData mahjongGameData,
             Room room,
+            User user,
             CanDoOperate canOperate) {
         List<Score> scores = new ArrayList<>(mahjongGameData.getPersonalCardInfos().size());
 
