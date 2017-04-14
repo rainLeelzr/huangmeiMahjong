@@ -1,8 +1,5 @@
 package com.huangmei.commonhm.service.impl;
 
-import java.io.Serializable;
-import java.util.List;
-
 import com.huangmei.commonhm.dao.BaseDao;
 import com.huangmei.commonhm.model.Entity;
 import com.huangmei.commonhm.model.Entity.Criteria;
@@ -12,6 +9,9 @@ import com.huangmei.commonhm.service.BaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.io.Serializable;
+import java.util.List;
 
 public class BaseServiceImpl<K extends Serializable, E extends Entity> implements BaseService<K, E> {
 	
@@ -77,6 +77,9 @@ public class BaseServiceImpl<K extends Serializable, E extends Entity> implement
 		}
 		if (pagination.getLimit() == 0) {
 			pagination.setLimit(10);
+		}
+		if (pagination.getPage() == 0) {
+			pagination.setPage(1);
 		}
 		if (pagination.getSort() != null) {
 			if (pagination.getOrder() == null) {

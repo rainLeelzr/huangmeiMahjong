@@ -95,7 +95,7 @@
 					  warningAlert(result.message[0].msg);
 				  }
 				});
-			return false;
+            //return false;
 		}
 	}
 

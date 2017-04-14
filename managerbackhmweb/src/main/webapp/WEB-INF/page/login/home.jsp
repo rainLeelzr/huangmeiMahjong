@@ -173,6 +173,12 @@ Purchase: http://wrapbootstrap.com
 			                <span class="menu-text">用户管理 </span>
 		                </a>
 			        </li>
+                    <li>
+                        <a href="javascript:pageTo('menu-icon fa fa-user-o','查看玩家','adminMgt/userList.do')">
+                            <i class="menu-icon fa fa-picture-o"></i>
+                            <span class="menu-text">查看玩家 </span>
+                        </a>
+                    </li>
 			    </ul>
 			    <!-- /Sidebar Menu -->
 			</div>
