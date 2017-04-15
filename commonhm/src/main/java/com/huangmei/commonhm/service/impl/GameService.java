@@ -15,10 +15,7 @@ import com.huangmei.commonhm.model.RoomMember;
 import com.huangmei.commonhm.model.Score;
 import com.huangmei.commonhm.model.User;
 import com.huangmei.commonhm.model.mahjong.*;
-import com.huangmei.commonhm.model.mahjong.vo.FirstPutOutCard;
-import com.huangmei.commonhm.model.mahjong.vo.GameStartVo;
-import com.huangmei.commonhm.model.mahjong.vo.GangVo;
-import com.huangmei.commonhm.model.mahjong.vo.PlayedMahjong;
+import com.huangmei.commonhm.model.mahjong.vo.*;
 import com.huangmei.commonhm.redis.GameRedis;
 import com.huangmei.commonhm.redis.RoomRedis;
 import com.huangmei.commonhm.redis.VersionRedis;
@@ -26,7 +23,6 @@ import com.huangmei.commonhm.service.RoomService;
 import com.huangmei.commonhm.util.CommonError;
 import com.huangmei.commonhm.util.JsonUtil;
 import com.huangmei.commonhm.util.PidValue;
-import net.sf.json.JSONObject;
 import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -824,15 +820,27 @@ public class GameService {
             scoreDao.save(score);
         }
 
-        //金币房所有玩家变成待准备状态，房间状态改为待开始
-        //好友房在没有达到局数上限时，所有玩家变成待准备状态，房间状态改为待开始
+        // 为下一局游戏做准备，或者结束游戏
+        List<SingleUserGameScoreVo> singleUserGameScoreVos = ready4NextGameOrFinishGame(mahjongGameData, room, scores);
+
+        return new Object[]{scores, mahjongGameData, specialMahjong, singleUserGameScoreVos};
+    }
+
+    /**
+     * 为下一局游戏做准备，或者结束游戏
+     * 金币房所有玩家变成待准备状态，房间状态改为待开始
+     * 好友房在没有达到局数上限时，所有玩家变成待准备状态，房间状态改为待开始
+     */
+    private List<SingleUserGameScoreVo> ready4NextGameOrFinishGame(MahjongGameData mahjongGameData, Room room, List<Score> scores) {
+        List<SingleUserGameScoreVo> singleUserGameScoreVos = null;
+
         if (mahjongGameData.getRoomType().equals(Room.type.COINS_ROOM)
                 || mahjongGameData.getCurrentTimes() < mahjongGameData.getTimes()) {
             room.setState(Room.state.wait.getCode());
             roomDao.update(room);
 
             for (PersonalCardInfo personalCardInfo : mahjongGameData.getPersonalCardInfos()) {
-                // roomMember改为游戏中
+                // roomMember改待准备
                 personalCardInfo.getRoomMember().setState(Room.state.wait.getCode());
                 roomRedis.editRoom(personalCardInfo.getRoomMember());
                 roomRedis.joinRoom(personalCardInfo.getRoomMember());
@@ -842,10 +850,81 @@ public class GameService {
                 temp.setState(Room.state.wait.getCode());
                 roomMemberDao.update(temp);
             }
+        } else {
+            for (Score score : scores) {
+                roomService.outRoom(room.getRoomCode(), score.getUserId());
+            }
+
+            singleUserGameScoreVos = calculateTotalScore(mahjongGameData);
         }
-        return new Object[]{scores, mahjongGameData, specialMahjong};
+        return singleUserGameScoreVos;
     }
 
+    /**
+     * 计算房间总结算
+     */
+    private List<SingleUserGameScoreVo> calculateTotalScore(MahjongGameData mahjongGameData) {
+        List<SingleUserGameScoreVo> singleUserGameScoreVos = new ArrayList<>(mahjongGameData.getPersonalCardInfos().size());
+        for (PersonalCardInfo cardInfo : mahjongGameData.getPersonalCardInfos()) {
+            SingleUserGameScoreVo userGameScoreVo = new SingleUserGameScoreVo();
+            userGameScoreVo.setuId(cardInfo.getRoomMember().getUserId());// 先设置为userId，在api层转为uId
+            singleUserGameScoreVos.add(userGameScoreVo);
+        }
+
+        Integer roomId = mahjongGameData.getRoomId();
+
+        // 总结算
+        // 自摸次数
+        Score scoreQueryParam = new Score();
+        scoreQueryParam.setRoomId(roomId);
+        scoreQueryParam.setIsZiMo(Score.IsZiMo.ZI_MO.getId());
+        List<Score> ziMoTimes = scoreDao.ziMoTimes(scoreQueryParam);
+        for (Score ziMoTime : ziMoTimes) {
+            for (SingleUserGameScoreVo singleUserGameScoreVo : singleUserGameScoreVos) {
+                if (singleUserGameScoreVo.getuId().equals(ziMoTime.getUserId())) {
+                    singleUserGameScoreVo.setZiMo(ziMoTime.getIsZiMo());
+                    break;
+                }
+            }
+        }
+
+        // 杠次数、总分数
+        List<Score> scoreAndGangTimes = scoreDao.scoreAndGangTimes(roomId);
+        for (Score scoreAndGangTime : scoreAndGangTimes) {
+            for (SingleUserGameScoreVo singleUserGameScoreVo : singleUserGameScoreVos) {
+                if (singleUserGameScoreVo.getuId().equals(scoreAndGangTime.getUserId())) {
+                    singleUserGameScoreVo.setAnGang(scoreAndGangTime.getAnGangTimes());
+                    singleUserGameScoreVo.setAnGang(scoreAndGangTime.getMingGangTimes());
+                    singleUserGameScoreVo.setScore(scoreAndGangTime.getScore());
+                    break;
+                }
+            }
+        }
+
+        // 接炮次数
+        List<Score> jiePaoTimes = scoreDao.jiePaoTimes(roomId);
+        for (Score jiePaoTime : jiePaoTimes) {
+            for (SingleUserGameScoreVo singleUserGameScoreVo : singleUserGameScoreVos) {
+                if (singleUserGameScoreVo.getuId().equals(jiePaoTime.getUserId())) {
+                    singleUserGameScoreVo.setAnGang(jiePaoTime.getJiePaoUserId());
+                    break;
+                }
+            }
+        }
+
+        // 点炮次数
+        List<Score> dianPaoTimes = scoreDao.dianPaoTimes(roomId);
+        for (Score dianPaoTime : dianPaoTimes) {
+            for (SingleUserGameScoreVo singleUserGameScoreVo : singleUserGameScoreVos) {
+                if (singleUserGameScoreVo.getuId().equals(dianPaoTime.getUserId())) {
+                    singleUserGameScoreVo.setAnGang(dianPaoTime.getDianPaoUserId());
+                    break;
+                }
+            }
+        }
+
+        return singleUserGameScoreVos;
+    }
 
     /**
      * 软自摸处理逻辑
@@ -938,25 +1017,9 @@ public class GameService {
             scoreDao.save(score);
         }
 
-        //金币房所有玩家变成待准备状态，房间状态改为待开始
-        //好友房在没有达到局数上限时，所有玩家变成待准备状态，房间状态改为待开始
-        if (mahjongGameData.getRoomType().equals(Room.type.COINS_ROOM)
-                || mahjongGameData.getCurrentTimes() < mahjongGameData.getTimes()) {
-            room.setState(Room.state.wait.getCode());
-            roomDao.update(room);
+        // 为下一局游戏做准备，或者结束游戏
+        ready4NextGameOrFinishGame(mahjongGameData, room, scores);
 
-            for (PersonalCardInfo personalCardInfo : mahjongGameData.getPersonalCardInfos()) {
-                // roomMember改为游戏中
-                personalCardInfo.getRoomMember().setState(Room.state.wait.getCode());
-                roomRedis.editRoom(personalCardInfo.getRoomMember());
-                roomRedis.joinRoom(personalCardInfo.getRoomMember());
-
-                RoomMember temp = new RoomMember();
-                temp.setId(personalCardInfo.getRoomMember().getId());
-                temp.setState(Room.state.wait.getCode());
-                roomMemberDao.update(temp);
-            }
-        }
         return new Object[]{scores, mahjongGameData, specialMahjong};
     }
 
@@ -1059,25 +1122,9 @@ public class GameService {
             scoreDao.save(score);
         }
 
-        //金币房所有玩家变成待准备状态，房间状态改为待开始
-        //好友房在没有达到局数上限时，所有玩家变成待准备状态，房间状态改为待开始
-        if (mahjongGameData.getRoomType().equals(Room.type.COINS_ROOM)
-                || mahjongGameData.getCurrentTimes() < mahjongGameData.getTimes()) {
-            room.setState(Room.state.wait.getCode());
-            roomDao.update(room);
+        // 为下一局游戏做准备，或者结束游戏
+        ready4NextGameOrFinishGame(mahjongGameData, room, scores);
 
-            for (PersonalCardInfo personalCardInfo : mahjongGameData.getPersonalCardInfos()) {
-                // roomMember改为游戏中
-                personalCardInfo.getRoomMember().setState(Room.state.wait.getCode());
-                roomRedis.editRoom(personalCardInfo.getRoomMember());
-                roomRedis.joinRoom(personalCardInfo.getRoomMember());
-
-                RoomMember temp = new RoomMember();
-                temp.setId(personalCardInfo.getRoomMember().getId());
-                temp.setState(Room.state.wait.getCode());
-                roomMemberDao.update(temp);
-            }
-        }
         return new Object[]{scores, mahjongGameData, specialMahjong};
     }
 
@@ -1180,35 +1227,13 @@ public class GameService {
             scoreDao.save(score);
         }
 
-        //金币房所有玩家变成待准备状态，房间状态改为待开始
-        //好友房在没有达到局数上限时，所有玩家变成待准备状态，房间状态改为待开始
-        if (mahjongGameData.getRoomType().equals(Room.type.COINS_ROOM)
-                || mahjongGameData.getCurrentTimes() < mahjongGameData.getTimes()) {
-            room.setState(Room.state.wait.getCode());
-            roomDao.update(room);
-
-            for (PersonalCardInfo personalCardInfo : mahjongGameData.getPersonalCardInfos()) {
-                // roomMember改为游戏中
-                personalCardInfo.getRoomMember().setState(Room.state.wait.getCode());
-                roomRedis.editRoom(personalCardInfo.getRoomMember());
-                roomRedis.joinRoom(personalCardInfo.getRoomMember());
-
-                RoomMember temp = new RoomMember();
-                temp.setId(personalCardInfo.getRoomMember().getId());
-                temp.setState(Room.state.wait.getCode());
-                roomMemberDao.update(temp);
-            }
-        } else {
-            // 退出房间、总结算
-            for (Score score : scores) {
-                roomService.outRoom(room.getRoomCode(), score.getUserId());
-            }
-        }
+        // 为下一局游戏做准备，或者结束游戏
+        ready4NextGameOrFinishGame(mahjongGameData, room, scores);
         return new Object[]{scores, mahjongGameData, specialMahjong};
     }
 
     /**
-     * 硬抢杠胡处理逻辑
+     * 硬、软抢杠胡处理逻辑
      */
     public Object[] qiangGangHu(Room room, User user, User gangUser, Mahjong qiangGangMahjong) throws InstantiationException, IllegalAccessException {
         canOperate(room.getId(), user.getId(), BaseOperate.HU);
@@ -1218,6 +1243,8 @@ public class GameService {
 
         Mahjong specialMahjong = qiangGangMahjong;
 
+        boolean isYinghu = true;
+
         // 获取胡牌类型
         List<CanDoOperate> canOperates = yingHuManager.scan(
                 mahjongGameData,
@@ -1226,6 +1253,7 @@ public class GameService {
         );
 
         if (canOperates.isEmpty()) {
+            isYinghu = false;
             canOperates = ruanHuManager.scan(
                     mahjongGameData,
                     specialMahjong,
@@ -1291,7 +1319,7 @@ public class GameService {
                         personalCardInfo,
                         huType,
                         true,
-                        true,
+                        isYinghu,
                         room.getMultiple(),
                         score);
             } else {
@@ -1326,34 +1354,27 @@ public class GameService {
         }
         gameRedis.saveMahjongGameData(mahjongGameData);
 
-        //金币房所有玩家变成待准备状态，房间状态改为待开始
-        //好友房在没有达到局数上限时，所有玩家变成待准备状态，房间状态改为待开始
-        if (mahjongGameData.getRoomType().equals(Room.type.COINS_ROOM)
-                || mahjongGameData.getCurrentTimes() < mahjongGameData.getTimes()) {
-            room.setState(Room.state.wait.getCode());
-            roomDao.update(room);
+        // 为下一局游戏做准备，或者结束游戏
+        ready4NextGameOrFinishGame(mahjongGameData, room, scores);
 
-            for (PersonalCardInfo personalCardInfo : mahjongGameData.getPersonalCardInfos()) {
-                // roomMember改为游戏中
-                personalCardInfo.getRoomMember().setState(Room.state.wait.getCode());
-                roomRedis.editRoom(personalCardInfo.getRoomMember());
-                roomRedis.joinRoom(personalCardInfo.getRoomMember());
-
-                RoomMember temp = new RoomMember();
-                temp.setId(personalCardInfo.getRoomMember().getId());
-                temp.setState(Room.state.wait.getCode());
-                roomMemberDao.update(temp);
-            }
-        }
         return new Object[]{scores, mahjongGameData, specialMahjong};
     }
 
+    /**
+     * 暂时只为硬自摸服务，待重构
+     */
     private List<Score> genScores4Game(
             MahjongGameData mahjongGameData,
             Room room,
             User user,
             CanDoOperate canOperate) {
         List<Score> scores = new ArrayList<>(mahjongGameData.getPersonalCardInfos().size());
+
+        Operate operate = null;
+        for (Operate temp : canOperate.getOperates()) {
+            operate = temp;
+            break;
+        }
 
         Date now = new Date();
 
@@ -1388,12 +1409,6 @@ public class GameService {
                 score.setWinType(Score.WinType.ZI_MO.getId());
 
                 // 设置胡牌类型
-                Operate operate = null;
-                for (Operate temp : canOperate.getOperates()) {
-                    operate = temp;
-                    break;
-                }
-
                 Score.HuType huType = Score.HuType.parse(operate);
                 score.setHuType(huType.getId());
 

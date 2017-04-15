@@ -325,7 +325,10 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
 
             //座位顺序比退出玩家位置大的玩家都需要退后一位
             Set<RoomMember> roomMembers = roomRedis.getRoomMembers(room.getId().toString());
-            for (RoomMember member : roomMembers) {
+            List<RoomMember> roomMemberList = new ArrayList<>(roomMembers);
+            Collections.sort(roomMemberList);
+
+            for (RoomMember member : roomMemberList) {
                 if (member.getSeat() > roomMember.getSeat()) {
                     roomRedis.editRoom(member);
                     member.setSeat(member.getSeat() - 1);

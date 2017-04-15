@@ -1,6 +1,6 @@
 package com.huangmei.commonhm.model;
 
-public class RoomMember implements Entity {
+public class RoomMember implements Entity, Comparable {
 
     private static final long serialVersionUID = 1L;
     /**  */
@@ -117,6 +117,20 @@ public class RoomMember implements Entity {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        if (o instanceof RoomMember) {
+            RoomMember other = (RoomMember) o;
+            if (roomId.equals(other.getRoomId())) {
+                return seat.compareTo(other.getSeat());
+            } else {
+                return roomId.compareTo(other.getRoomId());
+            }
+        }
+
+        return 0;
     }
 
     /**

@@ -79,7 +79,8 @@ public enum PidValue {
     //QIANG_GANG(4007, "抢杠消息推送");
     COMMUNICATION(4010, "聊天推送"),
     SINGLE_SCORE(4011, "单局结算广播"),
-    SYSTEM_NOTICE(4012, "获取公告栏公告推送");
+    SYSTEM_NOTICE(4012, "获取公告栏公告推送"),
+    TOTAL_SCORE(4013, "总结算广播");
 
     private int pid;
 

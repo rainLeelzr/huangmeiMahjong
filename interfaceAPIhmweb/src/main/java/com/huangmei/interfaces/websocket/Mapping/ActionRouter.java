@@ -1152,11 +1152,12 @@ public class ActionRouter {
 
     @Pid(PidValue.QIANG_GANG_HU)
     @LoginResource
+    @SuppressWarnings("unchecked")
     public JsonResultY qiangGangHu(WebSocketSession session, JSONObject data) throws IllegalAccessException, InstantiationException {
         User user = sessionManager.getUser(session.getId());
         Room room = sessionManager.getRoom(session.getId());
 
-        // 别人打出来，我抢杠的麻将
+        // 别人打出来，我抢杠的麻将,或者加杠的麻将
         Mahjong qiangGangMahjong = Mahjong.parse(JsonUtil.getInt(data, "mahjongId"));
         Integer gangUserUId = JsonUtil.getInt(data, "gangUserUId");
         Entity.UserCriteria userCriteria = new Entity.UserCriteria();
@@ -1167,64 +1168,22 @@ public class ActionRouter {
         List<Score> scores = (List<Score>) result[0];
         MahjongGameData mahjongGameData = (MahjongGameData) result[1];
         Mahjong specialMahjong = (Mahjong) result[2];
-
-        OutCard outCard = mahjongGameData.getOutCards().get(mahjongGameData.getOutCards().size() - 1);
+        List<SingleUserGameScoreVo> singleUserGameScoreVos = result[3] == null ? null : (List<SingleUserGameScoreVo>) result[3];
 
         //单局结算广播
-        SingleScoreVo singleScoreVo = new SingleScoreVo();
-        List<SingleUserScoreVo> singleUserScoreVos = new ArrayList<>(scores.size());
-        singleScoreVo.setSingleUserScoreVos(singleUserScoreVos);
-        for (Score score : scores) {
-            SingleUserScoreVo singleUserScoreVo = new SingleUserScoreVo();
-            singleUserScoreVos.add(singleUserScoreVo);
+        broadcastSingleScore(mahjongGameData, scores, room, user.getId(), gangUser.getId(), specialMahjong);
 
-            User tempUser = getUserByUserId(score.getUserId());
-            PersonalCardInfo personalCardInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), score.getUserId());
+        //单局结算广播
+        broadcastSingleScore(
+                mahjongGameData,
+                scores,
+                room,
+                user.getId(),
+                gangUser.getId(),
+                specialMahjong);
 
-            singleUserScoreVo.setNickName(tempUser.getNickName());
-            singleUserScoreVo.setImage(tempUser.getImage());
-
-            singleUserScoreVo.setPaoShu(score.getPaoNum());
-            singleUserScoreVo.setScore(score.getScore());
-            singleUserScoreVo.setState(SingleUserScoreVo.parseToState(score.getWinType()));
-
-            // 设置碰
-            singleUserScoreVo.setPeng(new ArrayList<Integer>(personalCardInfo.getPengs().size()));
-            for (Combo combo : personalCardInfo.getPengs()) {
-                singleUserScoreVo.getPeng().add(combo.getMahjongs().get(0).getNumber());
-            }
-
-            // 设置杠
-            singleUserScoreVo.setGang(new ArrayList<Integer>(personalCardInfo.getGangs().size()));
-            for (Combo combo : personalCardInfo.getGangs()) {
-                singleUserScoreVo.getGang().add(combo.getMahjongs().get(0).getNumber());
-            }
-
-            //设置手卡
-            singleUserScoreVo.setCard(new ArrayList<Integer>(personalCardInfo.getHandCards().size()));
-            for (Mahjong mahjong : personalCardInfo.getHandCards()) {
-                singleUserScoreVo.getCard().add(mahjong.getNumber());
-            }
-
-            if (user.getId().equals(score.getUserId())) {
-                singleUserScoreVo.setOtherCard(specialMahjong.getNumber());
-            } else if (outCard.getRoomMember().getUserId().equals(score.getUserId())) {
-                singleUserScoreVo.setOtherCard(specialMahjong.getNumber());
-            } else {
-                singleUserScoreVo.setOtherCard(0);
-            }
-
-        }
-        messageManager.sendMessageToRoomUsers(
-                room.getId().toString(),
-                new JsonResultY.Builder()
-                        .setPid(PidValue.SINGLE_SCORE)
-                        .setError(CommonError.SYS_SUSSES)
-                        .setData(singleScoreVo)
-                        .build());
-
-        // todome 总结算广播
-
+        // 总结算广播
+        broadcastUserTotalScore(singleUserGameScoreVos, room.getId());
 
         return null;
     }
@@ -1284,19 +1243,16 @@ public class ActionRouter {
         return null;
     }
 
-    @Pid(PidValue.YING_ZI_MO)
-    @LoginResource
-    @SuppressWarnings("unchecked")
-    public JsonResultY yingZiMo(WebSocketSession session, JSONObject data) throws IllegalAccessException, InstantiationException {
-        User user = sessionManager.getUser(session.getId());
-        Room room = sessionManager.getRoom(session.getId());
-
-        Object[] result = gameService.yingZiMo(room, user);
-        List<Score> scores = (List<Score>) result[0];
-        MahjongGameData mahjongGameData = (MahjongGameData) result[1];
-        Mahjong specialMahjong = (Mahjong) result[2];
-
-        //单局结算广播
+    /**
+     * 单局结算广播
+     */
+    private void broadcastSingleScore(
+            MahjongGameData mahjongGameData,
+            List<Score> scores,
+            Room room,
+            Integer winnerUserId,
+            Integer specialUserId,
+            Mahjong specialMahjong) {
         SingleScoreVo singleScoreVo = new SingleScoreVo();
         List<SingleUserScoreVo> singleUserScoreVos = new ArrayList<>(scores.size());
         singleScoreVo.setSingleUserScoreVos(singleUserScoreVos);
@@ -1332,12 +1288,15 @@ public class ActionRouter {
                 singleUserScoreVo.getCard().add(mahjong.getNumber());
             }
 
-            if (user.getId().equals(score.getUserId())) {
+            if (score.getUserId().equals(winnerUserId)) {
                 singleUserScoreVo.setOtherCard(specialMahjong.getNumber());
             } else {
-                singleUserScoreVo.setOtherCard(0);
+                if (score.getUserId().equals(specialUserId)) {
+                    singleUserScoreVo.setOtherCard(specialMahjong.getNumber());
+                } else {
+                    singleUserScoreVo.setOtherCard(0);
+                }
             }
-
 
         }
         messageManager.sendMessageToRoomUsers(
@@ -1347,11 +1306,51 @@ public class ActionRouter {
                         .setError(CommonError.SYS_SUSSES)
                         .setData(singleScoreVo)
                         .build());
+    }
 
-        // todome 总结算广播
+    @Pid(PidValue.YING_ZI_MO)
+    @LoginResource
+    @SuppressWarnings("unchecked")
+    public JsonResultY yingZiMo(WebSocketSession session, JSONObject data) throws IllegalAccessException, InstantiationException {
+        User user = sessionManager.getUser(session.getId());
+        Room room = sessionManager.getRoom(session.getId());
 
+        Object[] result = gameService.yingZiMo(room, user);
+        List<Score> scores = (List<Score>) result[0];
+        MahjongGameData mahjongGameData = (MahjongGameData) result[1];
+        Mahjong specialMahjong = (Mahjong) result[2];
+        List<SingleUserGameScoreVo> singleUserGameScoreVos = result[3] == null ? null : (List<SingleUserGameScoreVo>) result[3];
+
+        //单局结算广播
+        broadcastSingleScore(mahjongGameData, scores, room, user.getId(), user.getId(), specialMahjong);
+
+        // 总结算广播
+        broadcastUserTotalScore(singleUserGameScoreVos, room.getId());
 
         return null;
+    }
+
+    /**
+     * 总结算广播
+     */
+    private void broadcastUserTotalScore(List<SingleUserGameScoreVo> singleUserGameScoreVos, Integer roomId) {
+        if (singleUserGameScoreVos != null) {
+            for (SingleUserGameScoreVo singleUserGameScoreVo : singleUserGameScoreVos) {
+                Integer userId = singleUserGameScoreVo.getuId();
+                User user = getUserByUserId(userId);
+                singleUserGameScoreVo.setuId(user.getUId());
+                singleUserGameScoreVo.setImage(user.getImage());
+                singleUserGameScoreVo.setNickName(user.getNickName());
+            }
+            messageManager.sendMessageToRoomUsers(
+                    roomId.toString(),
+                    new JsonResultY.Builder()
+                            .setPid(PidValue.TOTAL_SCORE)
+                            .setError(CommonError.SYS_SUSSES)
+                            .setData(singleUserGameScoreVos)
+                            .build()
+            );
+        }
     }
 
     @Pid(PidValue.RUAN_ZI_MO)
@@ -1365,59 +1364,13 @@ public class ActionRouter {
         List<Score> scores = (List<Score>) result[0];
         MahjongGameData mahjongGameData = (MahjongGameData) result[1];
         Mahjong specialMahjong = (Mahjong) result[2];
+        List<SingleUserGameScoreVo> singleUserGameScoreVos = result[3] == null ? null : (List<SingleUserGameScoreVo>) result[3];
 
         //单局结算广播
-        SingleScoreVo singleScoreVo = new SingleScoreVo();
-        List<SingleUserScoreVo> singleUserScoreVos = new ArrayList<>(scores.size());
-        singleScoreVo.setSingleUserScoreVos(singleUserScoreVos);
-        for (Score score : scores) {
-            SingleUserScoreVo singleUserScoreVo = new SingleUserScoreVo();
-            singleUserScoreVos.add(singleUserScoreVo);
+        broadcastSingleScore(mahjongGameData, scores, room, user.getId(), user.getId(), specialMahjong);
 
-            User tempUser = getUserByUserId(score.getUserId());
-            PersonalCardInfo personalCardInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), score.getUserId());
-
-            singleUserScoreVo.setNickName(tempUser.getNickName());
-            singleUserScoreVo.setImage(tempUser.getImage());
-
-            singleUserScoreVo.setPaoShu(score.getPaoNum());
-            singleUserScoreVo.setScore(score.getScore());
-            singleUserScoreVo.setState(SingleUserScoreVo.parseToState(score.getWinType()));
-
-            // 设置碰
-            singleUserScoreVo.setPeng(new ArrayList<Integer>(personalCardInfo.getPengs().size()));
-            for (Combo combo : personalCardInfo.getPengs()) {
-                singleUserScoreVo.getPeng().add(combo.getMahjongs().get(0).getNumber());
-            }
-
-            // 设置杠
-            singleUserScoreVo.setGang(new ArrayList<Integer>(personalCardInfo.getGangs().size()));
-            for (Combo combo : personalCardInfo.getGangs()) {
-                singleUserScoreVo.getGang().add(combo.getMahjongs().get(0).getNumber());
-            }
-
-            //设置手卡
-            singleUserScoreVo.setCard(new ArrayList<Integer>(personalCardInfo.getHandCards().size()));
-            for (Mahjong mahjong : personalCardInfo.getHandCards()) {
-                singleUserScoreVo.getCard().add(mahjong.getNumber());
-            }
-
-            if (user.getId().equals(score.getUserId())) {
-                singleUserScoreVo.setOtherCard(specialMahjong.getNumber());
-            } else {
-                singleUserScoreVo.setOtherCard(0);
-            }
-
-        }
-        messageManager.sendMessageToRoomUsers(
-                room.getId().toString(),
-                new JsonResultY.Builder()
-                        .setPid(PidValue.SINGLE_SCORE)
-                        .setError(CommonError.SYS_SUSSES)
-                        .setData(singleScoreVo)
-                        .build());
-
-        // todome 总结算广播
+        // 总结算广播
+        broadcastUserTotalScore(singleUserGameScoreVos, room.getId());
 
 
         return null;
@@ -1434,63 +1387,21 @@ public class ActionRouter {
         List<Score> scores = (List<Score>) result[0];
         MahjongGameData mahjongGameData = (MahjongGameData) result[1];
         Mahjong specialMahjong = (Mahjong) result[2];
+        List<SingleUserGameScoreVo> singleUserGameScoreVos = result[3] == null ? null : (List<SingleUserGameScoreVo>) result[3];
 
         OutCard outCard = mahjongGameData.getOutCards().get(mahjongGameData.getOutCards().size() - 1);
 
         //单局结算广播
-        SingleScoreVo singleScoreVo = new SingleScoreVo();
-        List<SingleUserScoreVo> singleUserScoreVos = new ArrayList<>(scores.size());
-        singleScoreVo.setSingleUserScoreVos(singleUserScoreVos);
-        for (Score score : scores) {
-            SingleUserScoreVo singleUserScoreVo = new SingleUserScoreVo();
-            singleUserScoreVos.add(singleUserScoreVo);
+        broadcastSingleScore(
+                mahjongGameData,
+                scores,
+                room,
+                user.getId(),
+                outCard.getRoomMember().getUserId(),
+                specialMahjong);
 
-            User tempUser = getUserByUserId(score.getUserId());
-            PersonalCardInfo personalCardInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), score.getUserId());
-
-            singleUserScoreVo.setNickName(tempUser.getNickName());
-            singleUserScoreVo.setImage(tempUser.getImage());
-
-            singleUserScoreVo.setPaoShu(score.getPaoNum());
-            singleUserScoreVo.setScore(score.getScore());
-            singleUserScoreVo.setState(SingleUserScoreVo.parseToState(score.getWinType()));
-
-            // 设置碰
-            singleUserScoreVo.setPeng(new ArrayList<Integer>(personalCardInfo.getPengs().size()));
-            for (Combo combo : personalCardInfo.getPengs()) {
-                singleUserScoreVo.getPeng().add(combo.getMahjongs().get(0).getNumber());
-            }
-
-            // 设置杠
-            singleUserScoreVo.setGang(new ArrayList<Integer>(personalCardInfo.getGangs().size()));
-            for (Combo combo : personalCardInfo.getGangs()) {
-                singleUserScoreVo.getGang().add(combo.getMahjongs().get(0).getNumber());
-            }
-
-            //设置手卡
-            singleUserScoreVo.setCard(new ArrayList<Integer>(personalCardInfo.getHandCards().size()));
-            for (Mahjong mahjong : personalCardInfo.getHandCards()) {
-                singleUserScoreVo.getCard().add(mahjong.getNumber());
-            }
-
-            if (user.getId().equals(score.getUserId())) {
-                singleUserScoreVo.setOtherCard(specialMahjong.getNumber());
-            } else if (outCard.getRoomMember().getUserId().equals(score.getUserId())) {
-                singleUserScoreVo.setOtherCard(specialMahjong.getNumber());
-            } else {
-                singleUserScoreVo.setOtherCard(0);
-            }
-
-        }
-        messageManager.sendMessageToRoomUsers(
-                room.getId().toString(),
-                new JsonResultY.Builder()
-                        .setPid(PidValue.SINGLE_SCORE)
-                        .setError(CommonError.SYS_SUSSES)
-                        .setData(singleScoreVo)
-                        .build());
-
-        // todome 总结算广播
+        // 总结算广播
+        broadcastUserTotalScore(singleUserGameScoreVos, room.getId());
 
 
         return null;
@@ -1507,67 +1418,21 @@ public class ActionRouter {
         List<Score> scores = (List<Score>) result[0];
         MahjongGameData mahjongGameData = (MahjongGameData) result[1];
         Mahjong specialMahjong = (Mahjong) result[2];
+        List<SingleUserGameScoreVo> singleUserGameScoreVos = result[3] == null ? null : (List<SingleUserGameScoreVo>) result[3];
 
         OutCard outCard = mahjongGameData.getOutCards().get(mahjongGameData.getOutCards().size() - 1);
 
         //单局结算广播
-        SingleScoreVo singleScoreVo = new SingleScoreVo();
-        List<SingleUserScoreVo> singleUserScoreVos = new ArrayList<>(scores.size());
-        singleScoreVo.setSingleUserScoreVos(singleUserScoreVos);
-        for (Score score : scores) {
-            SingleUserScoreVo singleUserScoreVo = new SingleUserScoreVo();
-            singleUserScoreVos.add(singleUserScoreVo);
+        broadcastSingleScore(
+                mahjongGameData,
+                scores,
+                room,
+                user.getId(),
+                outCard.getRoomMember().getUserId(),
+                specialMahjong);
 
-            User tempUser = getUserByUserId(score.getUserId());
-            PersonalCardInfo personalCardInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), score.getUserId());
-
-            singleUserScoreVo.setNickName(tempUser.getNickName());
-            singleUserScoreVo.setImage(tempUser.getImage());
-
-            singleUserScoreVo.setPaoShu(score.getPaoNum());
-            singleUserScoreVo.setScore(score.getScore());
-            singleUserScoreVo.setState(SingleUserScoreVo.parseToState(score.getWinType()));
-
-            // 设置碰
-            singleUserScoreVo.setPeng(new ArrayList<Integer>(personalCardInfo.getPengs().size()));
-            for (Combo combo : personalCardInfo.getPengs()) {
-                singleUserScoreVo.getPeng().add(combo.getMahjongs().get(0).getNumber());
-            }
-
-            // 设置杠
-            singleUserScoreVo.setGang(new ArrayList<Integer>(personalCardInfo.getGangs().size()));
-            for (Combo combo : personalCardInfo.getGangs()) {
-                singleUserScoreVo.getGang().add(combo.getMahjongs().get(0).getNumber());
-            }
-
-            //设置手卡
-            singleUserScoreVo.setCard(new ArrayList<Integer>(personalCardInfo.getHandCards().size()));
-            for (Mahjong mahjong : personalCardInfo.getHandCards()) {
-                singleUserScoreVo.getCard().add(mahjong.getNumber());
-            }
-
-            if (user.getId().equals(score.getUserId())) {
-                singleUserScoreVo.setOtherCard(specialMahjong.getNumber());
-            } else if (outCard.getRoomMember().getUserId().equals(score.getUserId())) {
-                singleUserScoreVo.setOtherCard(specialMahjong.getNumber());
-            } else {
-                singleUserScoreVo.setOtherCard(0);
-            }
-
-        }
-        messageManager.sendMessageToRoomUsers(
-                room.getId().toString(),
-                new JsonResultY.Builder()
-                        .setPid(PidValue.SINGLE_SCORE)
-                        .setError(CommonError.SYS_SUSSES)
-                        .setData(singleScoreVo)
-                        .build());
-
-        // todome 总结算广播
-        if (mahjongGameData.getRoomType().equals(Room.type.FRIENDS_ROOM)
-                && mahjongGameData.getCurrentTimes().equals(mahjongGameData.getTimes())) {
-
-        }
+        // 总结算广播
+        broadcastUserTotalScore(singleUserGameScoreVos, room.getId());
 
         return null;
     }

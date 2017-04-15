@@ -44,16 +44,16 @@
 		SELECT * FROM tb_score WHERE room_id =#{roomId} AND (win_type=2 OR win_type=4) AND times=#{times};
     </select>
     <select id="ziMoTimes" parameterType="com.huangmei.commonhm.model.Score" resultMap="ScoreResultMap">
-		select user_id ,count(is_zi_mo) isZiMo from tb_score where room_id = #{roomId} and is_zi_mo = #{isZiMo} GROUP BY user_id;
+		select user_id ,count(is_zi_mo) is_zi_mo from tb_score where room_id = #{roomId} and is_zi_mo = #{isZiMo} GROUP BY user_id;
     </select>
     <select id="scoreAndGangTimes" parameterType="java.lang.Integer" resultMap="ScoreResultMap">
-        select user_id ,sum(an_gang_times) anGangTimes ,sum(ming_gang_times) mingGangTimes, sum(score) score from tb_score where room_id = #{roomId} GROUP BY user_id;
+        select user_id ,sum(an_gang_times) an_gang_times ,sum(ming_gang_times) ming_gang_times, sum(score) score from tb_score where room_id = #{roomId} GROUP BY user_id;
     </select>
     <select id="jiePaoTimes" parameterType="java.lang.Integer" resultMap="ScoreResultMap">
-        select jie_pao_user_id, count(jie_pao_user_id) jiePaoUserId from tb_score where room_id = #{roomId} and jie_pao_user_id is not null GROUP BY jie_pao_user_id;
+        select jie_pao_user_id user_id, count(jie_pao_user_id) jie_pao_user_id from tb_score where room_id = #{roomId} and jie_pao_user_id is not null GROUP BY jie_pao_user_id;
     </select>
     <select id="dianPaoTimes" parameterType="java.lang.Integer" resultMap="ScoreResultMap">
-        select dian_pao_user_id, count(dian_pao_user_id) dianPaoUserId from tb_score where room_id = #{roomId} and dian_pao_user_id is not null GROUP BY dian_pao_user_id;
+        select dian_pao_user_id user_id, count(dian_pao_user_id) dian_pao_user_id from tb_score where room_id = #{roomId} and dian_pao_user_id is not null GROUP BY dian_pao_user_id;
     </select>
 
 

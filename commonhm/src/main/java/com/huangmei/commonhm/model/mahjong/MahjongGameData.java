@@ -127,9 +127,9 @@ public class MahjongGameData {
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1YingMingGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1RuanMingGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2PengMahjongs();
-        List<Mahjong> allMahjongs = MockComboMahjongList.getSeat3QiangDaMingGangMahjongs();
+        //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat3QiangDaMingGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2ChiPingHuSeat3DaMingGangMahjongs();
-        //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1ZiMoPingHu();
+        List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1ZiMoPingHu();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1RuanZiMoPingHu();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2RuanChiPengPengHuMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2YingChiQiDuiMahjongs();
@@ -241,7 +241,6 @@ public class MahjongGameData {
 
 
         // 设定宝娘
-        // todome 设定宝娘
         mahjongGameData.setBaoMother(leftCards.get(0));
 
         // 设定宝牌
