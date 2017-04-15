@@ -76,7 +76,7 @@ public class GameService {
      * @param userId      玩家id
      * @param toDoOperate 玩家需要执行的操作
      */
-    private void canOperate(Integer roomId, Integer userId, Operate toDoOperate) {
+    private CanDoOperate canOperate(Integer roomId, Integer userId, Operate toDoOperate) {
         // 取出等待客户端操作对象waitingClientOperate
         CanDoOperate waitingClientOperate = gameRedis.getWaitingClientOperate(roomId);
         if (!waitingClientOperate.getRoomMember().getUserId().equals(userId)) {
@@ -85,6 +85,7 @@ public class GameService {
         if (!waitingClientOperate.getOperates().contains(toDoOperate)) {
             throw CommonError.NOT_YOUR_TURN.newException();
         }
+        return waitingClientOperate;
     }
 
     /**
@@ -200,6 +201,7 @@ public class GameService {
                 gameStartVo.setBankerUId(bankerUId);//先设置为userId，在api层转换为uId
                 gameStartVo.setDices(mahjongGameData.getDices());
                 gameStartVo.setBaoMotherId(mahjongGameData.getBaoMother().getId());
+                gameStartVo.setCurrentTimes(mahjongGameData.getCurrentTimes());
 
                 List<Integer> baoMahjongIds = new ArrayList<>(mahjongGameData.getBaoMahjongs().size());
                 for (Mahjong mahjong : mahjongGameData.getBaoMahjongs()) {
@@ -229,11 +231,7 @@ public class GameService {
      * 打出一张麻将
      */
     public Map<String, Object> playAMahjong(Room room, User user, Mahjong playedMahjong) {
-        // 取出等待客户端操作对象waitingClientOperate
-        CanDoOperate waitingClientOperate = gameRedis.getWaitingClientOperate(room.getId());
-        if (!waitingClientOperate.getRoomMember().getUserId().equals(user.getId())) {
-            throw CommonError.NOT_YOUR_TURN.newException();
-        }
+        canOperate(room.getId(), user.getId(), Operate.PLAY_A_MAHJONG);
 
         // 取出麻将数据对象
         MahjongGameData mahjongGameData = gameRedis.getMahjongGameData(room.getId());
@@ -257,7 +255,7 @@ public class GameService {
         // 广播打出的牌
         List<PlayedMahjong> playedMahjongs = playedMahjongBroadcast(mahjongGameData, user, playedMahjong);
 
-        Map<String, Object> result = new HashedMap(2);
+        Map<String, Object> result = new HashMap<>(2);
         result.put(PlayedMahjong.class.getSimpleName(), playedMahjongs);
         result.put(MahjongGameData.class.getSimpleName(), mahjongGameData);
         return result;
@@ -668,7 +666,7 @@ public class GameService {
      * 执行碰的逻辑
      */
     public Object[] peng(User user, Room room, List<Mahjong> mahjongs) {
-        canOperate(room.getId(), user.getId(), Operate.YING_PENG);
+        CanDoOperate canDoOperate = canOperate(room.getId(), user.getId(), Operate.YING_PENG);
 
         // 取出麻将数据对象
         MahjongGameData mahjongGameData = gameRedis.getMahjongGameData(room.getId());
@@ -692,6 +690,14 @@ public class GameService {
         personalCardInfo.getHandCards().removeAll(mahjongs);
 
         gameRedis.saveMahjongGameData(mahjongGameData);
+
+        // 添加可以打牌操作
+        Set<Operate> newOperates = new HashSet<>(2);
+        newOperates.add(Operate.PLAY_A_MAHJONG);
+        canDoOperate.setOperates(newOperates);
+        // 保存可操作列表到redis，记录正在等待哪个玩家的什么操作
+        gameRedis.saveWaitingClientOperate(canDoOperate);
+
         return new Object[]{mahjongGameData, yingDaMingGangCombo};
     }
 
@@ -1573,5 +1579,33 @@ public class GameService {
         score.setScore(totalPaoNum * multiple);
         score.setCoin(score.getScore());
 
+    }
+
+    /**
+     * 增加托管用户
+     *
+     * @param room 需要被托管的用户所在房间
+     * @param user 需要被托管的用户
+     */
+    public Object[] addTrusteeshipUser(Room room, User user) {
+        gameRedis.addTrusteeshipUserId(room.getId(), user.getId());
+
+        MahjongGameData mahjongGameData = null;
+        // 取出等待客户端操作对象waitingClientOperate
+        CanDoOperate waitingClientOperate = gameRedis.getWaitingClientOperate(room.getId());
+        mahjongGameData = gameRedis.getMahjongGameData(room.getId());
+
+        return new Object[]{waitingClientOperate, mahjongGameData};
+    }
+
+    /**
+     * 移除托管用户
+     *
+     * @param room 需要被托管的用户所在房间
+     * @param user 需要被托管的用户
+     */
+    public Object[] removeTrusteeshipUser(Room room, User user) {
+        gameRedis.removeTrusteeshipUserId(room.getId(), user.getId());
+        return null;
     }
 }

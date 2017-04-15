@@ -83,6 +83,14 @@ public class CanDoOperate implements Comparable {
         //        + "}}";
     }
 
+    public String toOperateNameString() {
+        String o = "";
+        for (Operate operate : operates) {
+            o += operate.getName() + "、";
+        }
+        return String.format("{、}", o);
+    }
+
     @Override
     public int compareTo(Object o) {
         Operate first = null;

@@ -142,7 +142,7 @@ public class MessageManager {
     public void sendMessageByUserId(Integer userId, JsonResultY jsonResultY) {
         WebSocketSession userSession = sessionManager.getByUserId(userId);
         if (userSession == null) {
-            log.error("给userId为[{}]的用户发送消息失败，从userIdSessions中没有id的信息", userId);
+            log.warn("给userId为[{}]的用户发送消息失败，从userIdSessions中没有id的信息", userId);
             return;
         }
         send(userSession, jsonResultY);

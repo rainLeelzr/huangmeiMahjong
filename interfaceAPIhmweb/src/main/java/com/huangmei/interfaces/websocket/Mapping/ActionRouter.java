@@ -21,6 +21,7 @@ import com.huangmei.interfaces.monitor.clientTouchMahjong.task.ClientTouchMahjon
 import com.huangmei.interfaces.monitor.clientTouchMahjong.toucher.CommonToucher;
 import com.huangmei.interfaces.monitor.clientTouchMahjong.toucher.GangToucher;
 import com.huangmei.interfaces.monitor.schedule.DismissRoomVoteTask;
+import com.huangmei.interfaces.monitor.trusteeship.TrusteeshipTask;
 import com.huangmei.interfaces.websocket.MessageManager;
 import com.huangmei.interfaces.websocket.SessionManager;
 import net.sf.json.JSONObject;
@@ -45,6 +46,7 @@ public class ActionRouter {
 
     @Autowired
     private RoomService roomService;
+
     @Autowired
     private VoteService voteService;
 
@@ -96,6 +98,7 @@ public class ActionRouter {
                 .setUsers(users)
                 .setGameRedis(gameRedis)
                 .setVersionRedis(versionRedis)
+                .setActionRouter(this)
                 .build());
     }
 
@@ -129,6 +132,7 @@ public class ActionRouter {
                 .setUsers(users)
                 .setGameRedis(gameRedis)
                 .setVersionRedis(versionRedis)
+                .setActionRouter(this)
                 .build());
     }
 
@@ -159,6 +163,32 @@ public class ActionRouter {
 
         nextCanDoOperate.getOperates().add(Operate.GUO);
         gameRedis.saveWaitingClientOperate(nextCanDoOperate);
+
+        dealTrustesshipTask(mahjongGameData, nextCanDoOperate);
+    }
+
+    /**
+     * 处理是否需要服务端自动帮玩家进行操作（执行托管）
+     */
+    public void dealTrustesshipTask(MahjongGameData mahjongGameData, CanDoOperate nextCanDoOperate) {
+        // 查找正在托管的用户
+        Integer nextOperateUserId = nextCanDoOperate.getRoomMember().getUserId();
+        List<Integer> trusteeshipUserIds = gameRedis.getTrusteeshipUserIds(mahjongGameData.getRoomId());
+        for (Integer trusteeshipUserId : trusteeshipUserIds) {
+            if (nextOperateUserId.equals(trusteeshipUserId)) {
+                monitorManager.schedule(
+                        new TrusteeshipTask.Builder()
+                                .setActionRouter(this)
+                                .setCanDoOperate(nextCanDoOperate)
+                                .setMahjongGameData(mahjongGameData)
+                                .setRoom(getRoomByUserIdOrRoomId(nextOperateUserId, mahjongGameData.getRoomId()))
+                                .setUser(getUserByUserId(nextOperateUserId))
+                                .build(),
+                        3000
+                );
+                break;
+            }
+        }
     }
 
     /**
@@ -228,6 +258,25 @@ public class ActionRouter {
             user = sessionManager.getUser(session.getId());
         }
         return user;
+    }
+
+    /**
+     * 根据用户id或房间id获取房间对象
+     */
+    private Room getRoomByUserIdOrRoomId(Integer userId, Integer roomId) {
+        WebSocketSession session = sessionManager.getByUserId(userId);
+
+        Room room = null;
+        if (session == null) {
+            room = roomService.selectOne(roomId);
+        } else {
+            room = sessionManager.getRoom(session.getId());
+            if (room == null) {
+                room = roomService.selectOne(roomId);
+            }
+        }
+
+        return room;
     }
 
     @Pid(PidValue.LOGIN)
@@ -496,6 +545,7 @@ public class ActionRouter {
                             .setUsers(users)
                             .setGameRedis(gameRedis)
                             .setVersionRedis(versionRedis)
+                            .setActionRouter(this)
                             .build(),
                     1000);
         }
@@ -786,7 +836,6 @@ public class ActionRouter {
 
     @Pid(PidValue.PLAY_A_MAHJONG)
     @LoginResource
-    @SuppressWarnings("unchecked")
     public JsonResultY playACard(WebSocketSession session, JSONObject data)
             throws Exception {
 
@@ -798,14 +847,25 @@ public class ActionRouter {
         User user = sessionManager.getUser(session.getId());
         Room room = sessionManager.getRoom(session.getId());
 
+        handlePlayACard(room, user, playedMahjong);
+        return null;
+    }
+
+    /**
+     * 处理玩家打出一张牌逻辑
+     */
+    @SuppressWarnings("unchecked")
+    public void handlePlayACard(Room room, User user, Mahjong playedMahjong) throws InstantiationException, IllegalAccessException {
         Map<String, Object> result = gameService.playAMahjong(room, user, playedMahjong);
 
         // 响应用户已经打出牌
-        messageManager.send(session, new JsonResultY.Builder()
-                .setPid(PidValue.PLAY_A_MAHJONG)
-                .setError(CommonError.SYS_SUSSES)
-                .setData(null)
-                .build());
+        messageManager.sendMessageByUserId(
+                user.getId(),
+                new JsonResultY.Builder()
+                        .setPid(PidValue.PLAY_A_MAHJONG)
+                        .setError(CommonError.SYS_SUSSES)
+                        .setData(null)
+                        .build());
 
         // 玩家打牌广播
         List<PlayedMahjong> playedMahjongs = (List<PlayedMahjong>) result.get(PlayedMahjong.class.getSimpleName());
@@ -843,9 +903,6 @@ public class ActionRouter {
 
             //CanDoOperate waitingClientOperate = gameRedis.getWaitingClientOperate(firstCanDoOperate.getRoomMember().getRoomId());
         }
-
-
-        return null;
     }
 
     @Pid(PidValue.YING_AN_GANG)
@@ -917,6 +974,7 @@ public class ActionRouter {
                 .setUsers(users)
                 .setGameRedis(gameRedis)
                 .setVersionRedis(versionRedis)
+                .setActionRouter(this)
                 .build());
 
         return null;
@@ -1113,6 +1171,8 @@ public class ActionRouter {
                         .setError(CommonError.SYS_SUSSES)
                         .build());
 
+
+
         // 广播玩家执行碰
         for (PersonalCardInfo personalCardInfo : mahjongGameData.getPersonalCardInfos()) {
             messageManager.sendMessageByUserId(
@@ -1193,7 +1253,18 @@ public class ActionRouter {
     public JsonResultY guo(WebSocketSession session, JSONObject data) throws IllegalAccessException, InstantiationException {
         User user = sessionManager.getUser(session.getId());
         Room room = sessionManager.getRoom(session.getId());
+        handleGuo(room, user);
 
+        return null;
+    }
+
+    /**
+     * 处理“过”
+     *
+     * @param room 选择“过”的用户所在的房间
+     * @param user 选择“过”的用户
+     */
+    public void handleGuo(Room room, User user) {
         // 下一个可以操作的人
         Object[] result = gameService.guo(user, room);
         CanDoOperate nextCanDoOperate = (CanDoOperate) result[0];
@@ -1201,8 +1272,8 @@ public class ActionRouter {
         MahjongGameData mahjongGameData = (MahjongGameData) result[2];
 
         // 通知玩家通过“过”验证
-        messageManager.send(
-                session,
+        messageManager.sendMessageByUserId(
+                user.getId(),
                 new JsonResultY.Builder()
                         .setPid(PidValue.GUO)
                         .setError(CommonError.SYS_SUSSES)
@@ -1238,9 +1309,6 @@ public class ActionRouter {
                 // 自己摸牌，自摸胡、暗杠、加杠的情况，自己需要主动打一张牌
             }
         }
-
-
-        return null;
     }
 
     /**
@@ -1433,6 +1501,66 @@ public class ActionRouter {
 
         // 总结算广播
         broadcastUserTotalScore(singleUserGameScoreVos, room.getId());
+
+        return null;
+    }
+
+    /**
+     * 玩家主动调用托管
+     */
+    @Pid(PidValue.ADD_TRUSTEESHIP)
+    @LoginResource
+    public JsonResultY addTrusteeshipUser(WebSocketSession session, JSONObject data) throws IllegalAccessException, InstantiationException {
+        User user = sessionManager.getUser(session.getId());
+        Room room = sessionManager.getRoom(session.getId());
+
+        if (room == null) {
+            throw CommonError.ROOM_USER_NOT_IN_ROOM.newException();
+        }
+
+        Object[] result = gameService.addTrusteeshipUser(room, user);
+
+
+        // 广播用户“托管”
+        messageManager.sendMessageToRoomUsers(
+                room.getId().toString(),
+                new JsonResultY.Builder()
+                        .setPid(PidValue.ADD_TRUSTEESHIP)
+                        .setError(CommonError.SYS_SUSSES)
+                        .setData(user.getUId())
+                        .build()
+        );
+
+        // 判断当前游戏是否在等待托管用户操作
+        dealTrustesshipTask((MahjongGameData) result[1], (CanDoOperate) result[0]);
+
+        return null;
+    }
+
+    /**
+     * 玩家主动取消托管
+     */
+    @Pid(PidValue.REMOVE_TRUSTEESHIP)
+    @LoginResource
+    public JsonResultY removeTrusteeshipUser(WebSocketSession session, JSONObject data) throws IllegalAccessException, InstantiationException {
+        User user = sessionManager.getUser(session.getId());
+        Room room = sessionManager.getRoom(session.getId());
+
+        if (room == null) {
+            throw CommonError.ROOM_USER_NOT_IN_ROOM.newException();
+        }
+
+        Object[] result = gameService.removeTrusteeshipUser(room, user);
+
+        // 广播用户“取消托管”
+        messageManager.sendMessageToRoomUsers(
+                room.getId().toString(),
+                new JsonResultY.Builder()
+                        .setPid(PidValue.REMOVE_TRUSTEESHIP)
+                        .setError(CommonError.SYS_SUSSES)
+                        .setData(user.getUId())
+                        .build()
+        );
 
         return null;
     }

@@ -31,16 +31,33 @@ public class JsonUtil {
     }
 
     public static String toJson(Object obj) {
-        JSONObject jsonObject = JSONObject.fromObject(obj, config);
-        return jsonObject.toString();
+        if (obj instanceof Collection || obj instanceof Object[]) {
+            JSONArray jsonArray = JSONArray.fromObject(obj, config);
+            return jsonArray.toString();
+        } else {
+            JSONObject jsonObject = JSONObject.fromObject(obj, config);
+            return jsonObject.toString();
+        }
+
     }
 
     public static <T> Object toBean(String json, Class<T> type) {
         return toBean(json, type, null);
     }
 
-    public static <T> Object toBean(String json, Class<T> type, Map<String,
-            Class> classMap) {
+    @SuppressWarnings("unchecked")
+    public static <T> List<T> toArray(Class<T> type, String json) {
+        JSONArray jsonArray = JSONArray.fromObject(json);
+
+        Object[] objArr = (Object[]) JSONArray.toArray(jsonArray);
+        List<T> list = new ArrayList<>(objArr.length);
+        for (Object o : objArr) {
+            list.add((T) o);
+        }
+        return list;
+    }
+
+    public static <T> Object toBean(String json, Class<T> type, Map<String, Class> classMap) {
         JSONObject jsonObject = JSONObject.fromObject(json);
         Object o = JSONObject.toBean(jsonObject, type, classMap);
         if (o instanceof RoomMember) {

@@ -17,6 +17,7 @@ import com.huangmei.interfaces.monitor.MonitorTask;
 import com.huangmei.interfaces.monitor.clientTouchMahjong.task.callback.success.TouchMahjongSender;
 import com.huangmei.interfaces.monitor.clientTouchMahjong.toucher.GangToucher;
 import com.huangmei.interfaces.monitor.clientTouchMahjong.toucher.Toucher;
+import com.huangmei.interfaces.websocket.Mapping.ActionRouter;
 import com.huangmei.interfaces.websocket.MessageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +56,7 @@ public class ClientTouchMahjongTask implements MonitorTask {
     private MessageManager messageManager;
     private GameRedis gameRedis;
     private VersionRedis versionRedis;
+    private ActionRouter actionRouter;
 
     @Override
     public String getTaskName() {
@@ -156,6 +158,8 @@ public class ClientTouchMahjongTask implements MonitorTask {
                         .build());
 
                 success();
+
+                actionRouter.dealTrustesshipTask(mahjongGameData, canOperate);
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
                 fail();
@@ -274,6 +278,11 @@ public class ClientTouchMahjongTask implements MonitorTask {
 
         public Builder setVersionRedis(VersionRedis versionRedis) {
             task.versionRedis = versionRedis;
+            return this;
+        }
+
+        public Builder setActionRouter(ActionRouter actionRouter) {
+            task.actionRouter = actionRouter;
             return this;
         }
 

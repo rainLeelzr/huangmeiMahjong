@@ -80,6 +80,10 @@ public class Redis {
             return new BigDecimal(tempStr);
         }
 
+        if (type == ArrayList.class) {
+            return JsonUtil.toArray(Integer.class, tempStr);
+        }
+
         return JsonUtil.toBean(tempStr, type, classMap);
     }
 

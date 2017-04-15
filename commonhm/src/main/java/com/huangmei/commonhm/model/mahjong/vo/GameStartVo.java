@@ -23,11 +23,22 @@ public class GameStartVo {
      * 宝娘
      */
     private Integer baoMotherId;
-
     /**
      * 宝牌
      */
     private List<Integer> baoMahjongs;
+    /**
+     * 当前局数
+     */
+    private Integer currentTimes;
+
+    public Integer getCurrentTimes() {
+        return currentTimes;
+    }
+
+    public void setCurrentTimes(Integer currentTimes) {
+        this.currentTimes = currentTimes;
+    }
 
     public Integer getBankerUId() {
         return bankerUId;

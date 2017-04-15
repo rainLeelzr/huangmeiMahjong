@@ -64,6 +64,9 @@ public enum PidValue {
 
     GUO(3200, "过"),
 
+    ADD_TRUSTEESHIP(3201, "添加托管"),
+    REMOVE_TRUSTEESHIP(3202, "取消托管"),
+
     /**
      * 消息推送
      */
