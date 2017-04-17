@@ -185,7 +185,7 @@ public class GameService {
         // 游戏开始数据
         GameStartVo gameStartVo = new GameStartVo();
 
-        // 添加roomMeMber，拆分成4份手牌数据，传给客户端
+        // 添加roomMember，拆分成4份手牌数据，传给客户端
         List<FirstPutOutCard> firstPutOutCards = new ArrayList<>(players);
         for (int i = 0; i < players; i++) {
             PersonalCardInfo personalCardInfo = mahjongGameData.getPersonalCardInfos().get(i);

@@ -11,8 +11,7 @@ public class TranRecord implements Entity {
 		BIND_PHONE(4, "绑定手机领取钻石"),
 		TEN_WINS(5, "胜利十局领取金币"),
 		WIN(6, "对局胜利获取金币"),
-		BIND_PROMOTE_CODE(7, "绑定推广码"),
-		PROMOTE_SUCCESS(8, "推广成功");
+        BIND_PROMOTE_CODE(7, "绑定推广码");
 
 
 		private int code;

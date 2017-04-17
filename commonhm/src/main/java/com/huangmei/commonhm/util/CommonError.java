@@ -45,6 +45,8 @@ public enum CommonError {
     ROOM_USER_NOT_IN_ROOM(300004, "玩家没有在房间中", UserNotInRoomException.class),
     ROOM_READY_ERROR(300005, "玩家准备动作失败", ReadyErrorException.class),
     ROOM_UNREADY(300006, "开始游戏失败,还有玩家没有准备", UnReadyException.class),
+    VOTE_APPLY_FAIL(300007, "距离上一次投票时间不够两分钟,不能再次发起投票", VoteApplyFailException.class),
+    OUT_ROOM_FAIL(300008, "游戏已开始,退出房间失败", OutRoomFailException.class),
 
     /**
      * 游戏过程

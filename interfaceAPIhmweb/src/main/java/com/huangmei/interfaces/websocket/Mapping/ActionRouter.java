@@ -476,6 +476,7 @@ public class ActionRouter {
         if (result != null) {
             Integer roomId = (Integer) result.get("roomId");
             result.remove("roomId");
+            result.put("uId", user.getUId());
             JsonResultY jsonResultY = new JsonResultY.Builder()
                     .setPid(PidValue.OUT_ROOM.getPid())
                     .setError(CommonError.SYS_SUSSES)
@@ -619,7 +620,7 @@ public class ActionRouter {
             dismissRoomVoteTask.setRoomService(roomService);
             dismissRoomVoteTask.setRoomId(roomId);
 
-            monitorManager.schedule(dismissRoomVoteTask, 120 * 1000);
+            monitorManager.schedule(dismissRoomVoteTask, 10 * 1000);
         }
 
         result.remove("roomId");

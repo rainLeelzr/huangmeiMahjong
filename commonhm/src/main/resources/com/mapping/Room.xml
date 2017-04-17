@@ -35,7 +35,7 @@
     </select>
     <select id="countForPlayers" parameterType="int" resultType="_long">
         SELECT COUNT(r.id) FROM tb_room_member rm join tb_room r ON r.id=rm.room_id WHERE r.multiple=#{multiple} and
-        r.state !=3 ;
+        r.state !=3 and rm.state !=4;
     </select>
 
 
