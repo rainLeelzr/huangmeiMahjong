@@ -691,14 +691,9 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
             User promoter = userDao.selectOne(userCriteria);
             if (promoter != null) {//推广码正确
                 user.setDiamond(user.getDiamond() + 8);
-                user.setPromoterId(promoter.getId());
+                user.setPromoterId(code);
                 userDao.update(user);
                 createRecord(user, TranRecord.way.BIND_PROMOTE_CODE.getCode(), TranRecord.itemType.DIAMOND.getCode(), 8);
-
-                promoter.setDiamond(user.getDiamond() + 8);
-                userDao.update(promoter);
-                createRecord(promoter, TranRecord.way.PROMOTE_SUCCESS.getCode(), TranRecord.itemType.DIAMOND.getCode(), 8);
-
                 result.put("user", user);
                 return result;
             } else {

@@ -297,6 +297,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
 
     /**
      * 退出房间
+     *
      * @param roomCode
      * @param userId
      * @return
@@ -308,7 +309,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
         if (roomMember != null) {//需要在房间中才能退出房间
             Room room = getRoomByRoomCode(roomCode);
 
-            if (room != null) {
+            if (room != null && room.getState() != Room.state.PLAYING.getCode()) {
                 Long count = roomRedis.getRoomMemberCount(room.getId().toString());
                 if (count > 1) {//房间人数大于1人时,退出房间后房间状态为待开始状态
                     room.setState(Room.state.wait.getCode());
@@ -318,33 +319,38 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                     roomRedis.dismissRoom(room);
                 }
                 roomDao.update(room);
-            } else {
-                throw CommonError.ROOM_NOT_EXIST.newException();
-            }
-            roomRedis.editRoom(roomMember);//移除redis中的房间成员
+                roomRedis.editRoom(roomMember);//移除redis中的房间成员
 
-            //座位顺序比退出玩家位置大的玩家都需要退后一位
-            Set<RoomMember> roomMembers = roomRedis.getRoomMembers(room.getId().toString());
-            List<RoomMember> roomMemberList = new ArrayList<>(roomMembers);
-            Collections.sort(roomMemberList);
+                //座位顺序比退出玩家位置大的玩家都需要退后一位
+                Set<RoomMember> roomMembers = roomRedis.getRoomMembers(room.getId().toString());
+                List<RoomMember> roomMemberList = new ArrayList<>(roomMembers);
+                Collections.sort(roomMemberList);
 
-            for (RoomMember member : roomMemberList) {
-                if (member.getSeat() > roomMember.getSeat()) {
-                    roomRedis.editRoom(member);
-                    member.setSeat(member.getSeat() - 1);
-                    roomMemberDao.update(member);
-                    roomRedis.joinRoom(member);//更新redis中的房间用户信息
+                Map<String, Integer> newSeats = new HashMap<>();
+
+                for (RoomMember member : roomMemberList) {
+                    if (member.getSeat() > roomMember.getSeat()) {
+                        roomRedis.editRoom(member);
+                        member.setSeat(member.getSeat() - 1);
+                        roomMemberDao.update(member);
+                        roomRedis.joinRoom(member);//更新redis中的房间用户信息
+                        User u = userDao.selectOne(member.getUserId());
+                        newSeats.put(u.getUId().toString(), member.getSeat());
+                    }
                 }
+
+                roomMember.setState(RoomMember.state.OUT_ROOM.getCode());
+                roomMember.setSeat(-1);
+                roomMember.setLeaveTime(new Date());
+                roomMemberDao.update(roomMember);
+
+                result.put("newSeats", newSeats);//告知客户端作为更新
+                result.put("result", true);
+                result.put("roomId", room.getId());
+                return result;
+            } else {
+                throw CommonError.OUT_ROOM_FAIL.newException();
             }
-
-            roomMember.setState(RoomMember.state.OUT_ROOM.getCode());
-            roomMember.setSeat(-1);
-            roomMember.setLeaveTime(new Date());
-            roomMemberDao.update(roomMember);
-
-            result.put("roomId", room.getId());
-            result.put("result", true);
-            return result;
         } else {
             throw CommonError.ROOM_USER_NOT_IN_ROOM.newException();
         }
@@ -389,24 +395,28 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                 }
                 r = true;
             } else {//已开始游戏,需要申请解散,其他玩家同意才可以解散
-                r = false;
 
-                for (RoomMember roomMember : roomMembers) {
-                    Vote vote = new Vote();
-                    vote.setRoomId(room.getId());
-                    vote.setType(Vote.type.DISMISS_VOTE.getCode());
-                    vote.setState(Vote.state.UN_VOTE.getCode());
-                    vote.setOrganizerUserId(user.getId());
-                    vote.setVoterUserId(roomMember.getUserId());
-                    vote.setStatus(Vote.status.PROCESSING.getCode());
-                    if (roomMember.getUserId().equals(user.getId())) {//假如是发起人,则默认投票为同意
-                        vote.setState(Vote.state.AGREE.getCode());
-                        vote.setStatus(Vote.status.FINISH.getCode());
+                //发起投票两分钟内不能再次投票
+
+                List<Vote> votes = checkVote(room.getId());
+                if (votes.size() > 0) {//距离上一次投票时间不够两分钟不能再次发起投票
+                    throw CommonError.VOTE_APPLY_FAIL.newException();
+                } else {
+                    r = false;
+                    for (RoomMember roomMember : roomMembers) {
+                        Vote vote = new Vote();
+                        vote.setRoomId(room.getId());
+                        vote.setType(Vote.type.DISMISS_VOTE.getCode());
+                        vote.setState(Vote.state.UN_VOTE.getCode());
+                        vote.setOrganizerUserId(user.getId());
+                        vote.setVoterUserId(roomMember.getUserId());
+                        vote.setStatus(Vote.status.PROCESSING.getCode());
+                        if (roomMember.getUserId().equals(user.getId())) {//假如是发起人,则默认投票为同意
+                            vote.setState(Vote.state.AGREE.getCode());
+                        }
+                        voteDao.save(vote);
                     }
-                    voteDao.save(vote);
                 }
-
-
             }
             result.put("roomId", room.getId());
             result.put("uId", user.getUId());
@@ -603,10 +613,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
         }
 
         //超过两分钟后这一轮投票设置为已结束
-        Entity.VoteCriteria vc = new Entity.VoteCriteria();
-        voteCriteria.setRoomId(Entity.Value.eq(roomId));
-        voteCriteria.setState(Entity.Value.eq(Vote.status.PROCESSING.getCode()));
-        List<Vote> vs = voteDao.selectList(voteCriteria);
+        List<Vote> vs = checkVote(roomId);
         for (Vote v : vs) {
             v.setStatus(Vote.status.FINISH.getCode());
             voteDao.update(v);
@@ -642,6 +649,21 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
         roomMember.setUserId(userId);
         roomMember = roomMemberDao.selectByUserIdForCheck(roomMember);
         return roomMember;
+    }
+
+    /**
+     * 判断房间中是否还有投票进行中的玩家
+     *
+     * @param roomId
+     * @return
+     */
+    private List<Vote> checkVote(Integer roomId) {
+        Entity.VoteCriteria voteCriteria = new Entity.VoteCriteria();
+        voteCriteria.setRoomId(Entity.Value.eq(roomId));
+        voteCriteria.setType(Entity.Value.eq(Vote.type.DISMISS_VOTE.getCode()));
+        voteCriteria.setStatus(Entity.Value.eq(Vote.status.PROCESSING.getCode()));
+        List<Vote> vs = voteDao.selectList(voteCriteria);
+        return vs;
     }
 
     /**
