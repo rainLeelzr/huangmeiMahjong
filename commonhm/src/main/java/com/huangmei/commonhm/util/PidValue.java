@@ -8,7 +8,7 @@ public enum PidValue {
     /**
      * 系统/
      */
-    CHECK_CONNECTION(9000, "检测连接"),
+    HEARTBEAT(9000, "心跳"),
     TEST(1, "开发调试"),
 
     /**

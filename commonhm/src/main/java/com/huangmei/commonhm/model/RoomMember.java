@@ -1,5 +1,7 @@
 package com.huangmei.commonhm.model;
 
+import com.huangmei.commonhm.model.mahjong.vo.PersonalCardVo;
+
 public class RoomMember implements Entity, Comparable {
 
     private static final long serialVersionUID = 1L;
@@ -19,6 +21,26 @@ public class RoomMember implements Entity, Comparable {
     protected Integer state;
     /**  */
     protected Integer userId;
+
+    private User user;
+
+    private PersonalCardVo personalCardVo;
+
+    public PersonalCardVo getPersonalCardVo() {
+        return personalCardVo;
+    }
+
+    public void setPersonalCardVo(PersonalCardVo personalCardVo) {
+        this.personalCardVo = personalCardVo;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 
     public Integer getId() {
         return id;

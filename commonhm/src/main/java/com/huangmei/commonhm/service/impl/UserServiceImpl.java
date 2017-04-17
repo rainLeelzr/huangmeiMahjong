@@ -2,7 +2,15 @@ package com.huangmei.commonhm.service.impl;
 
 import com.huangmei.commonhm.dao.*;
 import com.huangmei.commonhm.model.*;
+import com.huangmei.commonhm.model.mahjong.Mahjong;
+import com.huangmei.commonhm.model.mahjong.MahjongGameData;
+import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
+import com.huangmei.commonhm.model.mahjong.vo.GameStartVo;
+import com.huangmei.commonhm.model.mahjong.vo.GangVo;
+import com.huangmei.commonhm.model.mahjong.vo.PersonalCardVo;
+import com.huangmei.commonhm.model.mahjong.vo.ReconnectionVo;
 import com.huangmei.commonhm.model.vo.ScoreVo;
+import com.huangmei.commonhm.redis.GameRedis;
 import com.huangmei.commonhm.service.RoomService;
 import com.huangmei.commonhm.service.UserService;
 import com.huangmei.commonhm.util.CommonError;
@@ -29,6 +37,9 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
 
     @Autowired
     private RoomService roomService;
+
+    @Autowired
+    private GameRedis gameRedis;
 
     /**
      * 用户登录
@@ -83,9 +94,18 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
             roomMember.setUserId(user.getId());
             roomMember = roomMemberDao.selectByUserIdForCheck(roomMember);
             if (roomMember != null) {
-                loginType = 2;
-                Room room = roomService.selectOne(roomMember.getRoomId());
-                result.put("room", room);
+                if (roomMember.getState().equals(RoomMember.state.PLAYING.getCode())) {
+                    loginType = 2;
+                    Room room = roomService.selectOne(roomMember.getRoomId());
+                    result.put("room", room);
+
+                    // 组装游戏信息，返回给客户端渲染界面
+                    ReconnectionVo reconnectionVo = genReconnectionVo4Playing(room);
+                    result.put("gameData", reconnectionVo);
+
+                } else {
+                    loginType = 1;
+                }
             } else {
                 loginType = 1;
             }
@@ -93,6 +113,52 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         result.put("user", user);
         result.put("login_type", loginType);
         return result;
+    }
+
+    /**
+     * 生成正在游戏中的数据
+     */
+    private ReconnectionVo genReconnectionVo4Playing(Room room) {
+        MahjongGameData mahjongGameData = gameRedis.getMahjongGameData(room.getId());
+
+        GameStartVo gameStart = new GameStartVo();
+        gameStart.setDices(mahjongGameData.getDices());
+        gameStart.setBaoMotherId(mahjongGameData.getBaoMother().getId());
+        gameStart.setBaoMahjongs(Mahjong.parseToIds(mahjongGameData.getBaoMahjongs()));
+        gameStart.setCurrentTimes(mahjongGameData.getCurrentTimes());
+
+        Entity.RoomMemberCriteria roomMemberCriteria = new Entity.RoomMemberCriteria();
+        roomMemberCriteria.setRoomId(Entity.Value.eq(room.getId()));
+
+        // roomMembers的User在api中设置
+        List<RoomMember> roomMembers = roomMemberDao.selectList(roomMemberCriteria);
+        for (RoomMember roomMember : roomMembers) {
+            PersonalCardInfo personalCardInfo = PersonalCardInfo.getPersonalCardInfo(
+                    mahjongGameData.getPersonalCardInfos(),
+                    roomMember.getUserId()
+            );
+
+            PersonalCardVo pCardVo = new PersonalCardVo(
+                    Mahjong.parseToIds(personalCardInfo.getHandCards()),
+                    Mahjong.parseCombosToMahjongIds(personalCardInfo.getPengs()),
+                    GangVo.parseFromGangCombos(personalCardInfo.getGangs())
+            );
+            roomMember.setPersonalCardVo(pCardVo);
+
+            // 设置庄家
+            if (personalCardInfo.getRoomMember().getSeat().equals(mahjongGameData.getBankerSite())) {
+                gameStart.setBankerUId(personalCardInfo.getRoomMember().getUserId());// uId在api层再设置
+            }
+        }
+
+        ReconnectionVo reconnectionVo = new ReconnectionVo(
+                roomMembers,
+                room,
+                gameStart,
+                mahjongGameData.getLeftCards().size()
+        );
+
+        return reconnectionVo;
     }
 
     /**

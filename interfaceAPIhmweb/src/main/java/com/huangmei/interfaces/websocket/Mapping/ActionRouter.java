@@ -306,6 +306,14 @@ public class ActionRouter {
         return room;
     }
 
+    @Pid(PidValue.HEARTBEAT)
+    public JsonResultY heartbeat(WebSocketSession session, JSONObject data) {
+        return new JsonResultY.Builder()
+                .setPid(PidValue.HEARTBEAT.getPid())
+                .setError(CommonError.SYS_SUSSES)
+                .build();
+    }
+
     @Pid(PidValue.LOGIN)
     public JsonResultY login(WebSocketSession session, JSONObject data)
             throws Exception {
@@ -323,6 +331,20 @@ public class ActionRouter {
             if (loginType == 2) {
                 sessionManager.userJoinRoom((Room) result.get(("room")), session);
                 result.remove("room");
+
+                ReconnectionVo reconnectionVo = (ReconnectionVo) result.get("gameData");
+
+                Integer bankerUserId = reconnectionVo.getGameStart().getBankerUId();
+                User user = getUserByUserId(bankerUserId);
+                reconnectionVo.getGameStart().setBankerUId(user.getUId());
+
+                List<RoomMember> roomMembers = reconnectionVo.getRoomMembers();
+                for (RoomMember roomMember : roomMembers) {
+                    User me = getUserByUserId(roomMember.getUserId());
+                    roomMember.setUser(me);
+
+                    roomMember.getPersonalCardVo().setuId(me.getUId());
+                }
             }
         }
 
@@ -1611,4 +1633,38 @@ public class ActionRouter {
     }
 
 
+    /**
+     * 处理客户端断线
+     * 如果用户在游戏中，则设置用户为托管状态
+     */
+    public void dealDisconnection(WebSocketSession session) {
+        User user = sessionManager.getUser(session.getId());
+        if (user == null) {
+            return;
+        }
+
+        Object[] result = gameService.dealDisconnection(user);
+
+        // 用户不在游戏中，无需处理
+        if (result == null) {
+            return;
+        }
+
+        CanDoOperate waitingClientOperate = (CanDoOperate) result[0];
+        MahjongGameData mahjongGameData = (MahjongGameData) result[1];
+        Room room = (Room) result[2];
+
+        // 广播用户“托管”
+        messageManager.sendMessageToRoomUsers(
+                room.getId().toString(),
+                new JsonResultY.Builder()
+                        .setPid(PidValue.ADD_TRUSTEESHIP)
+                        .setError(CommonError.SYS_SUSSES)
+                        .setData(user.getUId())
+                        .build()
+        );
+
+        // 判断当前游戏是否在等待托管用户操作，是则自动打牌
+        dealTrustesshipTask(mahjongGameData, waitingClientOperate);
+    }
 }

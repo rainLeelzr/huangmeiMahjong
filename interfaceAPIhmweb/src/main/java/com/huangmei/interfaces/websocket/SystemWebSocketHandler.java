@@ -40,9 +40,10 @@ public class SystemWebSocketHandler implements WebSocketHandler {
     // 连接关闭
     public void afterConnectionClosed(WebSocketSession session,
                                       CloseStatus closeStatus) throws Exception {
-        log.debug("websocket[sessionId={}] cause[{}] connection closed......",
+        log.debug("webSocket接关闭[sessionId={}] 关闭原因[{}]",
                 session.getId(),
                 closeStatus.toString());
+        actionRouter.dealDisconnection(session);
         sessionManager.connectionClosed(session);
     }
 
@@ -50,7 +51,7 @@ public class SystemWebSocketHandler implements WebSocketHandler {
     // 连接上
     public void afterConnectionEstablished(WebSocketSession session)
             throws Exception {
-        log.debug("[sessionId={}] connect to the websocket success......", session.getId());
+        log.debug("新建立webSocket[sessionId={}]", session.getId());
         sessionManager.addSession(session);
         // 处理离线消息
 
@@ -140,7 +141,8 @@ public class SystemWebSocketHandler implements WebSocketHandler {
         if (session.isOpen()) {
             session.close();
         }
-        log.debug("websocket [sessionId={}] connection closed......", session.getId());
+        log.error("webSocket错误断开[sessionId={}]", session.getId());
+        log.error(exception.getMessage(), exception);
         sessionManager.connectionClosed(session);
     }
 

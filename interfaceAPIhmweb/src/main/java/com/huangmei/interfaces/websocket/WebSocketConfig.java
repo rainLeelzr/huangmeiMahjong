@@ -23,6 +23,8 @@ public class WebSocketConfig extends WebMvcConfigurerAdapter implements WebSocke
         ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
         container.setMaxTextMessageBufferSize(30 * 1024);
         container.setMaxBinaryMessageBufferSize(30 * 1024);
+        // DEBUGING　webSocket超时时间
+        //container.setMaxSessionIdleTimeout(TimeUnit.SECONDS.toMillis(15));
         return container;
     }
 

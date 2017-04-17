@@ -10,10 +10,7 @@ import com.huangmei.commonhm.manager.operate.Operate;
 import com.huangmei.commonhm.manager.putOutCard.AfterPutOutCardManager;
 import com.huangmei.commonhm.manager.ruanHu.RuanHuManager;
 import com.huangmei.commonhm.manager.yingHu.YingHuManager;
-import com.huangmei.commonhm.model.Room;
-import com.huangmei.commonhm.model.RoomMember;
-import com.huangmei.commonhm.model.Score;
-import com.huangmei.commonhm.model.User;
+import com.huangmei.commonhm.model.*;
 import com.huangmei.commonhm.model.mahjong.*;
 import com.huangmei.commonhm.model.mahjong.vo.*;
 import com.huangmei.commonhm.redis.GameRedis;
@@ -23,7 +20,6 @@ import com.huangmei.commonhm.service.RoomService;
 import com.huangmei.commonhm.util.CommonError;
 import com.huangmei.commonhm.util.JsonUtil;
 import com.huangmei.commonhm.util.PidValue;
-import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1636,5 +1632,37 @@ public class GameService {
         List<SingleUserGameScoreVo> singleUserGameScoreVos = ready4NextGameOrFinishGame(mahjongGameData, room, scores);
 
         return new Object[]{scores, singleUserGameScoreVos};
+    }
+
+    /**
+     * 判断玩家是否在游戏中，是的话，返回roomMember
+     *
+     * @param user 断开连接的玩家
+     * @return Object[] [0]:CanDoOperate [1]:MahjongGameData [2]:Room
+     */
+    public Object[] dealDisconnection(User user) {
+        Entity.RoomMemberCriteria roomMemberCriteria = new Entity.RoomMemberCriteria();
+        roomMemberCriteria.setUserId(Entity.Value.eq(user.getId()));
+        roomMemberCriteria.setLeaveTime(Entity.Value.isNull());
+
+        List<RoomMember> roomMembers = roomMemberDao.selectList(roomMemberCriteria);
+        if (roomMembers.isEmpty()) {
+            return null;
+        }
+
+        if (roomMembers.size() > 1) {
+            log.warn("webSocket断线时,查询库表[TB_ROOM_MEMBER]，[userId={}]在多个房间中的[leaveTime]不为null,具体roomMember:\n{}",
+                    user.getId(), roomMembers);
+        }
+
+        RoomMember roomMember = roomMembers.get(0);
+        Room room = roomService.selectOne(roomMember.getRoomId());
+        if (roomMember.getState().equals(RoomMember.state.PLAYING.getCode())) {
+            // 玩家在游戏中，设置为托管状态
+            Object[] result = addTrusteeshipUser(room, user);
+            return new Object[]{result[0], result[1], room};
+        }
+
+        return null;
     }
 }
