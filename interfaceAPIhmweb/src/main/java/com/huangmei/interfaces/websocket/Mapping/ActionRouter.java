@@ -37,6 +37,7 @@ import java.util.*;
  * 客户端接入到此类的某一个方法
  */
 @Component
+@SuppressWarnings("unchecked")
 public class ActionRouter {
 
     Logger log = LoggerFactory.getLogger(ActionRouter.class);
@@ -105,16 +106,31 @@ public class ActionRouter {
     /**
      * 下一个玩家摸牌逻辑
      */
-    private void handleCommonNextUserTouchAMahjong(MahjongGameData mahjongGameData) {
+    private void handleCommonNextUserTouchAMahjong(Room room, MahjongGameData mahjongGameData) {
         User currentUser = getLastPutOutCardUser(mahjongGameData);
 
-        handleCommonNextUserTouchAMahjong(mahjongGameData, currentUser);
+        handleCommonNextUserTouchAMahjong(room, mahjongGameData, currentUser);
     }
 
     /**
      * 下一个玩家摸牌逻辑
      */
-    private void handleCommonNextUserTouchAMahjong(MahjongGameData mahjongGameData, User currentUser) {
+    private void handleCommonNextUserTouchAMahjong(Room room, MahjongGameData mahjongGameData, User currentUser) {
+        // 是否平局（没有牌可以摸）
+        boolean isDraw = isDraw(mahjongGameData);
+        if (isDraw) {
+            Object[] result = gameService.draw(room, mahjongGameData);
+            List<Score> scores = (List<Score>) result[0];
+            List<SingleUserGameScoreVo> singleUserGameScoreVos = result[1] == null ? null : (List<SingleUserGameScoreVo>) result[1];
+
+            //单局结算广播
+            broadcastSingleScore(mahjongGameData, scores, room, null, null, null);
+
+            // 总结算广播
+            broadcastUserTotalScore(singleUserGameScoreVos, room.getId());
+            return;
+        }
+
         // 4个玩家，按座位号升序
         List<User> users = getRoomUsers(mahjongGameData.getPersonalCardInfos());
 
@@ -134,6 +150,17 @@ public class ActionRouter {
                 .setVersionRedis(versionRedis)
                 .setActionRouter(this)
                 .build());
+    }
+
+    /**
+     * 判断是否平局
+     */
+    private boolean isDraw(MahjongGameData mahjongGameData) {
+        if (mahjongGameData.getLeftCards().size() == 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 
@@ -184,7 +211,7 @@ public class ActionRouter {
                                 .setRoom(getRoomByUserIdOrRoomId(nextOperateUserId, mahjongGameData.getRoomId()))
                                 .setUser(getUserByUserId(nextOperateUserId))
                                 .build(),
-                        3000
+                        500
                 );
                 break;
             }
@@ -909,7 +936,7 @@ public class ActionRouter {
                 afterPutOutCardManager.scan(mahjongGameData, playedMahjong, user);
 
         if (canOperates.size() == 0) {
-            handleCommonNextUserTouchAMahjong(mahjongGameData, user);
+            handleCommonNextUserTouchAMahjong(room, mahjongGameData, user);
         } else {
             CanDoOperate firstCanDoOperate = canOperates.remove(0);
 
@@ -1191,7 +1218,6 @@ public class ActionRouter {
                         .build());
 
 
-
         // 广播玩家执行碰
         for (PersonalCardInfo personalCardInfo : mahjongGameData.getPersonalCardInfos()) {
             messageManager.sendMessageByUserId(
@@ -1317,13 +1343,13 @@ public class ActionRouter {
             } else if (waitingClientOperate.getOperates().contains(Operate.CHI_YING_PENG_PENG_HU)
                     || waitingClientOperate.getOperates().contains(Operate.CHI_YING_PING_HU)
                     || waitingClientOperate.getOperates().contains(Operate.CHI_YING_QI_DUI_HU)
-                    || waitingClientOperate.getOperates().contains(Operate.CHI_RUAN_QI_DUI_HU)
-                    || waitingClientOperate.getOperates().contains(Operate.CHI_RUAN_QI_DUI_HU)
+                    || waitingClientOperate.getOperates().contains(Operate.CHI_RUAN_PENG_PENG_HU)
+                    || waitingClientOperate.getOperates().contains(Operate.CHI_RUAN_PING_HU)
                     || waitingClientOperate.getOperates().contains(Operate.CHI_RUAN_QI_DUI_HU)
                     || waitingClientOperate.getOperates().contains(Operate.YING_DA_MING_GANG)
                     || waitingClientOperate.getOperates().contains(Operate.YING_PENG)) {
                 // 别人打牌，自己可以吃胡、大明杠、碰的情况
-                handleCommonNextUserTouchAMahjong(mahjongGameData);
+                handleCommonNextUserTouchAMahjong(room, mahjongGameData);
             } else {
                 // 自己摸牌，自摸胡、暗杠、加杠的情况，自己需要主动打一张牌
             }

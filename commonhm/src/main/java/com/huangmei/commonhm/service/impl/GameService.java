@@ -842,6 +842,7 @@ public class GameService {
 
         if (mahjongGameData.getRoomType().equals(Room.type.COINS_ROOM)
                 || mahjongGameData.getCurrentTimes() < mahjongGameData.getTimes()) {
+            // 还没到最后一局，可以继续一下局
             room.setState(Room.state.wait.getCode());
             roomDao.update(room);
 
@@ -857,6 +858,7 @@ public class GameService {
                 roomMemberDao.update(temp);
             }
         } else {
+            // 最后一局已结束，计算总结算
             for (Score score : scores) {
                 roomService.outRoom(room.getRoomCode(), score.getUserId());
             }
@@ -1368,6 +1370,9 @@ public class GameService {
 
     /**
      * 暂时只为硬自摸服务，待重构
+     *
+     * @param user       胡牌的玩家，如果平局，则user为null
+     * @param canOperate 用于设置胡牌的玩家的胡牌类型，如果平局，则为null
      */
     private List<Score> genScores4Game(
             MahjongGameData mahjongGameData,
@@ -1377,9 +1382,11 @@ public class GameService {
         List<Score> scores = new ArrayList<>(mahjongGameData.getPersonalCardInfos().size());
 
         Operate operate = null;
-        for (Operate temp : canOperate.getOperates()) {
-            operate = temp;
-            break;
+        if (canOperate != null) {
+            for (Operate temp : canOperate.getOperates()) {
+                operate = temp;
+                break;
+            }
         }
 
         Date now = new Date();
@@ -1393,7 +1400,7 @@ public class GameService {
             score.setType(room.getType());
             score.setTimes(mahjongGameData.getCurrentTimes());
 
-            boolean isWinner = personalCardInfo.getRoomMember().getUserId().equals(user.getId());
+            boolean isWinner = user != null && personalCardInfo.getRoomMember().getUserId().equals(user.getId());
 
             // 杠数量
             int anGangTimes = 0;
@@ -1432,7 +1439,13 @@ public class GameService {
                 score.setScore(0);
                 score.setPaoNum(0);
                 score.setCoin(0);
-                score.setWinType(Score.WinType.OTHER_USER_ZI_MO.getId());
+                if (user == null) {
+                    // 平局的情况，所有人都是"没有胡牌,不用输分"
+                    score.setWinType(Score.WinType.NONE.getId());
+                } else {
+                    score.setWinType(Score.WinType.OTHER_USER_ZI_MO.getId());
+                }
+
             }
 
             scores.add(score);
@@ -1607,5 +1620,21 @@ public class GameService {
     public Object[] removeTrusteeshipUser(Room room, User user) {
         gameRedis.removeTrusteeshipUserId(room.getId(), user.getId());
         return null;
+    }
+
+    /**
+     * 执行流局处理
+     */
+    public Object[] draw(Room room, MahjongGameData mahjongGameData) {
+        List<Score> scores = genScores4Game(mahjongGameData, room, null, null);
+
+        for (Score score : scores) {
+            scoreDao.save(score);
+        }
+
+        // 为下一局游戏做准备，或者结束游戏
+        List<SingleUserGameScoreVo> singleUserGameScoreVos = ready4NextGameOrFinishGame(mahjongGameData, room, scores);
+
+        return new Object[]{scores, singleUserGameScoreVos};
     }
 }

@@ -66,6 +66,7 @@ public class ClientTouchMahjongTask implements MonitorTask {
     @Override
     public void run() {
         try {
+
             toucher.setLeftCards(mahjongGameData.getLeftCards());
             Mahjong touchMahjong = toucher.touch();
 
