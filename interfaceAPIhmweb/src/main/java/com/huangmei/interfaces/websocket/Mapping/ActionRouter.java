@@ -658,6 +658,25 @@ public class ActionRouter {
                 .build();
     }
 
+    @Pid(PidValue.BIND_PROMOTE_CODE)
+    @LoginResource
+    public JsonResultY bindPromoteCode(WebSocketSession session, JSONObject data)
+            throws Exception {
+        User user = sessionManager.getUser(session.getId());
+
+        Map<String, Object> result = userService.bindPromoteCode(data, user);
+
+        if ((User) result.get("user") != null) {
+            sessionManager.userUpdate((User) result.get("user"), session);
+        }
+
+        return new JsonResultY.Builder()
+                .setPid(PidValue.BIND_PROMOTE_CODE.getPid())
+                .setError(CommonError.SYS_SUSSES)
+                .setData(result)
+                .build();
+    }
+
     @Pid(PidValue.TEN_WINS)
     @LoginResource
     public JsonResultY tenWins(WebSocketSession session, JSONObject data)

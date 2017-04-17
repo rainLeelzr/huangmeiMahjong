@@ -46,6 +46,28 @@ public class User implements Entity {
     /**  */
     protected Integer uId;
 
+    protected Integer promoteCode;
+
+    protected Integer promoterId;
+
+
+    public Integer getPromoterId() {
+
+        return promoterId;
+    }
+
+    public void setPromoterId(Integer promoterId) {
+        this.promoterId = promoterId;
+    }
+
+    public Integer getPromoteCode() {
+        return promoteCode;
+    }
+
+    public void setPromoteCode(Integer promoteCode) {
+        this.promoteCode = promoteCode;
+    }
+
     public User(Integer id) {
         this.id = id;
     }
@@ -183,6 +205,8 @@ public class User implements Entity {
         builder.append("openId = ").append(openId).append(", ");
         builder.append("sex = ").append(sex).append(", ");
         builder.append("uId = ").append(uId);
+        builder.append("promoteCode = ").append(promoteCode);
+        builder.append("promoterId = ").append(promoterId);
         return builder.toString();
     }
 
