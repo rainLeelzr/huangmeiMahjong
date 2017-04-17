@@ -313,6 +313,28 @@ public enum Mahjong implements Comparable<Mahjong> {
         return true;
     }
 
+    /**
+     * 获取下一张麻将，例如输入1万，输出2万，输入9万，输出1万
+     */
+    public static Mahjong next(Mahjong mahjong) {
+        Integer nextMahjongId = mahjong.getId() + 10;
+        Mahjong nextMahjong = null;
+        try {
+            nextMahjong = Mahjong.parse(nextMahjongId);
+            return nextMahjong;
+        } catch (RuntimeException e) {
+            if (mahjong.getZi().equals(FAN_ZI)) {
+                // 番子
+                nextMahjongId = mahjong.getId() - 20;
+            } else {
+                // 非番子
+                nextMahjongId = mahjong.getId() - 80;
+            }
+            nextMahjong = Mahjong.parse(nextMahjongId);
+        }
+        return nextMahjong;
+    }
+
     @Override
     public String toString() {
         //return "{\"id\":\"" + id + "\""

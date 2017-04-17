@@ -52,7 +52,8 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
     public Map<String, Object> login(JSONObject data, String ip) throws Exception {
 
         Map<String, Object> result = new HashMap<String, Object>(2);
-        Integer loginType;//1正常登陆,2游戏中断线重连,3结算后未显示结算页面
+        //1正常登陆,2进入了房间，未准备,3进入了房间，已准备，4进入了房间，游戏中，5结算后未显示结算页面
+        Integer loginType;
 
         String openId = (String) data.get("openId");
         String nickName = (String) data.get("nickName");
@@ -94,17 +95,22 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
             roomMember.setUserId(user.getId());
             roomMember = roomMemberDao.selectByUserIdForCheck(roomMember);
             if (roomMember != null) {
+                Room room = roomService.selectOne(roomMember.getRoomId());
+                result.put("room", room);
+
                 if (roomMember.getState().equals(RoomMember.state.PLAYING.getCode())) {
-                    loginType = 2;
-                    Room room = roomService.selectOne(roomMember.getRoomId());
-                    result.put("room", room);
+                    loginType = 4;// 进入了房间，游戏中
 
                     // 组装游戏信息，返回给客户端渲染界面
                     ReconnectionVo reconnectionVo = genReconnectionVo4Playing(room);
                     result.put("gameData", reconnectionVo);
 
+                } else if (roomMember.getState().equals(RoomMember.state.UNREADY.getCode())) {
+                    loginType = 2;// 2进入了房间，未准备
+                } else if (roomMember.getState().equals(RoomMember.state.READY.getCode())) {
+                    loginType = 3;// 进入了房间，已准备
                 } else {
-                    loginType = 1;
+                    throw CommonError.SYS_PARAM_ERROR.newException();
                 }
             } else {
                 loginType = 1;

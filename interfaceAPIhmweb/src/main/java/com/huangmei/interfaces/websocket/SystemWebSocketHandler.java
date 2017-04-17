@@ -58,7 +58,7 @@ public class SystemWebSocketHandler implements WebSocketHandler {
     }
 
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
-        log.info("received client  message:{}", message.getPayload());
+        log.info("收到客户端[sessionId={}]消息:{}", session.getId(), message.getPayload());
         String clientMessage = (String) message.getPayload();
 
         JsonResultY jsonResultY = null;

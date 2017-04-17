@@ -328,23 +328,26 @@ public class ActionRouter {
             sessionManager.userLogin((User) result.get("user"), session);
 
             Integer loginType = (Integer) result.get("login_type");
-            if (loginType == 2) {
+            if (loginType == 2 || loginType == 3 || loginType == 4) {
                 sessionManager.userJoinRoom((Room) result.get(("room")), session);
                 result.remove("room");
 
-                ReconnectionVo reconnectionVo = (ReconnectionVo) result.get("gameData");
+                if(loginType == 4){
+                    ReconnectionVo reconnectionVo = (ReconnectionVo) result.get("gameData");
 
-                Integer bankerUserId = reconnectionVo.getGameStart().getBankerUId();
-                User user = getUserByUserId(bankerUserId);
-                reconnectionVo.getGameStart().setBankerUId(user.getUId());
+                    Integer bankerUserId = reconnectionVo.getGameStart().getBankerUId();
+                    User user = getUserByUserId(bankerUserId);
+                    reconnectionVo.getGameStart().setBankerUId(user.getUId());
 
-                List<RoomMember> roomMembers = reconnectionVo.getRoomMembers();
-                for (RoomMember roomMember : roomMembers) {
-                    User me = getUserByUserId(roomMember.getUserId());
-                    roomMember.setUser(me);
+                    List<RoomMember> roomMembers = reconnectionVo.getRoomMembers();
+                    for (RoomMember roomMember : roomMembers) {
+                        User me = getUserByUserId(roomMember.getUserId());
+                        roomMember.setUser(me);
 
-                    roomMember.getPersonalCardVo().setuId(me.getUId());
+                        roomMember.getPersonalCardVo().setuId(me.getUId());
+                    }
                 }
+
             }
         }
 

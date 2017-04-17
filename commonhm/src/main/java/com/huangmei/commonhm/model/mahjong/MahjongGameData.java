@@ -242,15 +242,16 @@ public class MahjongGameData {
 
 
         // 设定宝娘
-        mahjongGameData.setBaoMother(leftCards.get(0));
+        Mahjong baoMother = leftCards.get(0);
+        mahjongGameData.setBaoMother(baoMother);
 
         // 设定宝牌
-        // todome 设定宝牌
+        Mahjong nextMahjong = Mahjong.next(baoMother);
+        Integer baoMahjongNumber = nextMahjong.getNumber();
         List<Mahjong> baoMahjongs = new ArrayList<>(4);
-        baoMahjongs.add(Mahjong.THREE_TIAO_1);
-        baoMahjongs.add(Mahjong.THREE_TIAO_2);
-        baoMahjongs.add(Mahjong.THREE_TIAO_3);
-        baoMahjongs.add(Mahjong.THREE_TIAO_4);
+        for (int i = 1; i <= 4; i++) {
+            baoMahjongs.add(Mahjong.parse(baoMahjongNumber * 10 + i));
+        }
         mahjongGameData.setBaoMahjongs(baoMahjongs);
 
         return mahjongGameData;
