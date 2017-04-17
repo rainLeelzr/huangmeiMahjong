@@ -33,6 +33,8 @@ public enum CommonError {
     NOT_STANDS(200011, "玩家在此房间还没有战绩", NotStandsException.class),
     USER_LACK_HORNS(200012, "喇叭不足", UserLackHornsException.class),
     NOT_ABLE_GET_COINS(200013, "距离上次领取金币还没超过两小时", NotAbleGetCoinsException.class),
+    PROMOTE_CODE_NOT_EXIST(200014, "推广码不存在", PromoteCodeNotExistException.class),
+    ALREADY_BIND_PROMOTE_CODE(200015, "已经绑定过推广码了", AlreadyBindPromoteCodeException.class),
 
     /**
      * 房间

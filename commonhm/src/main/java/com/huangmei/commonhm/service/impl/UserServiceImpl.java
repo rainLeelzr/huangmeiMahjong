@@ -196,7 +196,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         tr.setUserId(user.getId());
         Long count = tranRecordDao.countForPrizeDraw(tr);
 
-        if (query != null) {//户端需要判断是否免费抽奖
+        if (query != null) {//客户端需要判断是否免费抽奖
             if (count < 1) {
                 result.put("free", true);
             } else {
@@ -524,7 +524,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
 
         if (query != null) {//查询当前胜利局数
             result.put("winNum", num);
-            if (count < 0) {
+            if (count < 1) {
                 result.put("receive", false);
             } else {
                 result.put("receive", true);
@@ -532,7 +532,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         } else {
             if (num >= 10) {//当天胜利局数大于十局
 
-                if (count < 0) {//当天还没有领取胜利任务金币
+                if (count < 1) {//当天还没有领取胜利任务金币
                     user.setCoin(user.getCoin() + 2000);
                     userDao.update(user);
                     createRecord(user, TranRecord.way.TEN_WINS.getCode(), TranRecord.itemType.COIN.getCode(), 2000);
@@ -584,7 +584,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
                     sc.setRoomId(Entity.Value.eq(room.getId()));
                     List<Score> scs = scoreDao.selectList(sc);
                     for (Score se : scs) {//其中每局四个玩家的战绩
-                        User u = getUserByUserId(se.getUserId());
+                        User u = userDao.selectOne(se.getUserId());
                         if (se.getWinType() != 0) {
                             players.put(u.getUId().toString(), se.getScore() * room.getMultiple());
                         } else {
@@ -625,7 +625,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
             if (notices.size() > 0) {
                 for (Notice notice : notices) {
                     if (new Date().getTime() - notice.getCreateTime().getTime() < 600 * 1000) {//10分钟内需要继续滚动喊话
-                        User u = getUserByUserId(notice.getUserId());
+                        User u = userDao.selectOne(notice.getUserId());
                         String temp = u.getNickName() + ":" + notice.getContent();
                         strArrays.add(temp);
                     } else {
@@ -673,19 +673,43 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         return result;
     }
 
-
     /**
-     * 根据userId查询用户
+     * 绑定推广码
      *
-     * @param userId
+     * @param data
+     * @param user
      * @return
      */
-    private User getUserByUserId(Integer userId) {
-        Entity.UserCriteria userCriteria = new Entity.UserCriteria();
-        userCriteria.setId(Entity.Value.eq(userId));
-        User user = userDao.selectOne(userCriteria);
-        return user;
+    @Override
+    public Map<String, Object> bindPromoteCode(JSONObject data, User user) {
+        Map<String, Object> result = new HashMap<String, Object>(2);
+        Integer code = (Integer) data.get("code");
+
+        if (user.getPromoterId() == null) {//未绑定过推广码
+            Entity.UserCriteria userCriteria = new Entity.UserCriteria();
+            userCriteria.setPromoteCode(Entity.Value.eq(code));
+            User promoter = userDao.selectOne(userCriteria);
+            if (promoter != null) {//推广码正确
+                user.setDiamond(user.getDiamond() + 8);
+                user.setPromoterId(promoter.getId());
+                userDao.update(user);
+                createRecord(user, TranRecord.way.BIND_PROMOTE_CODE.getCode(), TranRecord.itemType.DIAMOND.getCode(), 8);
+
+                promoter.setDiamond(user.getDiamond() + 8);
+                userDao.update(promoter);
+                createRecord(promoter, TranRecord.way.PROMOTE_SUCCESS.getCode(), TranRecord.itemType.DIAMOND.getCode(), 8);
+
+                result.put("user", user);
+                return result;
+            } else {
+                throw CommonError.PROMOTE_CODE_NOT_EXIST.newException();
+            }
+        } else {
+            throw CommonError.ALREADY_BIND_PROMOTE_CODE.newException();
+        }
+
     }
+
 
 //	public TextMessage TestConnection() {
 //		JsonResult jsonResult=new JsonResult();

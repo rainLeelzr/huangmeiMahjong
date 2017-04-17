@@ -1013,6 +1013,14 @@ public interface Entity extends Serializable {
             this.addCriterion(criterion.setField("u_id"));
         }
 
+        public void setPromoteCode(Criterion criterion) {
+            this.addCriterion(criterion.setField("promote_code"));
+        }
+
+        public void setPromoterId(Criterion criterion) {
+            this.addCriterion(criterion.setField("promoter_id"));
+        }
+
     }
 
     public static class VoteCriteria extends SimpleCriteria {

@@ -23,6 +23,7 @@ public enum PidValue {
     GET_USER(1006, "用户信息"),
     TEN_WINS(1007, "胜利十局"),
     GET_STANDINGS(1008, "获取战绩"),
+    BIND_PROMOTE_CODE(1009, "绑定推广码"),
 
     /**
      * 房间
