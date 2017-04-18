@@ -246,7 +246,14 @@ public class MahjongGameData {
         mahjongGameData.setBaoMother(baoMother);
 
         // 设定宝牌
-        Mahjong nextMahjong = Mahjong.next(baoMother);
+        Mahjong nextMahjong;
+        if (baoMother.getNumber().equals(Mahjong.BAI_BAN_1)) {
+            nextMahjong = Mahjong.HONG_ZHONG_1;
+        } else if (baoMother.getNumber().equals(Mahjong.FA_CAI_1)) {
+            nextMahjong = Mahjong.BAI_BAN_1;
+        } else {
+            nextMahjong = Mahjong.next(baoMother);
+        }
         Integer baoMahjongNumber = nextMahjong.getNumber();
         List<Mahjong> baoMahjongs = new ArrayList<>(4);
         for (int i = 1; i <= 4; i++) {
