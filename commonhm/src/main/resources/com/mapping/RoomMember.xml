@@ -34,10 +34,6 @@
         <include refid="LimitSQL"/>
     </select>
 
-    <select id="selectByUserIdForCheck" parameterType="com.huangmei.commonhm.model.RoomMember"
-            resultMap="RoomMemberResultMap">
-		select * from tb_room_member where user_id=#{userId} and leave_time IS NULL;
-	</select>
     <select id="selectByUserIdForReady" parameterType="com.huangmei.commonhm.model.RoomMember"
             resultMap="RoomMemberResultMap">
 		select * from tb_room_member where user_id=#{userId} and state = #{state};
