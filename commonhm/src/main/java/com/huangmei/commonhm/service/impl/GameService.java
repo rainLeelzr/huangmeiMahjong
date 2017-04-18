@@ -855,12 +855,7 @@ public class GameService {
             }
         } else {
             // 最后一局已结束，计算总结算
-            room.setState(Room.state.DISMISS.getCode());
-            roomDao.update(room);
-            for (Score score : scores) {
-                roomService.outRoom(room.getRoomCode(), score.getUserId());
-            }
-
+            roomService.outRoom(room);
             singleUserGameScoreVos = calculateTotalScore(mahjongGameData);
         }
         return singleUserGameScoreVos;

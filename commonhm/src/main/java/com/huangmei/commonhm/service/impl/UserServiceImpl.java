@@ -93,9 +93,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
             user.setLastLoginTime(new Date());
             userDao.update(user);
 
-            RoomMember roomMember = new RoomMember();
-            roomMember.setUserId(user.getId());
-            roomMember = roomMemberDao.selectByUserIdForCheck(roomMember);
+            RoomMember roomMember = checkInRoom(user.getId());
             if (roomMember != null) {
                 Room room = roomService.selectOne(roomMember.getRoomId());
                 result.put("room", room);
@@ -807,6 +805,19 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
 //		TextMessage textMessage = new TextMessage(jsonResult.toString());
 //		return textMessage;
 //	}
+
+    /**
+     * 判断玩家是否在房间中
+     *
+     * @param userId
+     * @return
+     */
+    private RoomMember checkInRoom(Integer userId) {
+        Entity.RoomMemberCriteria roomMemberCriteria = new Entity.RoomMemberCriteria();
+        roomMemberCriteria.setUserId(Entity.Value.eq(userId));
+        roomMemberCriteria.setLeaveTime(Entity.Value.isNull());
+        return roomMemberDao.selectOne(roomMemberCriteria);
+    }
 
 
 }

@@ -10,14 +10,6 @@ import java.util.List;
 public class RoomMemberDaoImpl extends BaseDaoImpl<Integer, RoomMember> implements RoomMemberDao {
 
     @Override
-    public RoomMember selectByUserIdForCheck(RoomMember roomMember) {
-        return sqlSessionTemplate.selectOne(
-                statement("selectByUserIdForCheck"),
-                roomMember
-        );
-    }
-
-    @Override
     public RoomMember selectByUserIdForReady(RoomMember roomMember) {
 
         return sqlSessionTemplate.selectOne(

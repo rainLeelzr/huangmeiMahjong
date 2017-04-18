@@ -295,6 +295,28 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
     }
 
     /**
+     * 所有玩家退出房间
+     *
+     * @param room
+     */
+    public void outRoom(Room room) {
+        RoomMember roomMember = new RoomMember();
+        roomMember.setState(RoomMember.state.OUT_ROOM.getCode());
+        roomMember.setSeat(-1);
+        roomMember.setLeaveTime(new Date());
+        Entity.RoomMemberCriteria roomMemberCriteria = new Entity.RoomMemberCriteria();
+        roomMemberCriteria.setRoomId(Entity.Value.eq(room.getId()));
+        roomMemberCriteria.setLeaveTime(Entity.Value.isNull());
+        roomMemberDao.update(roomMember, roomMemberCriteria);
+
+        room.setState(Room.state.DISMISS.getCode());
+        room.setLastLoginTime(new Date());
+        roomRedis.dismissRoom(room);
+        roomDao.update(room);
+    }
+
+
+    /**
      * 退出房间
      *
      * @param roomCode
@@ -412,9 +434,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
 
             Set<RoomMember> roomMembers = roomRedis.getRoomMembers(room.getId().toString());
             if (room.getStart() == Room.start.UNSTART.getCode()) {//未开始游戏,可以直接解散房间
-                for (RoomMember roomMember : roomMembers) {
-                    outRoom(room.getRoomCode(), roomMember.getUserId());
-                }
+                outRoom(room);
                 r = true;
             } else {//已开始游戏,需要申请解散,其他玩家同意才可以解散
 
@@ -482,10 +502,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                         long count = checkForVote(room.getId());
 
                         if (count == 4) {//全部人投票同意解散房间
-                            Set<RoomMember> roomMembers = roomRedis.getRoomMembers(room.getId().toString());
-                            for (RoomMember member : roomMembers) {
-                                outRoom(room.getRoomCode(), roomMember.getUserId());
-                            }
+                            outRoom(room);
                         }
 
                     } else {//有玩家不同意解散,即游戏继续
@@ -626,11 +643,8 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
             long count = checkForVote(roomId);
 
             if (count == 4) {//全部人投票同意解散房间
-                Set<RoomMember> roomMembers = roomRedis.getRoomMembers(roomId.toString());
                 Room room = roomDao.selectOne(roomId);
-                for (RoomMember member : roomMembers) {
-                    outRoom(room.getRoomCode(), member.getUserId());
-                }
+                outRoom(room);
             }
 
         }
@@ -668,10 +682,10 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
      * @return
      */
     private RoomMember checkInRoom(Integer userId) {
-        RoomMember roomMember = new RoomMember();
-        roomMember.setUserId(userId);
-        roomMember = roomMemberDao.selectByUserIdForCheck(roomMember);
-        return roomMember;
+        Entity.RoomMemberCriteria roomMemberCriteria = new Entity.RoomMemberCriteria();
+        roomMemberCriteria.setUserId(Entity.Value.eq(userId));
+        roomMemberCriteria.setLeaveTime(Entity.Value.isNull());
+        return roomMemberDao.selectOne(roomMemberCriteria);
     }
 
     /**
