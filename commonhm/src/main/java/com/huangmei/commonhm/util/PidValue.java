@@ -35,6 +35,7 @@ public enum PidValue {
     AGREE_DISMISS(2004, "是否同意解散房间"),
     READY(2005, "用户准备"),
     NUMBER_OF_PLAYERS(2006, "金币场人数"),
+    ROOM_INFO(2007, "房间信息"),
 
     /**
      * 游戏过程

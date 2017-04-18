@@ -27,4 +27,6 @@ public interface RoomService extends BaseService<Integer, Room> {
     void dismissRoomVoteTask(Integer roomId);
 
     Map<String, Object> outRoom(Integer roomCode, Integer userId);
+
+    Map<String, Object> roomInfo(User user);
 }
