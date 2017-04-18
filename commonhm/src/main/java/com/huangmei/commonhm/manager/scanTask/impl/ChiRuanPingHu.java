@@ -159,6 +159,12 @@ public class ChiRuanPingHu extends AbstractHuScanTask {
     @Override
     public boolean doScan(PersonalCardInfo personalCardInfo)
             throws InstantiationException, IllegalAccessException {
+        if (!(this instanceof ZiMoRuanPingHu)) {
+            if (!huAdditionalCondition(false, personalCardInfo)) {
+                return false;
+            }
+        }
+
         List<Mahjong> handCards = new ArrayList<>(personalCardInfo.getHandCards());
         handCards.add(specifiedMahjong);
 

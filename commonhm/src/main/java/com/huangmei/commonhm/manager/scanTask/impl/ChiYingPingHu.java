@@ -13,15 +13,21 @@ import java.util.List;
  */
 public class ChiYingPingHu extends AbstractHuScanTask {
 
+    private static int[] noHuSize = new int[]{1, 4, 7, 10, 13};
+
     @Override
     public Operate getOperate() {
         return Operate.CHI_YING_PING_HU;
     }
 
-    private static int[] noHuSize = new int[]{1, 4, 7, 10, 13};
-
     @Override
     public boolean doScan(PersonalCardInfo personalCardInfo) throws InstantiationException, IllegalAccessException {
+        if (!(this instanceof ZiMoYingPingHu)) {
+            if (!huAdditionalCondition(true, personalCardInfo)) {
+                return false;
+            }
+        }
+
         List<Mahjong> handCards = new ArrayList<>(personalCardInfo.getHandCards());
         handCards.add(specifiedMahjong);
         return isPinghu(handCards);

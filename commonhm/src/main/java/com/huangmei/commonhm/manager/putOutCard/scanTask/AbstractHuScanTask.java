@@ -2,8 +2,9 @@ package com.huangmei.commonhm.manager.putOutCard.scanTask;
 
 
 import com.huangmei.commonhm.manager.scanTask.BaseScanTask;
-import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.Combo;
+import com.huangmei.commonhm.model.mahjong.Mahjong;
+import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,6 +69,72 @@ public abstract class AbstractHuScanTask extends BaseScanTask {
         }
 
         return myResult;
+    }
+
+    /**
+     * 可以胡牌的先决条件，指的是地方麻将的个别规则，根据客户需求而定。例如有癞子2炮起胡，无癞子4炮起胡
+     */
+    protected boolean huAdditionalCondition(boolean isYing, PersonalCardInfo personalCardInfo) {
+        // 有癞子2炮起胡，无癞子4炮起胡，即自摸无论硬软，肯定能胡
+
+        for (Combo combo : personalCardInfo.getPengs()) {
+            // 碰
+            List<Mahjong> mahjongs = combo.getMahjongs();
+            for (Mahjong mahjong : mahjongs) {
+                // 碰中，白板
+                if (mahjong.getNumber().equals(Mahjong.HONG_ZHONG_1.getNumber())
+                        || mahjong.getNumber().equals(Mahjong.BAI_BAN_1.getNumber())) {
+                    return true;
+                }
+
+                // 有发财
+                if (mahjong.getNumber().equals(Mahjong.FA_CAI_1.getNumber())) {
+                    return true;
+                }
+            }
+        }
+
+        // 杠
+        if (!personalCardInfo.getGangs().isEmpty()) {
+            return true;
+        }
+
+        // 有4个宝牌
+        int baoMahjongNum = 0;
+        int baiBanNum = 0;
+        int hongZhongNum = 0;
+        // 手牌
+        for (Mahjong mahjong : personalCardInfo.getHandCards()) {
+            // 有发财
+            if (mahjong.getNumber().equals(Mahjong.FA_CAI_1.getNumber())) {
+                return true;
+            }
+
+            // 宝牌
+            if (mahjong.getNumber().equals(mahjongGameData.getBaoMahjongs().get(0).getNumber())) {
+                baoMahjongNum++;
+            }
+            if (mahjong.getNumber().equals(Mahjong.BAI_BAN_1.getNumber())) {
+                baiBanNum++;
+            }
+            if (mahjong.getNumber().equals(Mahjong.HONG_ZHONG_1.getNumber())) {
+                hongZhongNum++;
+            }
+
+        }
+        if (!isYing && baoMahjongNum == 4) {
+            return true;
+        }
+        if (baiBanNum == 4) {
+            return true;
+        }
+        if (hongZhongNum == 4) {
+            return true;
+        }
+
+        // 碰中，白板 1，2
+        return false;
+
     }
 
     /**
@@ -158,6 +225,7 @@ public abstract class AbstractHuScanTask extends BaseScanTask {
 
         return true;
     }
+
 
     /**
      * 根据传入的list，组成AAA、ABC、AA组合
