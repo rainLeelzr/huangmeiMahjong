@@ -347,6 +347,35 @@ public class Score implements Entity {
             return result;
         }
 
+        public boolean isBigHu() {
+            switch (this) {
+                case PING_HU_GANG_SHANG_HUA:
+                    return true;
+                case PENG_PENG_HU:
+                    return true;
+                case QI_DUI:
+                    return true;
+                case QING_YI_SE:
+                    return true;
+                case PENG_PENG_HU_GANG_SHANG_HUA:
+                    return true;
+                case QI_DUI_GANG_SHANG_HUA:
+                    return true;
+                case QING_YI_SE_GANG_SHANG_HUA:
+                    return true;
+                case QING_YI_SE_PENG_PENG_HU:
+                    return true;
+                case QING_YI_SE_QI_DUI:
+                    return true;
+                case QING_YI_SE_PENG_PENG_HU_GANG_SHANG_HUA:
+                    return true;
+                case QING_YI_SE_QI_DUI_GANG_SHANG_HUA:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         public Integer getPaoNum() {
             return paoNum;
         }

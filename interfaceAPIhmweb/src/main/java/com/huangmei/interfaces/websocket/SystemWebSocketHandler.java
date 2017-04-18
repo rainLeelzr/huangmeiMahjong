@@ -3,6 +3,7 @@ package com.huangmei.interfaces.websocket;
 import com.huangmei.commonhm.model.User;
 import com.huangmei.commonhm.util.CommonError;
 import com.huangmei.commonhm.util.JsonResultY;
+import com.huangmei.commonhm.util.PidValue;
 import com.huangmei.interfaces.websocket.Mapping.ActionRouter;
 import com.huangmei.interfaces.websocket.Mapping.LoginResource;
 import com.huangmei.interfaces.websocket.Mapping.RouterHelper;
@@ -58,7 +59,7 @@ public class SystemWebSocketHandler implements WebSocketHandler {
     }
 
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
-        log.info("收到客户端[sessionId={}]消息:{}", session.getId(), message.getPayload());
+
         String clientMessage = (String) message.getPayload();
 
         JsonResultY jsonResultY = null;
@@ -69,6 +70,9 @@ public class SystemWebSocketHandler implements WebSocketHandler {
             JSONObject data = JSONObject.fromObject(jsonObject.get("data"));
 
             pid = jsonObject.getInt("pid");
+            if (pid != PidValue.HEARTBEAT.getPid()) {
+                log.info("收到客户端[sessionId={}]消息:{}", session.getId(), message.getPayload());
+            }
             Method m = RouterHelper.from(pid);
 
             //用户登录检查，如果是需要登录才能访问的资源，但是客户端未登录，则不允许继续访问业务逻辑
@@ -84,6 +88,7 @@ public class SystemWebSocketHandler implements WebSocketHandler {
                 }
             }
         } catch (Exception e) {
+            log.info("收到客户端[sessionId={}]消息:{}", session.getId(), message.getPayload());
             log.error(e.getMessage(), e);
             CommonError error = parse(e);
             if (error != null) {

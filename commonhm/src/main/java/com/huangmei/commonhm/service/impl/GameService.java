@@ -1469,28 +1469,30 @@ public class GameService {
         // 胡牌形式
         totalPaoNum += huType.getPaoNum();
 
-        //算炮规则一：
-        //自摸
-        if (score.getIsZiMo().equals(Score.IsZiMo.ZI_MO.getId())) {
-            totalPaoNum += 1;
-        }
-        //胡牌
-        totalPaoNum += 1;
-        //门前清1炮
-        if (personalCardInfo.getPengs().isEmpty()) {
-            List<Combo> gangs = personalCardInfo.getGangs();
-            if (gangs.isEmpty()) {
+        //算炮规则一(大胡不参与本类算炮规则)：
+        if (!huType.isBigHu()) {
+            //自摸
+            if (score.getIsZiMo().equals(Score.IsZiMo.ZI_MO.getId())) {
                 totalPaoNum += 1;
-            } else {
-                boolean isAllAnGang = true;
-                for (Combo gang : gangs) {
-                    if (gang.getPidValue() != PidValue.YING_AN_GANG) {
-                        isAllAnGang = false;
-                        break;
-                    }
-                }
-                if (isAllAnGang) {
+            }
+            //胡牌
+            totalPaoNum += 1;
+            //门前清1炮
+            if (personalCardInfo.getPengs().isEmpty()) {
+                List<Combo> gangs = personalCardInfo.getGangs();
+                if (gangs.isEmpty()) {
                     totalPaoNum += 1;
+                } else {
+                    boolean isAllAnGang = true;
+                    for (Combo gang : gangs) {
+                        if (gang.getPidValue() != PidValue.YING_AN_GANG) {
+                            isAllAnGang = false;
+                            break;
+                        }
+                    }
+                    if (isAllAnGang) {
+                        totalPaoNum += 1;
+                    }
                 }
             }
         }
@@ -1577,8 +1579,14 @@ public class GameService {
             totalPaoNum *= 2;
         }
 
-        // todome 单吊
-        // todome 卡牌
+        // todome 单吊(大胡不参与本类算炮规则)
+        if (!huType.isBigHu()) {
+
+        }
+        // todome 卡牌(大胡不参与本类算炮规则)
+        if (!huType.isBigHu()) {
+
+        }
 
         //设置最终得分
         score.setPaoNum(totalPaoNum);
@@ -1665,10 +1673,11 @@ public class GameService {
         } else if (
                 roomMember.getState().equals(RoomMember.state.UNREADY.getCode())
                         || roomMember.getState().equals(RoomMember.state.READY.getCode())) {
-            // 玩家未点击准备,或已准备，但游戏未开始时，踢出房间
-            roomService.outRoom(room.getRoomCode(), user.getId());
+            // DEBUGING　玩家未点击准备,或已准备，但游戏未开始时，踢出房间
+            //roomService.outRoom(room.getRoomCode(), user.getId());
         }
 
         return null;
     }
 }
+N

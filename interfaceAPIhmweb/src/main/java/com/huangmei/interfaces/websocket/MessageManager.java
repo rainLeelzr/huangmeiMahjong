@@ -1,6 +1,7 @@
 package com.huangmei.interfaces.websocket;
 
 import com.huangmei.commonhm.util.JsonResultY;
+import com.huangmei.commonhm.util.PidValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -228,7 +229,9 @@ public class MessageManager {
 
         private void log() {
             int pid = jsonResultY.getPid();
-            log.info("给客户端[sessionId:{}]发送消息：pid={}||{}", session.getId(), pid, jsonResultY.toString());
+            if (pid != PidValue.HEARTBEAT.getPid()) {
+                log.info("给客户端[sessionId:{}]发送消息：pid={}||{}", session.getId(), pid, jsonResultY.toString());
+            }
         }
     }
 
