@@ -196,8 +196,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
             } else {//进入金币场
                 if (roomMember != null) {//玩家已在房间中,即为换桌加入(加入到原来的等级的房间)
                     Room room = roomDao.selectOne(roomMember.getRoomId());
-                    data.put("roomCode", room.getRoomCode());
-                    outRoom(data, user);
+                    outRoom(room.getRoomCode(), user.getId());
                 }
                 if (multiple != null) {//进入指定金币场
                     if (user.getCoin() >= multiple) {
@@ -309,7 +308,11 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
         if (roomMember != null) {//需要在房间中才能退出房间
             Room room = getRoomByRoomCode(roomCode);
 
-            if (room != null && room.getState() != Room.state.PLAYING.getCode()) {
+            if (room != null) {
+                //金币房游戏开始后不能退出
+                if (room.getType().equals(Room.type.COINS_ROOM.getCode()) && room.getState().equals(Room.state.PLAYING.getCode())) {
+                    throw CommonError.OUT_ROOM_FAIL.newException();
+                }
                 Long count = roomRedis.getRoomMemberCount(room.getId().toString());
                 if (count > 1) {//房间人数大于1人时,退出房间后房间状态为待开始状态
                     room.setState(Room.state.wait.getCode());
@@ -344,12 +347,12 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                 roomMember.setLeaveTime(new Date());
                 roomMemberDao.update(roomMember);
 
-                result.put("newSeats", newSeats);//告知客户端作为更新
+                result.put("newSeats", newSeats);//告知客户端座位更新
                 result.put("result", true);
                 result.put("roomId", room.getId());
                 return result;
             } else {
-                throw CommonError.OUT_ROOM_FAIL.newException();
+                throw CommonError.ROOM_NOT_EXIST.newException();
             }
         } else {
             throw CommonError.ROOM_USER_NOT_IN_ROOM.newException();
@@ -357,18 +360,37 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
     }
 
     /**
-     * 解散房间
+     * 查询房间信息
+     *
+     * @param user
+     * @return
      */
-    private void dismissRoom(RoomMember roomMember) {
-        User user = userDao.selectOne(roomMember.getUserId());
+    @Override
+    public Map<String, Object> roomInfo(User user) {
+        Map<String, Object> result = new HashMap<>(3);
+        Entity.RoomCriteria roomCriteria = new Entity.RoomCriteria();
+        roomCriteria.setCreatedUserId(Entity.Value.eq(user.getId()));
+        roomCriteria.setState(Entity.Value.ne(Room.state.DISMISS));
+        Room room = roomDao.selectOne(roomCriteria);
 
-        Room room = roomDao.selectOne(roomMember.getRoomId());
+        if (room != null) {
 
+            Entity.RoomMemberCriteria roomMemberCriteria = new Entity.RoomMemberCriteria();
+            roomMemberCriteria.setRoomId(Entity.Value.eq(room.getId()));
+            roomMemberCriteria.setLeaveTime(Entity.Value.isNull());
+            long count = roomMemberDao.selectCount(roomMemberCriteria);
 
-        JSONObject data = new JSONObject();
-        data.put("roomCode", room.getRoomCode());
-        outRoom(data, user);
+            long time = new Date().getTime() - room.getCreatedTime().getTime();
+
+            result.put("count", count);
+            result.put("room", room);
+            result.put("time", time);
+            return result;
+        } else {
+            throw CommonError.ROOM_NOT_EXIST.newException();
+        }
     }
+
 
     /**
      * 申请解散房间
@@ -391,7 +413,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
             Set<RoomMember> roomMembers = roomRedis.getRoomMembers(room.getId().toString());
             if (room.getStart() == Room.start.UNSTART.getCode()) {//未开始游戏,可以直接解散房间
                 for (RoomMember roomMember : roomMembers) {
-                    dismissRoom(roomMember);
+                    outRoom(room.getRoomCode(), roomMember.getUserId());
                 }
                 r = true;
             } else {//已开始游戏,需要申请解散,其他玩家同意才可以解散
@@ -462,7 +484,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                         if (count == 4) {//全部人投票同意解散房间
                             Set<RoomMember> roomMembers = roomRedis.getRoomMembers(room.getId().toString());
                             for (RoomMember member : roomMembers) {
-                                dismissRoom(member);
+                                outRoom(room.getRoomCode(), roomMember.getUserId());
                             }
                         }
 
@@ -605,8 +627,9 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
 
             if (count == 4) {//全部人投票同意解散房间
                 Set<RoomMember> roomMembers = roomRedis.getRoomMembers(roomId.toString());
+                Room room = roomDao.selectOne(roomId);
                 for (RoomMember member : roomMembers) {
-                    dismissRoom(member);
+                    outRoom(room.getRoomCode(), member.getUserId());
                 }
             }
 

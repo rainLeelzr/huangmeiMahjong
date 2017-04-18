@@ -116,7 +116,7 @@
     }
 
     function createRoom() {
-        var message = '{"pid":2000,"data":{"uId":"216318","times":"16","type":2,"payType":1,"diamond":8}}';
+        var message = '{"pid":2000,"data":{"uId":"216318","times":16,"type":2,"payType":1,"diamond":8}}';
         websocket.send(message);
     }
 

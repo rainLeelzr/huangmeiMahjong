@@ -778,6 +778,21 @@ public class ActionRouter {
                 .build();
     }
 
+    @Pid(PidValue.ROOM_INFO)
+    @LoginResource
+    public JsonResultY roomInfo(WebSocketSession session, JSONObject data)
+            throws Exception {
+
+        User user = sessionManager.getUser(session.getId());
+        Map<String, Object> result = roomService.roomInfo(user);
+
+        return new JsonResultY.Builder()
+                .setPid(PidValue.ROOM_INFO.getPid())
+                .setError(CommonError.SYS_SUSSES)
+                .setData(result)
+                .build();
+    }
+
     @Pid(PidValue.BUY)
     @LoginResource
     public JsonResultY buy(WebSocketSession session, JSONObject data)
