@@ -94,7 +94,7 @@ public class CanDoOperate implements Comparable {
     @Override
     public int compareTo(Object o) {
         Operate first = null;
-        for (Operate operate : operates) {
+        for (Operate operate : this.operates) {
             first = operate;
             break;
         }

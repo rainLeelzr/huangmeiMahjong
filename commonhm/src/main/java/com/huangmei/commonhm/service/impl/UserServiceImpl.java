@@ -2,9 +2,7 @@ package com.huangmei.commonhm.service.impl;
 
 import com.huangmei.commonhm.dao.*;
 import com.huangmei.commonhm.model.*;
-import com.huangmei.commonhm.model.mahjong.Mahjong;
-import com.huangmei.commonhm.model.mahjong.MahjongGameData;
-import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
+import com.huangmei.commonhm.model.mahjong.*;
 import com.huangmei.commonhm.model.mahjong.vo.GameStartVo;
 import com.huangmei.commonhm.model.mahjong.vo.GangVo;
 import com.huangmei.commonhm.model.mahjong.vo.PersonalCardVo;
@@ -16,6 +14,8 @@ import com.huangmei.commonhm.service.UserService;
 import com.huangmei.commonhm.util.CommonError;
 import com.huangmei.commonhm.util.CommonUtil;
 import net.sf.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
@@ -24,6 +24,8 @@ import java.util.*;
 
 @Service
 public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements UserService {
+    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+
     @Autowired
     private UserDao userDao;
     @Autowired
@@ -105,10 +107,15 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
                     ReconnectionVo reconnectionVo = genReconnectionVo4Playing(room);
                     result.put("gameData", reconnectionVo);
 
-                } else if (roomMember.getState().equals(RoomMember.state.UNREADY.getCode())) {
-                    loginType = 2;// 2进入了房间，未准备
-                } else if (roomMember.getState().equals(RoomMember.state.READY.getCode())) {
-                    loginType = 3;// 进入了房间，已准备
+                } else if (roomMember.getState().equals(RoomMember.state.UNREADY.getCode())
+                        || roomMember.getState().equals(RoomMember.state.READY.getCode())) {
+                    loginType = 1;
+                    log.warn(
+                            "用户登录时，数据库中含有roomMember.state={}[{}],将其踢出房间。",
+                            RoomMember.state.UNREADY.getCode(),
+                            RoomMember.state.UNREADY.getName()
+                    );
+                    roomService.outRoom(room.getRoomCode(), user.getId());
                 } else {
                     throw CommonError.SYS_PARAM_ERROR.newException();
                 }
@@ -136,6 +143,9 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         Entity.RoomMemberCriteria roomMemberCriteria = new Entity.RoomMemberCriteria();
         roomMemberCriteria.setRoomId(Entity.Value.eq(room.getId()));
 
+        // 打出的麻将，需要排除碰了和杠了的麻将
+        List<OutCard> outMahjongs = new ArrayList<>(mahjongGameData.getOutCards());
+
         // roomMembers的User在api中设置
         List<RoomMember> roomMembers = roomMemberDao.selectList(roomMemberCriteria);
         for (RoomMember roomMember : roomMembers) {
@@ -144,10 +154,22 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
                     roomMember.getUserId()
             );
 
+            // 去掉outMahjong列表中碰了的麻将
+            for (Combo combo : personalCardInfo.getPengs()) {
+                OutCard.filterOutCard(outMahjongs, combo.getMahjongs());
+            }
+
+            // 去掉outMahjong列表中杠了的麻将
+            List<Combo> gangs = personalCardInfo.getGangs();
+            for (Combo combo : gangs) {
+                OutCard.filterOutCard(outMahjongs, combo.getMahjongs());
+            }
+
             PersonalCardVo pCardVo = new PersonalCardVo(
                     Mahjong.parseToIds(personalCardInfo.getHandCards()),
                     Mahjong.parseCombosToMahjongIds(personalCardInfo.getPengs()),
-                    GangVo.parseFromGangCombos(personalCardInfo.getGangs())
+                    GangVo.parseFromGangCombos(personalCardInfo.getGangs()),
+                    OutCard.filterByUserId(outMahjongs, roomMember.getUserId())
             );
             roomMember.setPersonalCardVo(pCardVo);
 

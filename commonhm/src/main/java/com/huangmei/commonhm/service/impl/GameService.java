@@ -1636,9 +1636,12 @@ public class GameService {
 
     /**
      * 判断玩家是否在游戏中，是的话，返回roomMember
+     * 用户进入了房间，未准备时，踢出房间
+     * 用户进入了房间，已准备时，踢出房间
+     * 用户进入了房间，已开始游戏，不用踢出房间，如果在金币场，则自动设置用户为托管状态，如果在好友场，则不用自动设置用户为托管状态。
      *
      * @param user 断开连接的玩家
-     * @return Object[] [0]:CanDoOperate [1]:MahjongGameData [2]:Room
+     * @return Object[] [0]:CanDoOperate [1]:MahjongGameData [2]:Room [3]:roomMember
      */
     public Object[] dealDisconnection(User user) {
         Entity.RoomMemberCriteria roomMemberCriteria = new Entity.RoomMemberCriteria();
@@ -1657,10 +1660,16 @@ public class GameService {
 
         RoomMember roomMember = roomMembers.get(0);
         Room room = roomService.selectOne(roomMember.getRoomId());
-        if (roomMember.getState().equals(RoomMember.state.PLAYING.getCode())) {
-            // 玩家在游戏中，设置为托管状态
+        if (roomMember.getState().equals(RoomMember.state.PLAYING.getCode())
+                && room.getType().equals(Room.type.COINS_ROOM.getCode())) {
+            // 金币场,玩家在游戏中，设置为托管状态
             Object[] result = addTrusteeshipUser(room, user);
-            return new Object[]{result[0], result[1], room};
+            return new Object[]{result[0], result[1], room, roomMember};
+        } else if (
+                roomMember.getState().equals(RoomMember.state.UNREADY.getCode())
+                        || roomMember.getState().equals(RoomMember.state.READY.getCode())) {
+            // 玩家未点击准备,或已准备，但游戏未开始时，踢出房间
+            roomService.outRoom(room.getRoomCode(), user.getId());
         }
 
         return null;

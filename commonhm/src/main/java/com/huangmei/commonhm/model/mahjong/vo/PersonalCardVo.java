@@ -18,10 +18,28 @@ public class PersonalCardVo {
      */
     private List<GangVo> gangs;
 
-    public PersonalCardVo(List<Integer> handCardIds, List<List<Integer>> pengMahjongIds, List<GangVo> gangs) {
+    /**
+     * 打出了的牌，不包括被人碰、杠的牌
+     */
+    private List<Integer> outCards;
+
+    public PersonalCardVo(
+            List<Integer> handCardIds,
+            List<List<Integer>> pengMahjongIds,
+            List<GangVo> gangs,
+            List<Integer> outCards) {
         this.handCardIds = handCardIds;
         this.pengMahjongIds = pengMahjongIds;
         this.gangs = gangs;
+        this.outCards = outCards;
+    }
+
+    public List<Integer> getOutCards() {
+        return outCards;
+    }
+
+    public void setOutCards(List<Integer> outCards) {
+        this.outCards = outCards;
     }
 
     public Integer getuId() {

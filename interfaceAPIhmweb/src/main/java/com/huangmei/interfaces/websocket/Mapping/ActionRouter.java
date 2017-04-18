@@ -1639,7 +1639,10 @@ public class ActionRouter {
 
     /**
      * 处理客户端断线
-     * 如果用户在游戏中，则设置用户为托管状态
+     * 用户进入了房间，未准备时，踢出房间
+     * 用户进入了房间，已准备时，踢出房间
+     * 用户进入了房间，已开始游戏，不用踢出房间，如果在金币场，则自动设置用户为托管状态，如果在好友场，则不用自动设置用户为托管状态。
+     * 用户进入了房间，单局游戏，不用踢出房间
      */
     public void dealDisconnection(WebSocketSession session) {
         User user = sessionManager.getUser(session.getId());
@@ -1657,6 +1660,7 @@ public class ActionRouter {
         CanDoOperate waitingClientOperate = (CanDoOperate) result[0];
         MahjongGameData mahjongGameData = (MahjongGameData) result[1];
         Room room = (Room) result[2];
+        RoomMember roomMember = (RoomMember) result[3];
 
         // 广播用户“托管”
         messageManager.sendMessageToRoomUsers(
