@@ -31,11 +31,21 @@ public class YingDaMingGang extends AbstractGangScanTask {
             if (mahjong.getNumber().equals(specifiedMahjong.getNumber())) {
                 match++;
             }
+
+            //如果有一张牌为宝娘，则三张牌亦可暗杠，明杠依旧如此
+            if (match == 2 &&
+                    specifiedMahjong.getNumber().equals(mahjongGameData.getBaoMother().getNumber())) {
+                hasGang = true;
+                return true;
+            }
+
             if (match == 3) {
                 hasGang = true;
                 return true;
             }
         }
+
+
         return false;
     }
 }

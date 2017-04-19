@@ -39,6 +39,7 @@ public class RuanDaMingGang extends AbstractGangScanTask {
             if (mahjong.getNumber().equals(specifiedMahjong.getNumber())) {
                 match++;
             }
+
             if (match == 3) {
                 return true;
             }

@@ -242,7 +242,7 @@ public class MahjongGameData {
 
 
         // 设定宝娘
-        Mahjong baoMother = leftCards.get(0);
+        Mahjong baoMother = leftCards.remove(0);
         mahjongGameData.setBaoMother(baoMother);
 
         // 设定宝牌

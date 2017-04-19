@@ -1534,6 +1534,11 @@ public class GameService {
         if (baoMahjongCount == 4) {
             totalPaoNum += 10;
         }
+        // 如果发财作为宝娘，则三个发财算四个
+        if (mahjongGameData.getBaoMother().getNumber().equals(Mahjong.FA_CAI_1.getNumber())
+                && faiCaiCount == 3) {
+            faiCaiCount = 4;
+        }
         switch (faiCaiCount) {
             case 1:
                 totalPaoNum += 1;
