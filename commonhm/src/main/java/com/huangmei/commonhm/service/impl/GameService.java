@@ -1273,6 +1273,18 @@ public class GameService {
             throw CommonError.SYS_PARAM_ERROR.newException();
         }
 
+        // 清除被抢杠用户的杠
+        PersonalCardInfo gangUserCardInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), gangUser);
+        List<Combo> gangs = gangUserCardInfo.getGangs();
+        Iterator<Combo> iterator = gangs.iterator();
+        while (iterator.hasNext()) {
+            Combo next = iterator.next();
+            if (next.getMahjongs().get(0).getNumber().equals(qiangGangMahjong.getNumber())) {
+                iterator.remove();
+                break;
+            }
+        }
+
         Date now = new Date();
 
         List<Score> scores = new ArrayList<>(mahjongGameData.getPersonalCardInfos().size());
@@ -1285,7 +1297,6 @@ public class GameService {
             score.setCreatedTime(now);
             score.setType(room.getType());
             score.setTimes(mahjongGameData.getCurrentTimes());
-
 
             boolean isWinner = personalCardInfo.getRoomMember().getUserId().equals(user.getId());
 
@@ -1349,17 +1360,7 @@ public class GameService {
             scoreDao.save(score);
         }
 
-        // 清除被抢杠用户的杠
-        PersonalCardInfo gangUserCardInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), gangUser);
-        List<Combo> gangs = gangUserCardInfo.getGangs();
-        Iterator<Combo> iterator = gangs.iterator();
-        while (iterator.hasNext()) {
-            Combo next = iterator.next();
-            if (next.getMahjongs().get(0).getNumber().equals(qiangGangMahjong.getNumber())) {
-                iterator.remove();
-                break;
-            }
-        }
+
         gameRedis.saveMahjongGameData(mahjongGameData);
 
         // 为下一局游戏做准备，或者结束游戏
