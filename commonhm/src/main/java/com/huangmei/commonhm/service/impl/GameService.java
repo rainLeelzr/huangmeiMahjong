@@ -1019,9 +1019,9 @@ public class GameService {
         }
 
         // 为下一局游戏做准备，或者结束游戏
-        ready4NextGameOrFinishGame(mahjongGameData, room, scores);
+        List<SingleUserGameScoreVo> singleUserGameScoreVos = ready4NextGameOrFinishGame(mahjongGameData, room, scores);
 
-        return new Object[]{scores, mahjongGameData, specialMahjong};
+        return new Object[]{scores, mahjongGameData, specialMahjong, singleUserGameScoreVos};
     }
 
     /**
@@ -1124,9 +1124,9 @@ public class GameService {
         }
 
         // 为下一局游戏做准备，或者结束游戏
-        ready4NextGameOrFinishGame(mahjongGameData, room, scores);
+        List<SingleUserGameScoreVo> singleUserGameScoreVos = ready4NextGameOrFinishGame(mahjongGameData, room, scores);
 
-        return new Object[]{scores, mahjongGameData, specialMahjong};
+        return new Object[]{scores, mahjongGameData, specialMahjong, singleUserGameScoreVos};
     }
 
     /**
@@ -1229,8 +1229,8 @@ public class GameService {
         }
 
         // 为下一局游戏做准备，或者结束游戏
-        ready4NextGameOrFinishGame(mahjongGameData, room, scores);
-        return new Object[]{scores, mahjongGameData, specialMahjong};
+        List<SingleUserGameScoreVo> singleUserGameScoreVos = ready4NextGameOrFinishGame(mahjongGameData, room, scores);
+        return new Object[]{scores, mahjongGameData, specialMahjong, singleUserGameScoreVos};
     }
 
     /**
@@ -1356,9 +1356,9 @@ public class GameService {
         gameRedis.saveMahjongGameData(mahjongGameData);
 
         // 为下一局游戏做准备，或者结束游戏
-        ready4NextGameOrFinishGame(mahjongGameData, room, scores);
+        List<SingleUserGameScoreVo> singleUserGameScoreVos = ready4NextGameOrFinishGame(mahjongGameData, room, scores);
 
-        return new Object[]{scores, mahjongGameData, specialMahjong};
+        return new Object[]{scores, mahjongGameData, specialMahjong, singleUserGameScoreVos};
     }
 
     /**
@@ -1674,10 +1674,9 @@ public class GameService {
                 roomMember.getState().equals(RoomMember.state.UNREADY.getCode())
                         || roomMember.getState().equals(RoomMember.state.READY.getCode())) {
             // DEBUGING　玩家未点击准备,或已准备，但游戏未开始时，踢出房间
-            //roomService.outRoom(room.getRoomCode(), user.getId());
+            roomService.outRoom(room.getRoomCode(), user.getId());
         }
 
         return null;
     }
 }
-N

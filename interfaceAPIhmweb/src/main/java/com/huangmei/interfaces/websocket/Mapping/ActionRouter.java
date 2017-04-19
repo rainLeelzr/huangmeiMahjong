@@ -332,7 +332,7 @@ public class ActionRouter {
                 sessionManager.userJoinRoom((Room) result.get(("room")), session);
                 result.remove("room");
 
-                if(loginType == 4){
+                if (loginType == 4) {
                     ReconnectionVo reconnectionVo = (ReconnectionVo) result.get("gameData");
 
                     Integer bankerUserId = reconnectionVo.getGameStart().getBankerUId();
@@ -567,18 +567,19 @@ public class ActionRouter {
                 jsonResultY);
 
         if (isFirstPutOutCard) {
-            // 广播游戏开始
-            messageManager.sendMessageToRoomUsers(
-                    (result.get("roomId")).toString(),
-                    new JsonResultY.Builder()
-                            .setPid(PidValue.GAME_START.getPid())
-                            .setError(CommonError.SYS_SUSSES)
-                            .setData(gameStartVo)
-                            .build()
-            );
 
-            // 广播給客户端他们各自的牌
             for (Object[] firstPutOutCardBroadcast : firstPutOutCardBroadcasts) {
+                // 广播游戏开始
+                messageManager.sendMessageByUserId(
+                        (Integer) firstPutOutCardBroadcast[0],
+                        new JsonResultY.Builder()
+                                .setPid(PidValue.GAME_START.getPid())
+                                .setError(CommonError.SYS_SUSSES)
+                                .setData(gameStartVo)
+                                .build()
+                        );
+
+                // 广播給客户端他们各自的牌
                 messageManager.sendMessageByUserId(
                         (Integer) firstPutOutCardBroadcast[0],
                         (JsonResultY) firstPutOutCardBroadcast[1],

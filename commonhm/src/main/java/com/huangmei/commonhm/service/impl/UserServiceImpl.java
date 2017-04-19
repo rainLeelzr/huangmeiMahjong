@@ -54,7 +54,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
     public Map<String, Object> login(JSONObject data, String ip) throws Exception {
 
         Map<String, Object> result = new HashMap<String, Object>(2);
-        //1正常登陆,2进入了房间，未准备,3进入了房间，已准备，4进入了房间，游戏中，5结算后未显示结算页面
+        //1正常登陆,2进入了房间，未准备或已准备，4进入了房间，游戏中，5结算后未显示结算页面
         Integer loginType;
 
         String openId = (String) data.get("openId");
@@ -107,13 +107,14 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
 
                 } else if (roomMember.getState().equals(RoomMember.state.UNREADY.getCode())
                         || roomMember.getState().equals(RoomMember.state.READY.getCode())) {
-                    loginType = 1;
+                    loginType = 2;
                     log.warn(
                             "用户登录时，数据库中含有roomMember.state={}[{}],将其踢出房间。",
                             RoomMember.state.UNREADY.getCode(),
                             RoomMember.state.UNREADY.getName()
                     );
-                    roomService.outRoom(room.getRoomCode(), user.getId());
+                    // DEBUGING　玩家未点击准备,或已准备，但游戏未开始时，踢出房间
+                    // roomService.outRoom(room.getRoomCode(), user.getId());
                 } else {
                     throw CommonError.SYS_PARAM_ERROR.newException();
                 }
