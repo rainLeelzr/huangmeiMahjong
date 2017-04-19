@@ -902,7 +902,7 @@ public class GameService {
             for (SingleUserGameScoreVo singleUserGameScoreVo : singleUserGameScoreVos) {
                 if (singleUserGameScoreVo.getuId().equals(scoreAndGangTime.getUserId())) {
                     singleUserGameScoreVo.setAnGang(scoreAndGangTime.getAnGangTimes());
-                    singleUserGameScoreVo.setAnGang(scoreAndGangTime.getMingGangTimes());
+                    singleUserGameScoreVo.setGang(scoreAndGangTime.getMingGangTimes());
                     singleUserGameScoreVo.setScore(scoreAndGangTime.getScore());
                     break;
                 }
@@ -914,7 +914,7 @@ public class GameService {
         for (Score jiePaoTime : jiePaoTimes) {
             for (SingleUserGameScoreVo singleUserGameScoreVo : singleUserGameScoreVos) {
                 if (singleUserGameScoreVo.getuId().equals(jiePaoTime.getUserId())) {
-                    singleUserGameScoreVo.setAnGang(jiePaoTime.getJiePaoUserId());
+                    singleUserGameScoreVo.setJiePao(jiePaoTime.getJiePaoUserId());
                     break;
                 }
             }
@@ -925,7 +925,7 @@ public class GameService {
         for (Score dianPaoTime : dianPaoTimes) {
             for (SingleUserGameScoreVo singleUserGameScoreVo : singleUserGameScoreVos) {
                 if (singleUserGameScoreVo.getuId().equals(dianPaoTime.getUserId())) {
-                    singleUserGameScoreVo.setAnGang(dianPaoTime.getDianPaoUserId());
+                    singleUserGameScoreVo.setDianPao(dianPaoTime.getDianPaoUserId());
                     break;
                 }
             }

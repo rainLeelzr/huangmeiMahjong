@@ -761,8 +761,8 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         //查询公告栏
 
         result.put("image1", "xxxxxxxxxxxxxxxxxxx");
-        result.put("text2", "cccccccccccc");
-        result.put("text3", "222");
+        result.put("text2", "等待管理后台对接");
+        result.put("text3", "等待管理后台对接");
         return result;
     }
 
