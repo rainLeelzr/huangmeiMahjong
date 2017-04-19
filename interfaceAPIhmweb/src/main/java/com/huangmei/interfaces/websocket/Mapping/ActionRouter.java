@@ -1319,21 +1319,27 @@ public class ActionRouter {
         MahjongGameData mahjongGameData = (MahjongGameData) result[1];
         Mahjong specialMahjong = (Mahjong) result[2];
         List<SingleUserGameScoreVo> singleUserGameScoreVos = result[3] == null ? null : (List<SingleUserGameScoreVo>) result[3];
+        List<Integer> cancelTrusteeshipUserIds = (List<Integer>) result[4];
 
         //单局结算广播
         broadcastSingleScore(mahjongGameData, scores, room, user.getId(), gangUser.getId(), specialMahjong);
 
-        //单局结算广播
-        broadcastSingleScore(
-                mahjongGameData,
-                scores,
-                room,
-                user.getId(),
-                gangUser.getId(),
-                specialMahjong);
-
         // 总结算广播
         broadcastUserTotalScore(singleUserGameScoreVos, room.getId());
+
+        // 广播用户“取消托管”
+        if (!cancelTrusteeshipUserIds.isEmpty()) {
+            for (Integer cancelTrusteeshipUserId : cancelTrusteeshipUserIds) {
+                messageManager.sendMessageToRoomUsers(
+                        room.getId().toString(),
+                        new JsonResultY.Builder()
+                                .setPid(PidValue.REMOVE_TRUSTEESHIP)
+                                .setError(CommonError.SYS_SUSSES)
+                                .setData(getUserByUserId(cancelTrusteeshipUserId).getUId())
+                                .build()
+                );
+            }
+        }
 
         return null;
     }
@@ -1479,12 +1485,27 @@ public class ActionRouter {
         MahjongGameData mahjongGameData = (MahjongGameData) result[1];
         Mahjong specialMahjong = (Mahjong) result[2];
         List<SingleUserGameScoreVo> singleUserGameScoreVos = result[3] == null ? null : (List<SingleUserGameScoreVo>) result[3];
+        List<Integer> cancelTrusteeshipUserIds = (List<Integer>) result[4];
 
         //单局结算广播
         broadcastSingleScore(mahjongGameData, scores, room, user.getId(), user.getId(), specialMahjong);
 
         // 总结算广播
         broadcastUserTotalScore(singleUserGameScoreVos, room.getId());
+
+        // 广播用户“取消托管”
+        if (!cancelTrusteeshipUserIds.isEmpty()) {
+            for (Integer cancelTrusteeshipUserId : cancelTrusteeshipUserIds) {
+                messageManager.sendMessageToRoomUsers(
+                        room.getId().toString(),
+                        new JsonResultY.Builder()
+                                .setPid(PidValue.REMOVE_TRUSTEESHIP)
+                                .setError(CommonError.SYS_SUSSES)
+                                .setData(getUserByUserId(cancelTrusteeshipUserId).getUId())
+                                .build()
+                );
+            }
+        }
 
         return null;
     }
@@ -1524,6 +1545,7 @@ public class ActionRouter {
         MahjongGameData mahjongGameData = (MahjongGameData) result[1];
         Mahjong specialMahjong = (Mahjong) result[2];
         List<SingleUserGameScoreVo> singleUserGameScoreVos = result[3] == null ? null : (List<SingleUserGameScoreVo>) result[3];
+        List<Integer> cancelTrusteeshipUserIds = (List<Integer>) result[4];
 
         //单局结算广播
         broadcastSingleScore(mahjongGameData, scores, room, user.getId(), user.getId(), specialMahjong);
@@ -1531,7 +1553,19 @@ public class ActionRouter {
         // 总结算广播
         broadcastUserTotalScore(singleUserGameScoreVos, room.getId());
 
-
+        // 广播用户“取消托管”
+        if (!cancelTrusteeshipUserIds.isEmpty()) {
+            for (Integer cancelTrusteeshipUserId : cancelTrusteeshipUserIds) {
+                messageManager.sendMessageToRoomUsers(
+                        room.getId().toString(),
+                        new JsonResultY.Builder()
+                                .setPid(PidValue.REMOVE_TRUSTEESHIP)
+                                .setError(CommonError.SYS_SUSSES)
+                                .setData(getUserByUserId(cancelTrusteeshipUserId).getUId())
+                                .build()
+                );
+            }
+        }
         return null;
     }
 
@@ -1547,6 +1581,7 @@ public class ActionRouter {
         MahjongGameData mahjongGameData = (MahjongGameData) result[1];
         Mahjong specialMahjong = (Mahjong) result[2];
         List<SingleUserGameScoreVo> singleUserGameScoreVos = result[3] == null ? null : (List<SingleUserGameScoreVo>) result[3];
+        List<Integer> cancelTrusteeshipUserIds = (List<Integer>) result[4];
 
         OutCard outCard = mahjongGameData.getOutCards().get(mahjongGameData.getOutCards().size() - 1);
 
@@ -1562,6 +1597,19 @@ public class ActionRouter {
         // 总结算广播
         broadcastUserTotalScore(singleUserGameScoreVos, room.getId());
 
+        // 广播用户“取消托管”
+        if (!cancelTrusteeshipUserIds.isEmpty()) {
+            for (Integer cancelTrusteeshipUserId : cancelTrusteeshipUserIds) {
+                messageManager.sendMessageToRoomUsers(
+                        room.getId().toString(),
+                        new JsonResultY.Builder()
+                                .setPid(PidValue.REMOVE_TRUSTEESHIP)
+                                .setError(CommonError.SYS_SUSSES)
+                                .setData(getUserByUserId(cancelTrusteeshipUserId).getUId())
+                                .build()
+                );
+            }
+        }
 
         return null;
     }
@@ -1578,6 +1626,7 @@ public class ActionRouter {
         MahjongGameData mahjongGameData = (MahjongGameData) result[1];
         Mahjong specialMahjong = (Mahjong) result[2];
         List<SingleUserGameScoreVo> singleUserGameScoreVos = result[3] == null ? null : (List<SingleUserGameScoreVo>) result[3];
+        List<Integer> cancelTrusteeshipUserIds = (List<Integer>) result[4];
 
         OutCard outCard = mahjongGameData.getOutCards().get(mahjongGameData.getOutCards().size() - 1);
 
@@ -1593,6 +1642,19 @@ public class ActionRouter {
         // 总结算广播
         broadcastUserTotalScore(singleUserGameScoreVos, room.getId());
 
+        // 广播用户“取消托管”
+        if (!cancelTrusteeshipUserIds.isEmpty()) {
+            for (Integer cancelTrusteeshipUserId : cancelTrusteeshipUserIds) {
+                messageManager.sendMessageToRoomUsers(
+                        room.getId().toString(),
+                        new JsonResultY.Builder()
+                                .setPid(PidValue.REMOVE_TRUSTEESHIP)
+                                .setError(CommonError.SYS_SUSSES)
+                                .setData(getUserByUserId(cancelTrusteeshipUserId).getUId())
+                                .build()
+                );
+            }
+        }
         return null;
     }
 

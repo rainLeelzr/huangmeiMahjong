@@ -156,7 +156,14 @@ public abstract class AbstractHuScanTask extends BaseScanTask {
         if (preCheck(ziHaoMahjongs, false)) {
             for (List<Mahjong> mahjongSet : ziHaoMahjongs.values()) {
                 //log.debug("按麻将的字号分组:{}", mahjongSet);
-                if (!checkPingHu(new ArrayList<>(mahjongSet))) {
+                List<Combo> combos = new ArrayList<>();
+                boolean canHu = checkPingHu(combos, new ArrayList<>(mahjongSet));
+                log.debug(
+                        "平胡扫描[{}]结果：{}，combos:{}",
+                        mahjongSet,
+                        canHu,
+                        combos);
+                if (!canHu) {
                     return false;
                 }
             }
@@ -239,111 +246,56 @@ public abstract class AbstractHuScanTask extends BaseScanTask {
     /**
      * 根据传入的list，组成AAA、ABC、AA组合
      * 组合成功，返回true，不成功返回false
+     * 如果能胡，则给combos为胡的组合
      */
-    private boolean checkPingHu(List<Mahjong> mahjongs) {
+    private boolean checkPingHu(List<Combo> combos, List<Mahjong> mahjongs) {
         if (mahjongs.size() == 0) {
             return true;
         }
 
         Combo combo = AA(mahjongs);
         if (combo != null) {
-            if (checkPingHu(mahjongs)) {
+            combos.add(combo);
+            if (checkPingHu(combos, mahjongs)) {
                 return true;
             } else {
                 putBackMahjongToList(combo, mahjongs);
+                combos.remove(combo);
                 combo = AAA(mahjongs);
-                return secondCheckAA(mahjongs, combo);
+                return secondCheckAA(combos, mahjongs, combo);
             }
         } else {
             combo = AAA(mahjongs);
-            return secondCheckAA(mahjongs, combo);
+            return secondCheckAA(combos, mahjongs, combo);
         }
     }
 
-    private boolean secondCheckAA(List<Mahjong> mahjongs, Combo combo) {
+    private boolean secondCheckAA(List<Combo> combos, List<Mahjong> mahjongs, Combo combo) {
         if (combo != null) {
-            if (checkPingHu(mahjongs)) {
+            combos.add(combo);
+            if (checkPingHu(combos, mahjongs)) {
                 return true;
             } else {
                 putBackMahjongToList(combo, mahjongs);
+                combos.remove(combo);
                 combo = ABC(mahjongs);
-                if (combo != null) {
-                    return checkPingHu(mahjongs);
-                } else {
-                    return false;
-                }
+                return ThirdCheckABC(combos, mahjongs, combo);
             }
         } else {
             combo = ABC(mahjongs);
-            if (combo != null) {
-                return checkPingHu(mahjongs);
-            } else {
-                return false;
-            }
+            return ThirdCheckABC(combos, mahjongs, combo);
         }
     }
 
-    /**
-     * 根据传入的list，组成AAA、ABC、AA组合
-     * 组合成功，返回true，不成功返回false
-     */
-    //private boolean checkPingHu(List<Mahjong> mahjongs) {
-    //    if (mahjongs.size() == 0) {
-    //        return true;
-    //    }
-    //
-    //    Combo combo = AAA(mahjongs);
-    //    if (combo != null) {
-    //        if (checkPingHu(mahjongs)) {
-    //            return true;
-    //        } else {
-    //            putBackMahjongToList(combo, mahjongs);
-    //            combo = ABC(mahjongs);
-    //            if (combo != null) {
-    //                if (checkPingHu(mahjongs)) {
-    //                    return true;
-    //                } else {
-    //                    putBackMahjongToList(combo, mahjongs);
-    //                    combo = AA(mahjongs);
-    //                    if (combo != null) {
-    //                        return checkPingHu(mahjongs);
-    //                    } else {
-    //                        return false;
-    //                    }
-    //                }
-    //            } else {
-    //                combo = AA(mahjongs);
-    //                if (combo != null) {
-    //                    return checkPingHu(mahjongs);
-    //                } else {
-    //                    return false;
-    //                }
-    //            }
-    //        }
-    //    } else {
-    //        combo = ABC(mahjongs);
-    //        if (combo != null) {
-    //            if (checkPingHu(mahjongs)) {
-    //                return true;
-    //            } else {
-    //                putBackMahjongToList(combo, mahjongs);
-    //                combo = AA(mahjongs);
-    //                if (combo != null) {
-    //                    return checkPingHu(mahjongs);
-    //                } else {
-    //                    return false;
-    //                }
-    //            }
-    //        } else {
-    //            combo = AA(mahjongs);
-    //            if (combo != null) {
-    //                return checkPingHu(mahjongs);
-    //            } else {
-    //                return false;
-    //            }
-    //        }
-    //    }
-    //}
+    private boolean ThirdCheckABC(List<Combo> combos, List<Mahjong> mahjongs, Combo combo) {
+        if (combo != null) {
+            combos.add(combo);
+            return checkPingHu(combos, mahjongs);
+        } else {
+            return false;
+        }
+    }
+
 
     /**
      * 根据传入的list，组成AA组合

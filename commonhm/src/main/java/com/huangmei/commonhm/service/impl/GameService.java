@@ -832,7 +832,9 @@ public class GameService {
         // 为下一局游戏做准备，或者结束游戏
         List<SingleUserGameScoreVo> singleUserGameScoreVos = ready4NextGameOrFinishGame(mahjongGameData, room, scores);
 
-        return new Object[]{scores, mahjongGameData, specialMahjong, singleUserGameScoreVos};
+        List<Integer> CancelTrusteeshipUserId = removeAllTrusteeshipUser(room.getId());
+
+        return new Object[]{scores, mahjongGameData, specialMahjong, singleUserGameScoreVos, CancelTrusteeshipUserId};
     }
 
     /**
@@ -1028,7 +1030,9 @@ public class GameService {
         // 为下一局游戏做准备，或者结束游戏
         List<SingleUserGameScoreVo> singleUserGameScoreVos = ready4NextGameOrFinishGame(mahjongGameData, room, scores);
 
-        return new Object[]{scores, mahjongGameData, specialMahjong, singleUserGameScoreVos};
+        List<Integer> CancelTrusteeshipUserId = removeAllTrusteeshipUser(room.getId());
+
+        return new Object[]{scores, mahjongGameData, specialMahjong, singleUserGameScoreVos, CancelTrusteeshipUserId};
     }
 
     /**
@@ -1133,7 +1137,9 @@ public class GameService {
         // 为下一局游戏做准备，或者结束游戏
         List<SingleUserGameScoreVo> singleUserGameScoreVos = ready4NextGameOrFinishGame(mahjongGameData, room, scores);
 
-        return new Object[]{scores, mahjongGameData, specialMahjong, singleUserGameScoreVos};
+        List<Integer> CancelTrusteeshipUserId = removeAllTrusteeshipUser(room.getId());
+
+        return new Object[]{scores, mahjongGameData, specialMahjong, singleUserGameScoreVos, CancelTrusteeshipUserId};
     }
 
     /**
@@ -1237,7 +1243,10 @@ public class GameService {
 
         // 为下一局游戏做准备，或者结束游戏
         List<SingleUserGameScoreVo> singleUserGameScoreVos = ready4NextGameOrFinishGame(mahjongGameData, room, scores);
-        return new Object[]{scores, mahjongGameData, specialMahjong, singleUserGameScoreVos};
+
+        List<Integer> CancelTrusteeshipUserId = removeAllTrusteeshipUser(room.getId());
+
+        return new Object[]{scores, mahjongGameData, specialMahjong, singleUserGameScoreVos, CancelTrusteeshipUserId};
     }
 
     /**
@@ -1366,7 +1375,9 @@ public class GameService {
         // 为下一局游戏做准备，或者结束游戏
         List<SingleUserGameScoreVo> singleUserGameScoreVos = ready4NextGameOrFinishGame(mahjongGameData, room, scores);
 
-        return new Object[]{scores, mahjongGameData, specialMahjong, singleUserGameScoreVos};
+        List<Integer> CancelTrusteeshipUserId = removeAllTrusteeshipUser(room.getId());
+
+        return new Object[]{scores, mahjongGameData, specialMahjong, singleUserGameScoreVos, CancelTrusteeshipUserId};
     }
 
     /**
@@ -1623,6 +1634,19 @@ public class GameService {
         mahjongGameData = gameRedis.getMahjongGameData(room.getId());
 
         return new Object[]{waitingClientOperate, mahjongGameData};
+    }
+
+    /**
+     * 移除房间里所有人的托管
+     *
+     * @return 被取消托管的userId
+     */
+    public List<Integer> removeAllTrusteeshipUser(Integer roomId) {
+        List<Integer> trusteeshipUserIds = gameRedis.getTrusteeshipUserIds(roomId);
+        for (Integer trusteeshipUserId : trusteeshipUserIds) {
+            gameRedis.removeTrusteeshipUserId(roomId, trusteeshipUserId);
+        }
+        return trusteeshipUserIds;
     }
 
     /**
