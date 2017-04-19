@@ -147,7 +147,7 @@ public class GameService {
                 for (PersonalCardInfo personalCardInfo : lastMahjongGameData.getPersonalCardInfos()) {
                     RoomMember roomMember = personalCardInfo.getRoomMember();
                     if (roomMember.getUserId().equals(lastWinnerUserId)) {
-                        bankerSite = 1;
+                        bankerSite = roomMember.getSeat();
                     }
                 }
                 if (bankerSite == 0) {
