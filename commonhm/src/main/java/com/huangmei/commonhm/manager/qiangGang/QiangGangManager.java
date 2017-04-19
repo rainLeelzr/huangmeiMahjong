@@ -52,12 +52,12 @@ public class QiangGangManager extends AbstractManager implements InitializingBea
         // 硬胡
         scanTasks.add(ChiYingPengPengHu.class);
         scanTasks.add(ChiYingQiDuiHu.class);
-        scanTasks.add(ChiYingPingHu.class);
+        scanTasks.add(QiangGangYingPingHu.class);
 
         // 软胡
         scanTasks.add(ChiRuanPengPengHu.class);
         scanTasks.add(ChiRuanQiDuiHu.class);
-        scanTasks.add(ChiRuanPingHu.class);
+        scanTasks.add(QiangGangRuanPingHu.class);
 
         setPersonalCardInfoPicker();
     }

@@ -513,7 +513,7 @@ public class MockComboMahjongList {
     /**
      * 大明杠抢杠麻将组合
      */
-    public static List<Mahjong> getSeat3QiangDaMingGangMahjongs() {
+    public static List<Mahjong> getSeat3QiangDaMingGangHuMahjongs() {
         List<Mahjong> all = Mahjong.getAllMahjongs();
 
         // 自定义所有4个玩家的初始麻将牌

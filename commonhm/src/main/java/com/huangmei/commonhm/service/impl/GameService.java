@@ -258,18 +258,25 @@ public class GameService {
     }
 
 
+    /**
+     * @param mahjongGameData mahjongGameData
+     * @param user            打出牌的用户
+     * @param playedMahjong   打出的麻将
+     * @return
+     */
     private List<PlayedMahjong> playedMahjongBroadcast(MahjongGameData mahjongGameData, User user, Mahjong
             playedMahjong) {
         List<PlayedMahjong> playedMahjongs = new ArrayList<>(mahjongGameData.getPersonalCardInfos().size());
+        PersonalCardInfo playedPersonalCardInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), user);
         for (PersonalCardInfo personalCardInfo : mahjongGameData.getPersonalCardInfos()) {
             PlayedMahjong temp = new PlayedMahjong();
             temp.setuId(personalCardInfo.getRoomMember().getUserId());//先设置为userid，在api转uid
             temp.setLeftCardCount(mahjongGameData.getLeftCards().size());
             temp.setPlayedMahjongId(playedMahjong.getId());
             temp.setPlayedUId(user.getUId());
-            temp.setHandCardIds(Mahjong.parseToIds(personalCardInfo.getHandCards()));
-            temp.setPengMahjongIds(Mahjong.parseCombosToMahjongIds(personalCardInfo.getPengs()));
-            temp.setGangs(GangVo.parseFromGangCombos(personalCardInfo.getGangs()));
+            temp.setHandCardIds(Mahjong.parseToIds(playedPersonalCardInfo.getHandCards()));
+            temp.setPengMahjongIds(Mahjong.parseCombosToMahjongIds(playedPersonalCardInfo.getPengs()));
+            temp.setGangs(GangVo.parseFromGangCombos(playedPersonalCardInfo.getGangs()));
             temp.setVersion(mahjongGameData.getVersion());
             playedMahjongs.add(temp);
         }

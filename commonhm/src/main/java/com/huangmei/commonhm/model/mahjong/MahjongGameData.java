@@ -127,8 +127,8 @@ public class MahjongGameData {
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1YingMingGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1RuanMingGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2PengMahjongs();
-        //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat3QiangDaMingGangMahjongs();
-        List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2ChiPingHuSeat3DaMingGangMahjongs();
+        List<Mahjong> allMahjongs = MockComboMahjongList.getSeat3QiangDaMingGangHuMahjongs();
+        //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2ChiPingHuSeat3DaMingGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2ChiPingHu();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1ZiMoPingHu();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1RuanZiMoPingHu();

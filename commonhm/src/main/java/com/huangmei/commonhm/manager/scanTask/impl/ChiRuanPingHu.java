@@ -159,7 +159,7 @@ public class ChiRuanPingHu extends AbstractHuScanTask {
     @Override
     public boolean doScan(PersonalCardInfo personalCardInfo)
             throws InstantiationException, IllegalAccessException {
-        if (!(this instanceof ZiMoRuanPingHu)) {
+        if (!(this instanceof ZiMoRuanPingHu || this instanceof QiangGangRuanPingHu)) {
             if (!huAdditionalCondition(false, personalCardInfo)) {
                 return false;
             }

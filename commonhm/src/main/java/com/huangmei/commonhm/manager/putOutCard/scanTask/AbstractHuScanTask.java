@@ -132,7 +132,16 @@ public abstract class AbstractHuScanTask extends BaseScanTask {
             return true;
         }
 
-        // 碰中，白板 1，2
+        // todome 单吊
+        if (isYing) {
+
+        }
+
+        // todome 卡牌
+        if (isYing) {
+
+        }
+
         return false;
 
     }
@@ -236,7 +245,22 @@ public abstract class AbstractHuScanTask extends BaseScanTask {
             return true;
         }
 
-        Combo combo = AAA(mahjongs);
+        Combo combo = AA(mahjongs);
+        if (combo != null) {
+            if (checkPingHu(mahjongs)) {
+                return true;
+            } else {
+                putBackMahjongToList(combo, mahjongs);
+                combo = AAA(mahjongs);
+                return secondCheckAA(mahjongs, combo);
+            }
+        } else {
+            combo = AAA(mahjongs);
+            return secondCheckAA(mahjongs, combo);
+        }
+    }
+
+    private boolean secondCheckAA(List<Mahjong> mahjongs, Combo combo) {
         if (combo != null) {
             if (checkPingHu(mahjongs)) {
                 return true;
@@ -244,47 +268,17 @@ public abstract class AbstractHuScanTask extends BaseScanTask {
                 putBackMahjongToList(combo, mahjongs);
                 combo = ABC(mahjongs);
                 if (combo != null) {
-                    if (checkPingHu(mahjongs)) {
-                        return true;
-                    } else {
-                        putBackMahjongToList(combo, mahjongs);
-                        combo = AA(mahjongs);
-                        if (combo != null) {
-                            return checkPingHu(mahjongs);
-                        } else {
-                            return false;
-                        }
-                    }
+                    return checkPingHu(mahjongs);
                 } else {
-                    combo = AA(mahjongs);
-                    if (combo != null) {
-                        return checkPingHu(mahjongs);
-                    } else {
-                        return false;
-                    }
+                    return false;
                 }
             }
         } else {
             combo = ABC(mahjongs);
             if (combo != null) {
-                if (checkPingHu(mahjongs)) {
-                    return true;
-                } else {
-                    putBackMahjongToList(combo, mahjongs);
-                    combo = AA(mahjongs);
-                    if (combo != null) {
-                        return checkPingHu(mahjongs);
-                    } else {
-                        return false;
-                    }
-                }
+                return checkPingHu(mahjongs);
             } else {
-                combo = AA(mahjongs);
-                if (combo != null) {
-                    return checkPingHu(mahjongs);
-                } else {
-                    return false;
-                }
+                return false;
             }
         }
     }
@@ -299,32 +293,54 @@ public abstract class AbstractHuScanTask extends BaseScanTask {
     //    }
     //
     //    Combo combo = AAA(mahjongs);
-    //    if (combo == null) {
-    //        combo = ABC(mahjongs);
-    //        if (combo == null) {
-    //            combo = AA(mahjongs);
-    //            if (combo == null) {
-    //                return false;
-    //            } else {
-    //                if (hasEyes) {
-    //                    return false;
-    //                } else {
-    //                    hasEyes = true;
-    //                }
-    //                return checkPingHu(mahjongs);
-    //            }
+    //    if (combo != null) {
+    //        if (checkPingHu(mahjongs)) {
+    //            return true;
     //        } else {
-    //            if (mahjongs.size() == 0) {
-    //                return true;
+    //            putBackMahjongToList(combo, mahjongs);
+    //            combo = ABC(mahjongs);
+    //            if (combo != null) {
+    //                if (checkPingHu(mahjongs)) {
+    //                    return true;
+    //                } else {
+    //                    putBackMahjongToList(combo, mahjongs);
+    //                    combo = AA(mahjongs);
+    //                    if (combo != null) {
+    //                        return checkPingHu(mahjongs);
+    //                    } else {
+    //                        return false;
+    //                    }
+    //                }
     //            } else {
-    //                return checkPingHu(mahjongs);
+    //                combo = AA(mahjongs);
+    //                if (combo != null) {
+    //                    return checkPingHu(mahjongs);
+    //                } else {
+    //                    return false;
+    //                }
     //            }
     //        }
     //    } else {
-    //        if (mahjongs.size() == 0) {
-    //            return true;
+    //        combo = ABC(mahjongs);
+    //        if (combo != null) {
+    //            if (checkPingHu(mahjongs)) {
+    //                return true;
+    //            } else {
+    //                putBackMahjongToList(combo, mahjongs);
+    //                combo = AA(mahjongs);
+    //                if (combo != null) {
+    //                    return checkPingHu(mahjongs);
+    //                } else {
+    //                    return false;
+    //                }
+    //            }
     //        } else {
-    //            return checkPingHu(mahjongs);
+    //            combo = AA(mahjongs);
+    //            if (combo != null) {
+    //                return checkPingHu(mahjongs);
+    //            } else {
+    //                return false;
+    //            }
     //        }
     //    }
     //}

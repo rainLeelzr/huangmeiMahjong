@@ -577,7 +577,7 @@ public class ActionRouter {
                                 .setError(CommonError.SYS_SUSSES)
                                 .setData(gameStartVo)
                                 .build()
-                        );
+                );
 
                 // 广播給客户端他们各自的牌
                 messageManager.sendMessageByUserId(
@@ -1019,8 +1019,8 @@ public class ActionRouter {
                         .build());
 
         // 广播玩家执行暗杠
+        PersonalCardInfo gangUserCarInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), user);
         for (PersonalCardInfo personalCardInfo : mahjongGameData.getPersonalCardInfos()) {
-
             GangBroadcast anGangBroadcast =
                     new GangBroadcast(
                             getUserByUserId(
@@ -1035,9 +1035,9 @@ public class ActionRouter {
                             toBeGangMahjongIds,
                             user.getUId(),
                             PidValue.YING_AN_GANG.getPid(),
-                            Mahjong.parseToIds(personalCardInfo.getHandCards()),
-                            Mahjong.parseCombosToMahjongIds(personalCardInfo.getPengs()),
-                            GangVo.parseFromGangCombos(personalCardInfo.getGangs())
+                            Mahjong.parseToIds(gangUserCarInfo.getHandCards()),
+                            Mahjong.parseCombosToMahjongIds(gangUserCarInfo.getPengs()),
+                            GangVo.parseFromGangCombos(gangUserCarInfo.getGangs())
                     );
             messageManager.sendMessageByUserId(
                     personalCardInfo.getRoomMember().getUserId(),
@@ -1093,6 +1093,7 @@ public class ActionRouter {
                         .build());
 
         // 广播玩家执行硬加杠
+        PersonalCardInfo gangUserCarInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), user);
         for (PersonalCardInfo personalCardInfo : mahjongGameData.getPersonalCardInfos()) {
             GangBroadcast yingJiaGangBroadcast =
                     new GangBroadcast(
@@ -1104,9 +1105,9 @@ public class ActionRouter {
                             Mahjong.parseToIds(jiaGangCombo.mahjongs),
                             user.getUId(),
                             PidValue.YING_AN_GANG.getPid(),
-                            Mahjong.parseToIds(personalCardInfo.getHandCards()),
-                            Mahjong.parseCombosToMahjongIds(personalCardInfo.getPengs()),
-                            GangVo.parseFromGangCombos(personalCardInfo.getGangs())
+                            Mahjong.parseToIds(gangUserCarInfo.getHandCards()),
+                            Mahjong.parseCombosToMahjongIds(gangUserCarInfo.getPengs()),
+                            GangVo.parseFromGangCombos(gangUserCarInfo.getGangs())
                     );
             messageManager.sendMessageByUserId(
                     personalCardInfo.getRoomMember().getUserId(),
@@ -1190,8 +1191,9 @@ public class ActionRouter {
                         .build());
 
         // 广播玩家执行大明杠
+        PersonalCardInfo gangUserCarInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), user);
         for (PersonalCardInfo personalCardInfo : mahjongGameData.getPersonalCardInfos()) {
-            GangBroadcast ruanJiaGangBroadcast =
+            GangBroadcast daMingGangBroadcast =
                     new GangBroadcast(
                             getUserByUserId(
                                     personalCardInfo.getRoomMember().getUserId()
@@ -1206,16 +1208,16 @@ public class ActionRouter {
                             Mahjong.parseToIds(yingDaMingGangCombo.mahjongs),
                             user.getUId(),
                             PidValue.YING_DA_MING_GANG.getPid(),
-                            Mahjong.parseToIds(personalCardInfo.getHandCards()),
-                            Mahjong.parseCombosToMahjongIds(personalCardInfo.getPengs()),
-                            GangVo.parseFromGangCombos(personalCardInfo.getGangs())
+                            Mahjong.parseToIds(gangUserCarInfo.getHandCards()),
+                            Mahjong.parseCombosToMahjongIds(gangUserCarInfo.getPengs()),
+                            GangVo.parseFromGangCombos(gangUserCarInfo.getGangs())
                     );
             messageManager.sendMessageByUserId(
                     personalCardInfo.getRoomMember().getUserId(),
                     new JsonResultY.Builder()
                             .setPid(PidValue.GANG_BROADCAST)
                             .setError(CommonError.SYS_SUSSES)
-                            .setData(ruanJiaGangBroadcast)
+                            .setData(daMingGangBroadcast)
                             .build());
         }
 
@@ -1261,6 +1263,7 @@ public class ActionRouter {
 
 
         // 广播玩家执行碰
+        PersonalCardInfo pengUserCarInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), user);
         for (PersonalCardInfo personalCardInfo : mahjongGameData.getPersonalCardInfos()) {
             messageManager.sendMessageByUserId(
                     personalCardInfo.getRoomMember().getUserId(),
@@ -1283,9 +1286,9 @@ public class ActionRouter {
                                     Mahjong.parseToIds(yingDaMingGangCombo.mahjongs),
                                     user.getUId(),
                                     PidValue.YING_PENG.getPid(),
-                                    Mahjong.parseToIds(personalCardInfo.getHandCards()),
-                                    Mahjong.parseCombosToMahjongIds(personalCardInfo.getPengs()),
-                                    GangVo.parseFromGangCombos(personalCardInfo.getGangs())
+                                    Mahjong.parseToIds(pengUserCarInfo.getHandCards()),
+                                    Mahjong.parseCombosToMahjongIds(pengUserCarInfo.getPengs()),
+                                    GangVo.parseFromGangCombos(pengUserCarInfo.getGangs())
                             ))
                             .build()
             );
@@ -1388,6 +1391,7 @@ public class ActionRouter {
                     || waitingClientOperate.getOperates().contains(Operate.CHI_RUAN_PENG_PENG_HU)
                     || waitingClientOperate.getOperates().contains(Operate.CHI_RUAN_PING_HU)
                     || waitingClientOperate.getOperates().contains(Operate.CHI_RUAN_QI_DUI_HU)
+                    || waitingClientOperate.getOperates().contains(Operate.QIANG_GANG_HU)
                     || waitingClientOperate.getOperates().contains(Operate.YING_DA_MING_GANG)
                     || waitingClientOperate.getOperates().contains(Operate.YING_PENG)) {
                 // 别人打牌，自己可以吃胡、大明杠、碰的情况

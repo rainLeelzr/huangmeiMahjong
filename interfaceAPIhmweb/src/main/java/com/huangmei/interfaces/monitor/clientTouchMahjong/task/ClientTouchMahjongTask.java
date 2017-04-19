@@ -88,6 +88,7 @@ public class ClientTouchMahjongTask implements MonitorTask {
                 RoomMember touchMahjongRoomMember = null;
 
                 // 封装4个ClientTouchMahjong对象，分别发给对应的客户端
+                PersonalCardInfo toucherCardInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), user);
                 clientTouchMahjongs = new ArrayList<>(mahjongGameData.getPersonalCardInfos().size());
                 for (PersonalCardInfo personalCardInfo : mahjongGameData.getPersonalCardInfos()) {
                     User personalCardInfoUser = null;
@@ -115,12 +116,12 @@ public class ClientTouchMahjongTask implements MonitorTask {
                     clientTouchMahjong.setVersion(mahjongGameData.getVersion());
                     clientTouchMahjong.setLeftCardCount(mahjongGameData.getLeftCards().size());
                     clientTouchMahjong.setuId(user.getUId());
-                    clientTouchMahjong.setHandCardIds(Mahjong.parseToIds(personalCardInfo.getHandCards()));
+                    clientTouchMahjong.setHandCardIds(Mahjong.parseToIds(toucherCardInfo.getHandCards()));
                     clientTouchMahjong.setTouchMahjongId(isToucher ? touchMahjong.getId() : null);
                     clientTouchMahjong.setTouchMahjongUId(user.getUId());
 
-                    clientTouchMahjong.setPengMahjongIds(Mahjong.parseCombosToMahjongIds(personalCardInfo.getPengs()));
-                    clientTouchMahjong.setGangs(GangVo.parseFromGangCombos(personalCardInfo.getGangs()));
+                    clientTouchMahjong.setPengMahjongIds(Mahjong.parseCombosToMahjongIds(toucherCardInfo.getPengs()));
+                    clientTouchMahjong.setGangs(GangVo.parseFromGangCombos(toucherCardInfo.getGangs()));
                     if (isToucher && canOperates.size() != 0) {
                         clientTouchMahjong.setOperatePids(Operate.parseToPids(canOperates.get(0).getOperates()));
                     } else {
