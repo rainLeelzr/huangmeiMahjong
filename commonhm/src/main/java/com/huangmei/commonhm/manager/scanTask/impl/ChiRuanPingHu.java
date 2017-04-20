@@ -159,15 +159,9 @@ public class ChiRuanPingHu extends AbstractHuScanTask {
     @Override
     public boolean doScan(PersonalCardInfo personalCardInfo)
             throws InstantiationException, IllegalAccessException {
-        if (!(this instanceof ZiMoRuanPingHu || this instanceof QiangGangRuanPingHu)) {
-            if (!huAdditionalCondition(false, personalCardInfo)) {
-                return false;
-            }
-        }
+
 
         List<Mahjong> handCards = new ArrayList<>(personalCardInfo.getHandCards());
-        handCards.add(specifiedMahjong);
-
         List<Mahjong> myBaoMahjongs = getMyBaoMahjongs(handCards);
 
         log.debug("座位{}有{}只宝牌", personalCardInfo.getRoomMember().getSeat(),
@@ -177,6 +171,8 @@ public class ChiRuanPingHu extends AbstractHuScanTask {
         if (myBaoMahjongs.size() == 0) {
             return false;
         }
+
+        handCards.add(specifiedMahjong);
 
         // 创建用于笛卡尔的集合
         List<List<Mahjong>> baoMahjongs = new ArrayList<>(myBaoMahjongs.size());
@@ -205,9 +201,17 @@ public class ChiRuanPingHu extends AbstractHuScanTask {
             //        personalCardInfo.getRoomMember().getSeat(),
             //        handCards
             //);
-            if (isPinghu(handCards)) {
-                return true;
+            boolean pingHu = isPinghu(handCards);
+            if (pingHu) {
+                if (this instanceof ZiMoRuanPingHu || this instanceof QiangGangRuanPingHu) {
+                    return true;
+                }
+
+                if (huAdditionalCondition(false, personalCardInfo)) {
+                    return true;
+                }
             }
+
 
             for (int i = 0; i < myBaoMahjongs.size(); i++) {
                 handCards.remove(mahjongs.get(i));

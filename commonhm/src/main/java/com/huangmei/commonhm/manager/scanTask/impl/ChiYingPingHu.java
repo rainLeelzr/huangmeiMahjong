@@ -22,15 +22,24 @@ public class ChiYingPingHu extends AbstractHuScanTask {
 
     @Override
     public boolean doScan(PersonalCardInfo personalCardInfo) throws InstantiationException, IllegalAccessException {
-        if (!(this instanceof ZiMoYingPingHu || this instanceof QiangGangYingPingHu)) {
-            if (!huAdditionalCondition(true, personalCardInfo)) {
-                return false;
-            }
-        }
-
         List<Mahjong> handCards = new ArrayList<>(personalCardInfo.getHandCards());
         handCards.add(specifiedMahjong);
-        return isPinghu(handCards);
+        boolean pingHu = isPinghu(handCards);
+
+        if (!pingHu) {
+            return false;
+        }
+
+        if (this instanceof ZiMoYingPingHu || this instanceof QiangGangYingPingHu) {
+            return true;
+        }
+
+
+        if (huAdditionalCondition(true, personalCardInfo)) {
+            return true;
+        }
+
+        return false;
     }
 
     //public boolean isPingHu(PersonalCardInfo personalCardInfo) {

@@ -870,7 +870,7 @@ public class GameService {
     private List<SingleUserGameScoreVo> ready4NextGameOrFinishGame(MahjongGameData mahjongGameData, Room room, List<Score> scores) {
         List<SingleUserGameScoreVo> singleUserGameScoreVos = null;
 
-        if (mahjongGameData.getRoomType().equals(Room.type.COINS_ROOM)
+        if (mahjongGameData.getRoomType().equals(Room.type.COINS_ROOM.getCode())
                 || mahjongGameData.getCurrentTimes() < mahjongGameData.getTimes()) {
             // 还没到最后一局，可以继续一下局
             room.setState(Room.state.wait.getCode());
@@ -1112,7 +1112,6 @@ public class GameService {
             score.setCreatedTime(now);
             score.setType(room.getType());
             score.setTimes(mahjongGameData.getCurrentTimes());
-
 
             boolean isWinner = personalCardInfo.getRoomMember().getUserId().equals(user.getId());
 
@@ -1707,13 +1706,20 @@ public class GameService {
             totalPaoNum *= 2;
         }
 
-        // todome 单吊(大胡不参与本类算炮规则)
-        if (!huType.isBigHu()) {
-
+        // 单吊(大胡不参与本类算炮规则)
+        if (!huType.isBigHu() && isYingHu) {
+            if (mahjongGameData.getLastWinDanDiao() != null
+                    && mahjongGameData.getLastWinDanDiao()) {
+                totalPaoNum += 2;
+            }
         }
-        // todome 卡牌(大胡不参与本类算炮规则)
-        if (!huType.isBigHu()) {
 
+        // 卡牌(大胡不参与本类算炮规则)
+        if (!huType.isBigHu() && isYingHu) {
+            if (mahjongGameData.getLastWinMiddleMahjong() != null
+                    && mahjongGameData.getLastWinMiddleMahjong()) {
+                totalPaoNum += 2;
+            }
         }
 
         //设置最终得分
