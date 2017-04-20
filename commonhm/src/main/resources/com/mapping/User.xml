@@ -23,6 +23,9 @@
         <include refid="SetSQL"/>
         <include refid="CriteriaSQL"/>
     </update>
+    <update id="addCoin">
+        UPDATE TB_USER SET COIN = COIN + #{coin} where ID =#{userId}
+    </update>
 
     <select id="selectCount" parameterType="com.huangmei.commonhm.model.User" resultType="_long">
         SELECT COUNT(1) FROM TB_USER

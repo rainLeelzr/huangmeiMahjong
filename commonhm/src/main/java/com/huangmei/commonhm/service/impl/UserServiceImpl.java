@@ -8,6 +8,7 @@ import com.huangmei.commonhm.model.mahjong.vo.GangVo;
 import com.huangmei.commonhm.model.mahjong.vo.PersonalCardVo;
 import com.huangmei.commonhm.model.mahjong.vo.ReconnectionVo;
 import com.huangmei.commonhm.model.vo.ScoreVo;
+import com.huangmei.commonhm.model.vo.UserVo;
 import com.huangmei.commonhm.redis.GameRedis;
 import com.huangmei.commonhm.service.RoomService;
 import com.huangmei.commonhm.service.UserService;
@@ -650,8 +651,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
     @Override
     public Map<String, Object> getStanding(Room room, User user) {
         Map<String, Object> result = new HashMap<String, Object>(2);
-        Map<String, Integer> players = new HashMap<String, Integer>(4);
-        List stands = new ArrayList();
+        List<ScoreVo> stands = new ArrayList();
 
         if (room != null) {
 
@@ -663,10 +663,12 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
 
                 for (Score score : scores) {//个人在这个房间的所有战绩
                     ScoreVo sv = new ScoreVo();
+                    List<UserVo> players = new ArrayList();
                     sv.setCreatedTime(score.getCreatedTime());
                     sv.setRoomCode(room.getRoomCode());
 
-                    if (score.getWinType() != 0) {
+                    if (score.getWinType().equals(Score.WinType.ZI_MO.getId())
+                            || score.getWinType().equals(Score.WinType.JIE_PAO.getId())) {
                         sv.setState(ScoreVo.WIN);
                     } else {
                         sv.setState(ScoreVo.LOSE);
@@ -678,11 +680,16 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
                     List<Score> scs = scoreDao.selectList(sc);
                     for (Score se : scs) {//其中每局四个玩家的战绩
                         User u = userDao.selectOne(se.getUserId());
-                        if (se.getWinType() != 0) {
-                            players.put(u.getUId().toString(), se.getScore() * room.getMultiple());
+                        UserVo userVo = new UserVo();
+                        userVo.setNickName(u.getNickName());
+                        userVo.setuId(u.getUId());
+                        if (se.getWinType().equals(Score.WinType.ZI_MO.getId())
+                                || se.getWinType().equals(Score.WinType.JIE_PAO.getId())) {
+                            userVo.setScore(se.getScore());
                         } else {
-                            players.put(u.getUId().toString(), -(se.getScore() * room.getMultiple()));
+                            userVo.setScore(-se.getScore());
                         }
+                        players.add(userVo);
                     }
                     sv.setPlayers(players);
                     stands.add(sv);

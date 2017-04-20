@@ -1,7 +1,7 @@
 package com.huangmei.commonhm.model.vo;
 
 import java.util.Date;
-import java.util.Map;
+import java.util.List;
 
 /**
  * 用于封装用户房间战绩的vo类
@@ -10,7 +10,7 @@ public class ScoreVo {
     private Date createdTime;
     private Integer state;
     private Integer roomCode;
-    private Map<String, Integer> players;
+    private List<UserVo> players;
 
     public static final Integer WIN = 1;
     public static final Integer LOSE = 2;
@@ -28,7 +28,7 @@ public class ScoreVo {
                 '}';
     }
 
-    public ScoreVo(Date createdTime, Integer state, Integer roomCode, Map<String, Integer> players) {
+    public ScoreVo(Date createdTime, Integer state, Integer roomCode, List<UserVo> players) {
         this.createdTime = createdTime;
         this.state = state;
         this.roomCode = roomCode;
@@ -60,11 +60,11 @@ public class ScoreVo {
         this.roomCode = roomCode;
     }
 
-    public Map<String, Integer> getPlayers() {
+    public List<UserVo> getPlayers() {
         return players;
     }
 
-    public void setPlayers(Map<String, Integer> players) {
+    public void setPlayers(List<UserVo> players) {
         this.players = players;
     }
 }

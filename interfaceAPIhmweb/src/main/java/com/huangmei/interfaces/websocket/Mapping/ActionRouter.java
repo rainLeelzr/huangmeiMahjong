@@ -467,6 +467,21 @@ public class ActionRouter {
                 .build();
     }
 
+    @Pid(PidValue.CHANGE_ROOM)
+    @LoginResource
+    public JsonResultY changeRoom(WebSocketSession session, JSONObject data)
+            throws Exception {
+        data = new JSONObject();
+        JsonResultY jsonResultY = joinRoom(session, data);
+
+        messageManager.send(session, new JsonResultY.Builder()
+                .setPid(PidValue.CHANGE_ROOM.getPid())
+                .setError(CommonError.SYS_SUSSES)
+                .setData(jsonResultY.getData())
+                .build());
+        return null;
+    }
+
     @Pid(PidValue.OUT_ROOM)
     @LoginResource
     public JsonResultY outRoom(WebSocketSession session, JSONObject data)

@@ -36,6 +36,7 @@ public enum PidValue {
     READY(2005, "用户准备"),
     NUMBER_OF_PLAYERS(2006, "金币场人数"),
     ROOM_INFO(2007, "房间信息"),
+    CHANGE_ROOM(2008, "换桌"),
 
     /**
      * 游戏过程

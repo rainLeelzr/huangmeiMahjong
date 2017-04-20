@@ -3,6 +3,7 @@ package com.huangmei.commonhm.service.impl;
 import com.huangmei.commonhm.dao.RoomDao;
 import com.huangmei.commonhm.dao.RoomMemberDao;
 import com.huangmei.commonhm.dao.ScoreDao;
+import com.huangmei.commonhm.dao.UserDao;
 import com.huangmei.commonhm.manager.getACard.GetACardManager;
 import com.huangmei.commonhm.manager.operate.BaseOperate;
 import com.huangmei.commonhm.manager.operate.CanDoOperate;
@@ -31,6 +32,7 @@ import java.util.*;
 public class GameService {
 
     public static final String PUT_OUT_HANDCARD_KEY = "putOutHandCard";
+    public static final int coinsScoreRate = 1;//分数与金币倍率
     private static final Logger log = LoggerFactory.getLogger(GameService.class);
     @Autowired
     private GameRedis gameRedis;
@@ -58,6 +60,9 @@ public class GameService {
 
     @Autowired
     private ScoreDao scoreDao;
+
+    @Autowired
+    private UserDao userDao;
 
     @Autowired
     private RoomRedis roomRedis;
@@ -825,8 +830,28 @@ public class GameService {
 
         List<Score> scores = genScores4Game(mahjongGameData, room, user, canOperates.get(0));
 
+        Score winnerScore = null;
         for (Score score : scores) {
+            if (score.getUserId().equals(user.getId())) {
+                winnerScore = score;
+            }
+        }
+
+        for (Score score : scores) {
+            if (score.getUserId().equals(winnerScore.getUserId())) {
+
+            } else {
+                score.setScore(-winnerScore.getScore());
+                score.setPaoNum(0);
+                score.setCoin(-winnerScore.getCoin());
+            }
+
             scoreDao.save(score);
+            // 添加或扣除金币
+            if (mahjongGameData.getRoomType().equals(Room.type.COINS_ROOM.getCode())
+                    && score.getCoin() != 0) {
+                userDao.addCoin(score);
+            }
         }
 
         // 为下一局游戏做准备，或者结束游戏
@@ -1014,17 +1039,34 @@ public class GameService {
                         score);
             } else {
                 score.setIsZiMo(Score.IsZiMo.NOT_ZI_MO.getId());
-                score.setScore(0);
-                score.setPaoNum(0);
-                score.setCoin(0);
                 score.setWinType(Score.WinType.OTHER_USER_ZI_MO.getId());
             }
 
             scores.add(score);
         }
 
+        Score winnerScore = null;
         for (Score score : scores) {
+            if (score.getUserId().equals(user.getId())) {
+                winnerScore = score;
+            }
+        }
+
+        for (Score score : scores) {
+            if (score.getUserId().equals(winnerScore.getUserId())) {
+
+            } else {
+                score.setScore(-winnerScore.getScore());
+                score.setPaoNum(0);
+                score.setCoin(-winnerScore.getCoin());
+            }
+
             scoreDao.save(score);
+            // 添加或扣除金币
+            if (mahjongGameData.getRoomType().equals(Room.type.COINS_ROOM.getCode())
+                    && score.getCoin() != 0) {
+                userDao.addCoin(score);
+            }
         }
 
         // 为下一局游戏做准备，或者结束游戏
@@ -1117,9 +1159,6 @@ public class GameService {
                         score);
             } else {
                 score.setIsZiMo(Score.IsZiMo.NOT_ZI_MO.getId());
-                score.setScore(0);
-                score.setPaoNum(0);
-                score.setCoin(0);
                 if (outCard.getRoomMember().getId().equals(personalCardInfo.getRoomMember().getId())) {
                     score.setWinType(Score.WinType.DIAN_PAO.getId());
                 } else {
@@ -1130,8 +1169,32 @@ public class GameService {
             scores.add(score);
         }
 
+        Score winnerScore = null;
         for (Score score : scores) {
+            if (score.getUserId().equals(user.getId())) {
+                winnerScore = score;
+            }
+        }
+
+        for (Score score : scores) {
+            if (score == winnerScore) {
+
+            } else if (outCard.getRoomMember().getUserId().equals(score.getUserId())) {
+                score.setScore(-winnerScore.getScore());
+                score.setPaoNum(0);
+                score.setCoin(-winnerScore.getCoin());
+            } else {
+                score.setScore(0);
+                score.setPaoNum(0);
+                score.setCoin(0);
+            }
+
             scoreDao.save(score);
+            // 添加或扣除金币
+            if (mahjongGameData.getRoomType().equals(Room.type.COINS_ROOM.getCode())
+                    && score.getCoin() != 0) {
+                userDao.addCoin(score);
+            }
         }
 
         // 为下一局游戏做准备，或者结束游戏
@@ -1224,9 +1287,6 @@ public class GameService {
                         score);
             } else {
                 score.setIsZiMo(Score.IsZiMo.NOT_ZI_MO.getId());
-                score.setScore(0);
-                score.setPaoNum(0);
-                score.setCoin(0);
                 if (outCard.getRoomMember().getId().equals(personalCardInfo.getRoomMember().getId())) {
                     score.setWinType(Score.WinType.DIAN_PAO.getId());
                 } else {
@@ -1237,8 +1297,32 @@ public class GameService {
             scores.add(score);
         }
 
+        Score winnerScore = null;
         for (Score score : scores) {
+            if (score.getUserId().equals(user.getId())) {
+                winnerScore = score;
+            }
+        }
+
+        for (Score score : scores) {
+            if (score == winnerScore) {
+
+            } else if (outCard.getRoomMember().getUserId().equals(score.getUserId())) {
+                score.setScore(-winnerScore.getScore());
+                score.setPaoNum(0);
+                score.setCoin(-winnerScore.getCoin());
+            } else {
+                score.setScore(0);
+                score.setPaoNum(0);
+                score.setCoin(0);
+            }
+
             scoreDao.save(score);
+            // 添加或扣除金币
+            if (mahjongGameData.getRoomType().equals(Room.type.COINS_ROOM.getCode())
+                    && score.getCoin() != 0) {
+                userDao.addCoin(score);
+            }
         }
 
         // 为下一局游戏做准备，或者结束游戏
@@ -1257,7 +1341,7 @@ public class GameService {
 
         // 取出麻将数据对象
         MahjongGameData mahjongGameData = gameRedis.getMahjongGameData(room.getId());
-
+        OutCard outCard = mahjongGameData.getOutCards().get(mahjongGameData.getOutCards().size() - 1);
         Mahjong specialMahjong = qiangGangMahjong;
 
         boolean isYinghu = true;
@@ -1352,9 +1436,6 @@ public class GameService {
                         score);
             } else {
                 score.setIsZiMo(Score.IsZiMo.NOT_ZI_MO.getId());
-                score.setScore(0);
-                score.setPaoNum(0);
-                score.setCoin(0);
                 if (gangUser.getId().equals(personalCardInfo.getRoomMember().getId())) {
                     score.setWinType(Score.WinType.DIAN_PAO.getId());
                 } else {
@@ -1365,10 +1446,33 @@ public class GameService {
             scores.add(score);
         }
 
+        Score winnerScore = null;
         for (Score score : scores) {
-            scoreDao.save(score);
+            if (score.getUserId().equals(user.getId())) {
+                winnerScore = score;
+            }
         }
 
+        for (Score score : scores) {
+            if (score == winnerScore) {
+
+            } else if (outCard.getRoomMember().getUserId().equals(score.getUserId())) {
+                score.setScore(-winnerScore.getScore());
+                score.setPaoNum(0);
+                score.setCoin(-winnerScore.getCoin());
+            } else {
+                score.setScore(0);
+                score.setPaoNum(0);
+                score.setCoin(0);
+            }
+
+            scoreDao.save(score);
+            // 添加或扣除金币
+            if (mahjongGameData.getRoomType().equals(Room.type.COINS_ROOM.getCode())
+                    && score.getCoin() != 0) {
+                userDao.addCoin(score);
+            }
+        }
 
         gameRedis.saveMahjongGameData(mahjongGameData);
 
