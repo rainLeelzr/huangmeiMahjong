@@ -910,15 +910,6 @@ public class GetACardTest extends AbstractTestClass {
         // 掷骰
         mahjongGameData.setDices(MahjongGameData.rollDice());
 
-        // 宝牌
-        List<Mahjong> baoMahjongs = new ArrayList<>(4);
-        baoMahjongs.add(Mahjong.THREE_TIAO_1);
-        baoMahjongs.add(Mahjong.THREE_TIAO_2);
-        baoMahjongs.add(Mahjong.THREE_TIAO_3);
-        baoMahjongs.add(Mahjong.THREE_TIAO_4);
-        mahjongGameData.setBaoMahjongs(baoMahjongs);
-        log.debug("宝牌:{}", baoMahjongs);
-
         // 获取新版本号
         Long version = versionRedis.nextVersion(roomMembers[0].getRoomId());
         mahjongGameData.setVersion(version);
@@ -960,6 +951,28 @@ public class GetACardTest extends AbstractTestClass {
         for (; index < allMahjongs.size(); index++) {
             leftCards.add(allMahjongs.get(index));
         }
+
+        // 设定宝娘
+        Mahjong baoMother = leftCards.remove(0);
+        mahjongGameData.setBaoMother(baoMother);
+
+        // 宝牌
+        // 设定宝牌
+        Mahjong nextMahjong;
+        if (baoMother.getNumber().equals(Mahjong.BAI_BAN_1)) {
+            nextMahjong = Mahjong.HONG_ZHONG_1;
+        } else if (baoMother.getNumber().equals(Mahjong.FA_CAI_1)) {
+            nextMahjong = Mahjong.BAI_BAN_1;
+        } else {
+            nextMahjong = Mahjong.next(baoMother);
+        }
+        Integer baoMahjongNumber = nextMahjong.getNumber();
+        List<Mahjong> baoMahjongs = new ArrayList<>(4);
+        for (int i = 1; i <= 4; i++) {
+            baoMahjongs.add(Mahjong.parse(baoMahjongNumber * 10 + i));
+        }
+        mahjongGameData.setBaoMahjongs(baoMahjongs);
+        log.debug("宝牌:{}", baoMahjongs);
 
         // 麻将数据存redis
         gameRedis.saveMahjongGameData(mahjongGameData);
@@ -1061,18 +1074,6 @@ public class GetACardTest extends AbstractTestClass {
         mahjongGameData.setPersonalCardInfos(handCards);
         mahjongGameData.setLeftCards(leftCards);
 
-        // 掷骰
-        mahjongGameData.setDices(MahjongGameData.rollDice());
-
-        // 宝牌
-        List<Mahjong> baoMahjongs = new ArrayList<>(4);
-        baoMahjongs.add(Mahjong.THREE_TIAO_1);
-        baoMahjongs.add(Mahjong.THREE_TIAO_2);
-        baoMahjongs.add(Mahjong.THREE_TIAO_3);
-        baoMahjongs.add(Mahjong.THREE_TIAO_4);
-        mahjongGameData.setBaoMahjongs(baoMahjongs);
-        log.debug("宝牌:{}", baoMahjongs);
-
         // 获取新版本号
         Long version = versionRedis.nextVersion(roomMembers[0].getRoomId());
         mahjongGameData.setVersion(version);
@@ -1114,6 +1115,28 @@ public class GetACardTest extends AbstractTestClass {
         for (; index < allMahjongs.size(); index++) {
             leftCards.add(allMahjongs.get(index));
         }
+
+        // 设定宝娘
+        Mahjong baoMother = leftCards.remove(0);
+        mahjongGameData.setBaoMother(baoMother);
+
+        // 宝牌
+        // 设定宝牌
+        Mahjong nextMahjong;
+        if (baoMother.getNumber().equals(Mahjong.BAI_BAN_1)) {
+            nextMahjong = Mahjong.HONG_ZHONG_1;
+        } else if (baoMother.getNumber().equals(Mahjong.FA_CAI_1)) {
+            nextMahjong = Mahjong.BAI_BAN_1;
+        } else {
+            nextMahjong = Mahjong.next(baoMother);
+        }
+        Integer baoMahjongNumber = nextMahjong.getNumber();
+        List<Mahjong> baoMahjongs = new ArrayList<>(4);
+        for (int i = 1; i <= 4; i++) {
+            baoMahjongs.add(Mahjong.parse(baoMahjongNumber * 10 + i));
+        }
+        mahjongGameData.setBaoMahjongs(baoMahjongs);
+        log.debug("宝牌:{}", baoMahjongs);
 
         // 麻将数据存redis
         gameRedis.saveMahjongGameData(mahjongGameData);

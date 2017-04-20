@@ -27,14 +27,14 @@ public class ChiRuanQiDuiHu extends AbstractHuScanTask {
         // todome 判断是否已经有杠，是则肯定不是七对
 
         List<Mahjong> handCards = new ArrayList<>(personalCardInfo.getHandCards());
-        handCards.add(specifiedMahjong);
-
         List<Mahjong> myBaoMahjongs = getMyBaoMahjongs(handCards);
 
         // 如果没有宝牌，则不能软七对
         if (myBaoMahjongs.size() == 0) {
             return false;
         }
+
+        handCards.add(specifiedMahjong);
 
         // 创建用于笛卡尔的集合
         List<List<Mahjong>> baoMahjongs = new ArrayList<>(myBaoMahjongs.size());

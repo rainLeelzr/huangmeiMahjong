@@ -141,6 +141,16 @@ public class Combo {
         this.mahjongs = mahjongs;
     }
 
+    @Override
+    public String toString() {
+        return "{\"Combo\":{"
+                + "\"type\":\"" + type + "\""
+                + ", \"yingRuan\":\"" + yingRuan + "\""
+                + ", \"mahjongs\":" + mahjongs
+                + ", \"pidValue\":\"" + pidValue + "\""
+                + "}}";
+    }
+
     public enum Type {
         // 杠
         AAAA(),

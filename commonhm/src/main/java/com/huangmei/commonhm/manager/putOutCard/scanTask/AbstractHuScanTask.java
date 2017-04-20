@@ -132,14 +132,21 @@ public abstract class AbstractHuScanTask extends BaseScanTask {
             return true;
         }
 
-        // todome 单吊
+        //  最后有可能听胡的条件：同时是单吊、卡牌才能叫胡
         if (isYing) {
+            // 卡牌
+            if (mahjongGameData.getLastWinMiddleMahjong() == null
+                    || !mahjongGameData.getLastWinMiddleMahjong()) {
+                return false;
+            }
 
-        }
+            // 单吊
+            if (mahjongGameData.getLastWinDanDiao() == null
+                    || !mahjongGameData.getLastWinDanDiao()) {
+                return false;
+            }
 
-        // todome 卡牌
-        if (isYing) {
-
+            return true;
         }
 
         return false;
@@ -154,9 +161,9 @@ public abstract class AbstractHuScanTask extends BaseScanTask {
         Map<Integer, List<Mahjong>> ziHaoMahjongs = groupByZiHao(handCards);
 
         if (preCheck(ziHaoMahjongs, false)) {
+            List<Combo> combos = new ArrayList<>();
             for (List<Mahjong> mahjongSet : ziHaoMahjongs.values()) {
                 //log.debug("按麻将的字号分组:{}", mahjongSet);
-                List<Combo> combos = new ArrayList<>();
                 boolean canHu = checkPingHu(combos, new ArrayList<>(mahjongSet));
                 log.debug(
                         "平胡扫描[{}]结果：{}，combos:{}",
@@ -164,9 +171,35 @@ public abstract class AbstractHuScanTask extends BaseScanTask {
                         canHu,
                         combos);
                 if (!canHu) {
+                    // 如果有一个分组不能组成胡牌，则肯定整副手牌都不能胡
                     return false;
                 }
             }
+
+            // 设置是否卡牌
+            for (Combo combo : combos) {
+                if (combo.getType() != Combo.Type.ABC) {
+                    continue;
+                }
+
+                if (combo.getMahjongs().get(1) == this.specifiedMahjong) {
+                    mahjongGameData.setLastWinMiddleMahjong(true);
+                    break;
+                }
+            }
+
+            // 设置是否单吊
+            for (Combo combo : combos) {
+                if (combo.getType() == Combo.Type.AA) {
+                    continue;
+                }
+
+                if (combo.getMahjongs().get(1) == this.specifiedMahjong) {
+                    mahjongGameData.setLastWinMiddleMahjong(true);
+                    break;
+                }
+            }
+
             return true;
         } else {
             return false;
@@ -262,15 +295,15 @@ public abstract class AbstractHuScanTask extends BaseScanTask {
                 putBackMahjongToList(combo, mahjongs);
                 combos.remove(combo);
                 combo = AAA(mahjongs);
-                return secondCheckAA(combos, mahjongs, combo);
+                return secondCheckAAA(combos, mahjongs, combo);
             }
         } else {
             combo = AAA(mahjongs);
-            return secondCheckAA(combos, mahjongs, combo);
+            return secondCheckAAA(combos, mahjongs, combo);
         }
     }
 
-    private boolean secondCheckAA(List<Combo> combos, List<Mahjong> mahjongs, Combo combo) {
+    private boolean secondCheckAAA(List<Combo> combos, List<Mahjong> mahjongs, Combo combo) {
         if (combo != null) {
             combos.add(combo);
             if (checkPingHu(combos, mahjongs)) {

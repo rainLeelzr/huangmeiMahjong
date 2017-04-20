@@ -28,14 +28,14 @@ public class ChiRuanPengPengHu extends AbstractHuScanTask {
     @Override
     public boolean doScan(PersonalCardInfo personalCardInfo) throws InstantiationException, IllegalAccessException {
         List<Mahjong> handCards = new ArrayList<>(personalCardInfo.getHandCards());
-        handCards.add(specifiedMahjong);
-
         List<Mahjong> myBaoMahjongs = getMyBaoMahjongs(handCards);
 
         // 如果没有宝牌，则不能软碰碰胡
         if (myBaoMahjongs.size() == 0) {
             return false;
         }
+
+        handCards.add(specifiedMahjong);
 
         // 创建用于笛卡尔的集合
         List<List<Mahjong>> baoMahjongs = new ArrayList<>(myBaoMahjongs.size());

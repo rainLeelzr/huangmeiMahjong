@@ -74,6 +74,8 @@ public class GameRedis {
     }
 
     public void saveMahjongGameData(MahjongGameData mahjongGameData) {
+        mahjongGameData.setLastWinMiddleMahjong(null);
+        mahjongGameData.setLastWinDanDiao(null);
         redis.hash.put(
                 String.format(RoomRedis.ROOM_KEY, mahjongGameData.getRoomId()),
                 MAHJONG_GAME_DATA_FIELD_KEY,

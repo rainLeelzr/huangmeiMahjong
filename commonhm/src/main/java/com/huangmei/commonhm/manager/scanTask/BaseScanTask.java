@@ -40,6 +40,7 @@ public abstract class BaseScanTask {
      * 具体的任务扫描器判定到某个用户可以执行某些操作时，向此列表添加元素
      */
     private List<CanDoOperate> canOperates;
+
     /**
      * 提取器，从mahjongGameData中提取出需要扫描的玩家手牌
      */

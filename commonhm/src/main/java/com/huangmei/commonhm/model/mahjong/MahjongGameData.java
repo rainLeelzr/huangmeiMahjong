@@ -107,6 +107,18 @@ public class MahjongGameData {
     private Long version;
 
     /**
+     * 最后赢的人的麻将是否单吊
+     * 在玩家请求胡牌协议，在扫描玩家的牌是否能胡时，设置此变量
+     */
+    private Boolean isLastWinDanDiao;
+
+    /**
+     * 最后赢的人的麻将是否卡牌
+     * 在玩家请求胡牌协议，在扫描玩家的牌是否能胡时，设置此变量
+     */
+    private Boolean isLastWinMiddleMahjong;
+
+    /**
      * 初始化麻将游戏，将麻将打乱，分成n份，每份13只，还有剩余的牌
      * 庄家在最后会摸多一张牌，即庄家有14张
      * 初始数据的生成与实际的玩家无关，只需要确定玩家的人数和庄家座位即可。
@@ -127,9 +139,9 @@ public class MahjongGameData {
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1YingMingGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1RuanMingGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2PengMahjongs();
-        List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2AnGangMahjongs();
+        //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2AnGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat3QiangDaMingGangHuMahjongs();
-        //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2ChiPingHuSeat3DaMingGangMahjongs();
+        List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2ChiPingHuSeat3DaMingGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2ChiPingHu();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1ZiMoPingHu();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1RuanZiMoPingHu();
@@ -283,6 +295,22 @@ public class MahjongGameData {
         baoMahjongs.add(Mahjong.THREE_TIAO_4);
         data.setBaoMahjongs(baoMahjongs);
         data.getBaoMahjongMakeUpMahjongs();
+    }
+
+    public Boolean getLastWinDanDiao() {
+        return isLastWinDanDiao;
+    }
+
+    public void setLastWinDanDiao(Boolean lastWinDanDiao) {
+        isLastWinDanDiao = lastWinDanDiao;
+    }
+
+    public Boolean getLastWinMiddleMahjong() {
+        return isLastWinMiddleMahjong;
+    }
+
+    public void setLastWinMiddleMahjong(Boolean lastWinMiddleMahjong) {
+        isLastWinMiddleMahjong = lastWinMiddleMahjong;
     }
 
     public Integer getRoomType() {
