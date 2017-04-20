@@ -118,7 +118,9 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
         roomDao.save(room);
         result.put("room", room);
         RoomMember roomMember = createRoomMember(room, room.getCreatedUserId());
-        result.put("roomMember", roomMember);
+        Set<RoomMember> roomMembers = new HashSet<>();
+        roomMembers.add(roomMember);
+        result.put("roomMembers", roomMembers);
         roomRedis.createRoom(room, roomMember);
         return result;
     }
@@ -131,7 +133,9 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
         roomDao.save(room);
         result.put("room", room);
         RoomMember roomMember = createRoomMember(room, room.getCreatedUserId());
-        result.put("roomMember", roomMember);
+        Set<RoomMember> roomMembers = new HashSet<>();
+        roomMembers.add(roomMember);
+        result.put("roomMembers", roomMembers);
         roomRedis.createRoom(room, roomMember);
 
         return result;
@@ -411,6 +415,30 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
         result.put("time", time);
         return result;
 
+    }
+
+    /**
+     * 房主重新加入房间
+     *
+     * @param user
+     * @param room
+     * @return
+     */
+    @Override
+    public Map<String, Object> returnRoom(User user, Room room) {
+        Map<String, Object> result = new HashMap<>(3);
+        Set<RoomMember> roomMembers = roomRedis.getRoomMembers(room.getId().toString());
+        List<User> users = new ArrayList<>();
+        if (roomMembers != null) {
+            for (RoomMember member : roomMembers) {
+                User u = userDao.selectOne(member.getUserId());
+                users.add(u);
+            }
+            result.put("users", users);
+            result.put("roomMembers", roomMembers);
+            result.put("room", room);
+        }
+        return result;
     }
 
 

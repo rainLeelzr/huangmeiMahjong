@@ -31,4 +31,6 @@ public interface RoomService extends BaseService<Integer, Room> {
     void outRoom(Room room);
 
     Map<String, Object> roomInfo(User user);
+
+    Map<String, Object> returnRoom(User user, Room room);
 }

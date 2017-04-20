@@ -482,6 +482,21 @@ public class ActionRouter {
         return null;
     }
 
+    @Pid(PidValue.RETURN_ROOM)
+    @LoginResource
+    public JsonResultY returnRoom(WebSocketSession session, JSONObject data)
+            throws Exception {
+        User user = sessionManager.getUser(session.getId());
+        Room room = sessionManager.getRoom(session.getId());
+        Map<String, Object> result = roomService.returnRoom(user, room);
+        messageManager.send(session, new JsonResultY.Builder()
+                .setPid(PidValue.RETURN_ROOM.getPid())
+                .setError(CommonError.SYS_SUSSES)
+                .setData(result)
+                .build());
+        return null;
+    }
+
     @Pid(PidValue.OUT_ROOM)
     @LoginResource
     public JsonResultY outRoom(WebSocketSession session, JSONObject data)
