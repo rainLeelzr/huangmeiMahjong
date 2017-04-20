@@ -190,12 +190,26 @@ public abstract class AbstractHuScanTask extends BaseScanTask {
 
             // 设置是否单吊
             for (Combo combo : combos) {
-                if (combo.getType() == Combo.Type.AA) {
-                    continue;
-                }
-
-                if (combo.getMahjongs().get(1) == this.specifiedMahjong) {
-                    mahjongGameData.setLastWinMiddleMahjong(true);
+                if (combo.getType() == Combo.Type.AA
+                        && combo.getMahjongs().get(0).getNumber().equals(this.specifiedMahjong.getNumber())) {
+                    mahjongGameData.setLastWinDanDiao(true);
+                    break;
+                } else if (combo.getType() == Combo.Type.ABC) {
+                    if (combo.getMahjongs().get(1) == this.specifiedMahjong) {
+                        mahjongGameData.setLastWinDanDiao(true);
+                        break;
+                    } else if (combo.getMahjongs().get(0).getDigit().equals(1)
+                            && combo.getMahjongs().get(2) == this.specifiedMahjong) {
+                        // 1，2，3，听3
+                        mahjongGameData.setLastWinDanDiao(true);
+                        break;
+                    } else if (combo.getMahjongs().get(2).getDigit().equals(9)
+                            && combo.getMahjongs().get(0) == this.specifiedMahjong) {
+                        // 7 8 9，听7
+                        mahjongGameData.setLastWinDanDiao(true);
+                        break;
+                    }
+                    mahjongGameData.setLastWinDanDiao(true);
                     break;
                 }
             }
