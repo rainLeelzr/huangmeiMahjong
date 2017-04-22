@@ -235,11 +235,10 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
      * 获取用户信息
      *
      * @param user
-     * @param data
      * @return
      */
     @Override
-    public Map<String, Object> getUser(JSONObject data, User user) {
+    public Map<String, Object> getUser(User user) {
         Map<String, Object> result = new HashMap<String, Object>(6);
         if (user != null) {
             result.put("user", user);
@@ -529,7 +528,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         Integer diamond = (Integer) data.get("diamond");
         Integer horn = (Integer) data.get("horn");
 
-        //支付接口对接
+        // todome 支付接口对接
 
         if (coin != null) {
             user.setCoin(user.getCoin() + coin);
@@ -718,7 +717,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         String query = (String) data.get("query");
         String userMsg = (String) data.get("userMsg");
         if (query != null) {//查询滚动公告
-            //查询系统滚动公告
+            //todome   查询系统滚动公告
             result.put("administrator", "等待管理后台对接");
             //查询用户内容
             List<Notice> notices = noticeDao.selectAll();
@@ -758,15 +757,13 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
     /**
      * 获取公告栏
      *
-     * @param data
      * @param user
      * @return
      */
     @Override
-    public Map<String, Object> systemNotice(JSONObject data, User user) {
+    public Map<String, Object> systemNotice(User user) {
         Map<String, Object> result = new HashMap<String, Object>(2);
-        //查询公告栏
-
+        //todome 查询公告栏
         result.put("image1", "xxxxxxxxxxxxxxxxxxx");
         result.put("text2", "等待管理后台对接");
         result.put("text3", "等待管理后台对接");

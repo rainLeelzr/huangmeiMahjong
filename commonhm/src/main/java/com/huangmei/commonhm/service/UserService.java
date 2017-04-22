@@ -14,7 +14,7 @@ public interface UserService extends BaseService<Integer, User> {
 
 	User logout(JSONObject data);
 
-	Map<String,Object> getUser(JSONObject data,User user);
+	Map<String, Object> getUser(User user);
 
     Map<String,Object> prizeDraw(JSONObject data,User user);
 
@@ -31,7 +31,7 @@ public interface UserService extends BaseService<Integer, User> {
 
     Map<String, Object> hornSpeak(JSONObject data, User user);
 
-    Map<String, Object> systemNotice(JSONObject data, User user);
+	Map<String, Object> systemNotice(User user);
 
     Map<String, Object> bindPromoteCode(JSONObject data, User user);
 }
