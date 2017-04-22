@@ -877,19 +877,21 @@ public class GameService {
         if (mahjongGameData.getRoomType().equals(Room.type.COINS_ROOM.getCode())
                 || mahjongGameData.getCurrentTimes() < mahjongGameData.getTimes()) {
             // 还没到最后一局，可以继续一下局
-            room.setState(Room.state.wait.getCode());
-            roomDao.update(room);
+            Room temp = new Room();
+            temp.setId(room.getId());
+            temp.setState(Room.state.wait.getCode());
+            roomDao.update(temp);
 
             for (PersonalCardInfo personalCardInfo : mahjongGameData.getPersonalCardInfos()) {
                 // roomMember改待准备
-                personalCardInfo.getRoomMember().setState(Room.state.wait.getCode());
+                personalCardInfo.getRoomMember().setState(RoomMember.state.UNREADY.getCode());
                 roomRedis.editRoom(personalCardInfo.getRoomMember());
                 roomRedis.joinRoom(personalCardInfo.getRoomMember());
 
-                RoomMember temp = new RoomMember();
-                temp.setId(personalCardInfo.getRoomMember().getId());
-                temp.setState(Room.state.wait.getCode());
-                roomMemberDao.update(temp);
+                RoomMember member = new RoomMember();
+                member.setId(personalCardInfo.getRoomMember().getId());
+                member.setState(RoomMember.state.UNREADY.getCode());
+                roomMemberDao.update(member);
             }
         } else {
             // 最后一局已结束，计算总结算
