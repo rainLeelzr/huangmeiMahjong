@@ -1755,6 +1755,11 @@ public class ActionRouter {
             throw CommonError.USER_NOT_IN_ROOM.newException();
         }
 
+        // 好友房不能托管
+        if (room.getType().equals(Room.type.FRIENDS_ROOM.getCode())) {
+            return null;
+        }
+
         Room room1 = roomRedis.getRoom(room.getId());
         if (!room1.getState().equals(Room.state.PLAYING.getCode())) {
             return null;
