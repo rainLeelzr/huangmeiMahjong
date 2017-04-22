@@ -242,6 +242,7 @@ public class GameService {
             throw CommonError.USER_NOT_HAVE_SPECIFIED_CARD.newException();
         }
 
+
         // 删除redis的等待客户端操作对象waitingClientOperate
         gameRedis.deleteWaitingClientOperate(room.getId());
 
@@ -251,6 +252,14 @@ public class GameService {
                 user.getId()
         );
         mahjongGameData.getOutCards().add(new OutCard(playedMahjong, personalCardInfo.getRoomMember()));
+
+        // 删除personalCardInfo的被打出的麻将
+        if (personalCardInfo.getTouchMahjong() == null) {
+            personalCardInfo.getHandCards().remove(playedMahjong);
+        } else {
+            personalCardInfo.setTouchMahjong(null);
+        }
+
         gameRedis.saveMahjongGameData(mahjongGameData);
 
         // 广播打出的牌

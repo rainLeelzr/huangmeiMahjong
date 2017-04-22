@@ -4,12 +4,16 @@ import com.huangmei.commonhm.manager.operate.CanDoOperate;
 import com.huangmei.commonhm.manager.operate.Operate;
 import com.huangmei.commonhm.model.Room;
 import com.huangmei.commonhm.model.User;
+import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.MahjongGameData;
 import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
 import com.huangmei.interfaces.monitor.MonitorTask;
 import com.huangmei.interfaces.websocket.Mapping.ActionRouter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * 托管任务
@@ -46,7 +50,20 @@ public class TrusteeshipTask implements MonitorTask {
                 actionRouter.handleGuo(room, user);
             } else if (waitingClientOperate.getOperates().contains(Operate.PLAY_A_MAHJONG)) {
                 PersonalCardInfo personalCardInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), user);
-                actionRouter.handlePlayACard(room, user, personalCardInfo.getTouchMahjong());
+                // 需要打出麻将，有3种情况
+                // 第一种是正常摸牌后需要打一只麻将
+                // 第二种是碰之后需要打一只麻将
+                // 第三种是杠之后需要打一只麻将
+                Mahjong toBePlayMahjong = personalCardInfo.getTouchMahjong();
+                if (toBePlayMahjong == null) {
+                    Iterator<Mahjong> iterator = personalCardInfo.getHandCards().iterator();
+                    while (iterator.hasNext()) {
+                        toBePlayMahjong = iterator.next();
+                        iterator.remove();
+                        break;
+                    }
+                }
+                actionRouter.handlePlayACard(room, user, toBePlayMahjong);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
