@@ -9,6 +9,8 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;
 
+import java.util.concurrent.TimeUnit;
+
 
 @Configuration
 @EnableWebSocket
@@ -24,7 +26,7 @@ public class WebSocketConfig extends WebMvcConfigurerAdapter implements WebSocke
         container.setMaxTextMessageBufferSize(30 * 1024);
         container.setMaxBinaryMessageBufferSize(30 * 1024);
         // DEBUGING　webSocket超时时间
-        //container.setMaxSessionIdleTimeout(TimeUnit.SECONDS.toMillis(15));
+        container.setMaxSessionIdleTimeout(TimeUnit.SECONDS.toMillis(15));
         return container;
     }
 
