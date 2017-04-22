@@ -1475,7 +1475,7 @@ public class GameService {
         for (Score score : scores) {
             if (score == winnerScore) {
 
-            } else if (outCard.getRoomMember().getUserId().equals(score.getUserId())) {
+            } else if (gangUser.getId().equals(score.getUserId())) {
                 score.setScore(-winnerScore.getScore());
                 score.setPaoNum(0);
                 score.setCoin(-winnerScore.getCoin());

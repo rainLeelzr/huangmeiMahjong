@@ -191,13 +191,11 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
 
         if (user != null) {
             RoomMember roomMember = checkInRoom(user.getId());
-
+            if (roomMember != null) {//玩家没有在房间中
+                throw CommonError.USER_ALREADY_IN_ROOM.newException();
+            }
             if (roomCode != null) {//进入好友场
-                if (roomMember == null) {//玩家没有在房间中
                     result = joinFriendRoom(user, roomCode, result);
-                } else {
-                    throw CommonError.USER_ALREADY_IN_ROOM.newException();
-                }
             } else {//进入金币场
 
                 if (multiple != null) {//进入指定金币场
@@ -321,7 +319,6 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
             result.put("result", false);
             return result;
         }
-
 
         return outRoom(room, user.getId());
     }

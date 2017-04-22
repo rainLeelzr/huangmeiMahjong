@@ -502,13 +502,16 @@ public class ActionRouter {
         Room room = sessionManager.getRoom(session.getId());
         data.put("roomId", room.getId());
         Map<String, Object> result = roomService.outRoom(data, user, room);
-        JsonResultY jsonResultY = joinRoom(session, data);
         messageManager.sendMessageToOtherRoomUsers(room.getId().toString(), user.getId(), new JsonResultY.Builder()
                 .setPid(PidValue.OUT_ROOM.getPid())
                 .setError(CommonError.SYS_SUSSES)
                 .setData(result)
                 .build());
+        if ((Boolean) result.get("result")) {
+            sessionManager.userExitRoom(room.getId().toString(), session);
+        }
 
+        JsonResultY jsonResultY = joinRoom(session, data);
         messageManager.send(session, new JsonResultY.Builder()
                 .setPid(PidValue.CHANGE_ROOM.getPid())
                 .setError(CommonError.SYS_SUSSES)
@@ -874,8 +877,7 @@ public class ActionRouter {
         return new JsonResultY.Builder()
                 .setPid(PidValue.PLAYERS_INFO.getPid())
                 .setError(CommonError.SYS_SUSSES)
-                .setData(result)
-                .build();
+                .setData(result).build();
     }
 
     @Pid(PidValue.BUY)
