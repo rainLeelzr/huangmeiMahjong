@@ -9,6 +9,7 @@ import com.huangmei.commonhm.model.*;
 import com.huangmei.commonhm.model.mahjong.*;
 import com.huangmei.commonhm.model.mahjong.vo.*;
 import com.huangmei.commonhm.redis.GameRedis;
+import com.huangmei.commonhm.redis.RoomRedis;
 import com.huangmei.commonhm.redis.VersionRedis;
 import com.huangmei.commonhm.redis.base.Redis;
 import com.huangmei.commonhm.service.RoomService;
@@ -53,6 +54,9 @@ public class ActionRouter {
 
     @Autowired
     private GameService gameService;
+
+    @Autowired
+    private RoomRedis roomRedis;
 
     @Autowired
     private Redis redis;
@@ -122,12 +126,27 @@ public class ActionRouter {
             Object[] result = gameService.draw(room, mahjongGameData);
             List<Score> scores = (List<Score>) result[0];
             List<SingleUserGameScoreVo> singleUserGameScoreVos = result[1] == null ? null : (List<SingleUserGameScoreVo>) result[1];
+            List<Integer> cancelTrusteeshipUserIds = (List<Integer>) result[2];
 
             //单局结算广播
             broadcastSingleScore(mahjongGameData, scores, room, null, null, null);
 
             // 总结算广播
             broadcastUserTotalScore(singleUserGameScoreVos, room.getId());
+
+            // 广播用户“取消托管”
+            if (!cancelTrusteeshipUserIds.isEmpty()) {
+                for (Integer cancelTrusteeshipUserId : cancelTrusteeshipUserIds) {
+                    messageManager.sendMessageToRoomUsers(
+                            room.getId().toString(),
+                            new JsonResultY.Builder()
+                                    .setPid(PidValue.REMOVE_TRUSTEESHIP)
+                                    .setError(CommonError.SYS_SUSSES)
+                                    .setData(getUserByUserId(cancelTrusteeshipUserId).getUId())
+                                    .build()
+                    );
+                }
+            }
             return;
         }
 
@@ -198,8 +217,13 @@ public class ActionRouter {
      * 处理是否需要服务端自动帮玩家进行操作（执行托管）
      */
     public void dealTrustesshipTask(MahjongGameData mahjongGameData, CanDoOperate nextCanDoOperate) {
-        // 查找正在托管的用户
+        if (nextCanDoOperate == null) {
+            return;
+        }
+
         Integer nextOperateUserId = nextCanDoOperate.getRoomMember().getUserId();
+
+        // 查找正在托管的用户
         List<Integer> trusteeshipUserIds = gameRedis.getTrusteeshipUserIds(mahjongGameData.getRoomId());
         for (Integer trusteeshipUserId : trusteeshipUserIds) {
             if (nextOperateUserId.equals(trusteeshipUserId)) {
@@ -472,7 +496,18 @@ public class ActionRouter {
     public JsonResultY changeRoom(WebSocketSession session, JSONObject data)
             throws Exception {
         data = new JSONObject();
+
+        User user = sessionManager.getUser(session.getId());
+
+        Room room = sessionManager.getRoom(session.getId());
+        data.put("roomId", room.getId());
+        Map<String, Object> result = roomService.outRoom(data, user, room);
         JsonResultY jsonResultY = joinRoom(session, data);
+        messageManager.sendMessageToOtherRoomUsers(room.getId().toString(), user.getId(), new JsonResultY.Builder()
+                .setPid(PidValue.OUT_ROOM.getPid())
+                .setError(CommonError.SYS_SUSSES)
+                .setData(result)
+                .build());
 
         messageManager.send(session, new JsonResultY.Builder()
                 .setPid(PidValue.CHANGE_ROOM.getPid())
@@ -497,23 +532,26 @@ public class ActionRouter {
         return null;
     }
 
+
     @Pid(PidValue.OUT_ROOM)
     @LoginResource
     public JsonResultY outRoom(WebSocketSession session, JSONObject data)
             throws Exception {
         User user = sessionManager.getUser(session.getId());
-        Map<String, Object> result = roomService.outRoom(data, user);
+        Room room = sessionManager.getRoom(session.getId());
+        Map<String, Object> result = roomService.outRoom(data, user, room);
         if (result != null) {
-            Integer roomId = (Integer) result.get("roomId");
-            result.remove("roomId");
+
             result.put("uId", user.getUId());
             JsonResultY jsonResultY = new JsonResultY.Builder()
                     .setPid(PidValue.OUT_ROOM.getPid())
                     .setError(CommonError.SYS_SUSSES)
                     .setData(result)
                     .build();
-            messageManager.sendMessageToRoomUsers(roomId.toString(), jsonResultY);
-            sessionManager.userExitRoom(roomId.toString(), session);
+            messageManager.sendMessageToRoomUsers(room.getId().toString(), jsonResultY);
+            if ((Boolean) result.get("result")) {
+                sessionManager.userExitRoom(room.getId().toString(), session);
+            }
         }
 
         return null;
@@ -819,6 +857,22 @@ public class ActionRouter {
 
         return new JsonResultY.Builder()
                 .setPid(PidValue.ROOM_INFO.getPid())
+                .setError(CommonError.SYS_SUSSES)
+                .setData(result)
+                .build();
+    }
+
+    @Pid(PidValue.PLAYERS_INFO)
+    @LoginResource
+    public JsonResultY playersInfo(WebSocketSession session, JSONObject data)
+            throws Exception {
+
+        User user = sessionManager.getUser(session.getId());
+        Room room = sessionManager.getRoom(session.getId());
+        Map<String, Object> result = roomService.returnRoom(user, room);
+
+        return new JsonResultY.Builder()
+                .setPid(PidValue.PLAYERS_INFO.getPid())
                 .setError(CommonError.SYS_SUSSES)
                 .setData(result)
                 .build();
@@ -1698,7 +1752,12 @@ public class ActionRouter {
         Room room = sessionManager.getRoom(session.getId());
 
         if (room == null) {
-            throw CommonError.ROOM_USER_NOT_IN_ROOM.newException();
+            throw CommonError.USER_NOT_IN_ROOM.newException();
+        }
+
+        Room room1 = roomRedis.getRoom(room.getId());
+        if (!room1.getState().equals(Room.state.PLAYING.getCode())) {
+            return null;
         }
 
         Object[] result = gameService.addTrusteeshipUser(room, user);
@@ -1730,7 +1789,7 @@ public class ActionRouter {
         Room room = sessionManager.getRoom(session.getId());
 
         if (room == null) {
-            throw CommonError.ROOM_USER_NOT_IN_ROOM.newException();
+            throw CommonError.USER_NOT_IN_ROOM.newException();
         }
 
         Object[] result = gameService.removeTrusteeshipUser(room, user);

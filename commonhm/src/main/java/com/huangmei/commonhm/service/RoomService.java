@@ -12,7 +12,7 @@ public interface RoomService extends BaseService<Integer, Room> {
 
     Map<String, Object> joinRoom(JSONObject data, User user);
 
-    Map<String, Object> outRoom(JSONObject data, User user);
+    Map<String, Object> outRoom(JSONObject data, User user, Room room);
 
     Map<String, Object> ready(User user) throws IllegalAccessException, InstantiationException;
 
@@ -26,11 +26,12 @@ public interface RoomService extends BaseService<Integer, Room> {
 
     void dismissRoomVoteTask(Integer roomId);
 
-    Map<String, Object> outRoom(Integer roomCode, Integer userId);
+    Map<String, Object> outRoom(Room room, Integer userId);
 
     void outRoom(Room room);
 
     Map<String, Object> roomInfo(User user);
 
     Map<String, Object> returnRoom(User user, Room room);
+
 }

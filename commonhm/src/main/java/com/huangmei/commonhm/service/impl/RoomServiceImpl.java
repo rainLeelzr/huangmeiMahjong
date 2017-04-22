@@ -72,6 +72,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                 room.setStart(Room.start.UNSTART.getCode());
                 room.setState(Room.state.wait.getCode());
                 room.setMultiple(multiple);
+                room.setRoomOwnerUid(user.getUId());
                 Integer roomCode = CommonUtil.createRoomCode();
                 roomCode = checkRoomCode(roomCode);
                 room.setRoomCode(roomCode);
@@ -89,7 +90,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                 result.put("user", user);
                 return result;
             } else {
-                throw CommonError.ROOM_USER_IN_ROOM.newException();
+                throw CommonError.USER_ALREADY_IN_ROOM.newException();
             }
         } else {
             throw CommonError.USER_NOT_EXIST.newException();
@@ -186,6 +187,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
 
         Integer roomCode = (Integer) data.get("roomCode");
         Integer multiple = (Integer) data.get("multiple");
+        Integer roomId = (Integer) data.get("roomId");
 
         if (user != null) {
             RoomMember roomMember = checkInRoom(user.getId());
@@ -194,16 +196,13 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                 if (roomMember == null) {//玩家没有在房间中
                     result = joinFriendRoom(user, roomCode, result);
                 } else {
-                    throw CommonError.ROOM_USER_IN_ROOM.newException();
+                    throw CommonError.USER_ALREADY_IN_ROOM.newException();
                 }
             } else {//进入金币场
-                if (roomMember != null) {//玩家已在房间中,即为换桌加入(加入到原来的等级的房间)
-                    Room room = roomDao.selectOne(roomMember.getRoomId());
-                    outRoom(room.getRoomCode(), user.getId());
-                }
+
                 if (multiple != null) {//进入指定金币场
                     if (user.getCoin() >= multiple) {
-                        result = joinCoinRoom(multiple, user, result);
+                        result = joinCoinRoom(multiple, user, result, roomId);
                         if (result == null) {//所有房间都已经满人,系统自动创建金币房间
                             data.put("uId", user.getUId().toString());
                             data.put("type", Room.type.COINS_ROOM.getCode());
@@ -221,7 +220,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                     } else {
                         throw CommonError.USER_LACK_COINS.newException();
                     }
-                    result = joinCoinRoom(multiple, user, result);
+                    result = joinCoinRoom(multiple, user, result, roomId);
                     if (result == null) {//所有房间都已经满人或没有对应的金币场房间,系统自动创建金币房间
                         data.put("multiple", multiple);
                         data.put("uId", user.getUId().toString());
@@ -237,6 +236,11 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
                 for (RoomMember member : roomMembers) {
                     User u = userDao.selectOne(member.getUserId());
                     users.add(u);
+                    if (member.getSeat() == 1) {//说明是房主
+                        Room r = (Room) result.get("room");
+                        r.setRoomOwnerUid(u.getUId());
+                        result.put("room", r);
+                    }
                 }
                 result.put("users", users);
                 result.put("userId", user.getId());
@@ -250,16 +254,19 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
     }
 
 
-    private Map<String, Object> joinCoinRoom(Integer multiple, User user, Map<String, Object> result) {
+    private Map<String, Object> joinCoinRoom(Integer multiple, User user, Map<String, Object> result, Integer roomId) {
         Entity.RoomCriteria roomCriteria = new Entity.RoomCriteria();
         roomCriteria.setMultiple(Entity.Value.eq(multiple));
         roomCriteria.setState(Entity.Value.ne(Room.state.DISMISS.getCode()));
+        if (roomId != null) {
+            roomCriteria.setId(Entity.Value.ne(roomId));
+        }
         List<Room> rooms = roomDao.selectList(roomCriteria);
         if (rooms.size() > 0) {
-            for (Room room : rooms) {
-                Long count = roomRedis.getRoomMemberCount(room.getId().toString());
+            for (Room r : rooms) {
+                Long count = roomRedis.getRoomMemberCount(r.getId().toString());
                 if (count < Room.playerLimit) {
-                    return joinRoomMember(room, count, user, result);
+                    return joinRoomMember(r, count, user, result);
                 }
             }
         }
@@ -288,13 +295,35 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
      * @return
      */
     @Override
-    public Map<String, Object> outRoom(JSONObject data, User user) {
+    public Map<String, Object> outRoom(JSONObject data, User user, Room room) {
+        Map<String, Object> result = new HashMap<>(2);
         if (user == null) {
             throw CommonError.USER_NOT_EXIST.newException();
         }
+        RoomMember roomMember = checkInRoom(user.getId());
+        if (roomMember == null) {
+            throw CommonError.USER_NOT_IN_ROOM.newException();
+        }
+        if (room.getType().equals(Room.type.FRIENDS_ROOM.getCode())
+                && room.getCreatedUserId().equals(user.getId())) {
+            if (roomMember.getState().equals(RoomMember.state.READY.getCode())) {//房主离开房间之前是准备状态的时候
+                roomMember.setState(RoomMember.state.UNREADY.getCode());
+                roomMemberDao.update(roomMember);
+            }
+            Set<RoomMember> roomMembers = roomRedis.getRoomMembers(room.getId().toString());
+            List<User> users = new ArrayList<>();
+            for (RoomMember member : roomMembers) {
+                User u = userDao.selectOne(member.getUserId());
+                users.add(u);
+            }
+            result.put("roomMembers", roomMembers);
+            result.put("users", users);
+            result.put("result", false);
+            return result;
+        }
 
-        Integer roomCode = (Integer) data.get("roomCode");
-        return outRoom(roomCode, user.getId());
+
+        return outRoom(room, user.getId());
     }
 
     /**
@@ -322,17 +351,15 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
     /**
      * 单个玩家退出房间
      *
-     * @param roomCode
+     * @param room
      * @param userId
      * @return
      */
-    public Map<String, Object> outRoom(Integer roomCode, Integer userId) {
+    public Map<String, Object> outRoom(Room room, Integer userId) {
         Map<String, Object> result = new HashMap<>(2);
 
         RoomMember roomMember = checkInRoom(userId);
         if (roomMember != null) {//需要在房间中才能退出房间
-            Room room = getRoomByRoomCode(roomCode);
-
             if (room != null) {
                 //金币房游戏开始后不能退出
                 if (room.getType().equals(Room.type.COINS_ROOM.getCode()) && room.getState().equals(Room.state.PLAYING.getCode())) {
@@ -375,13 +402,12 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
 
                 result.put("users", users);
                 result.put("result", true);
-                result.put("roomId", room.getId());
                 return result;
             } else {
                 throw CommonError.ROOM_NOT_EXIST.newException();
             }
         } else {
-            throw CommonError.ROOM_USER_NOT_IN_ROOM.newException();
+            throw CommonError.USER_NOT_IN_ROOM.newException();
         }
     }
 
@@ -396,17 +422,15 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
         Map<String, Object> result = new HashMap<>(3);
         Entity.RoomCriteria roomCriteria = new Entity.RoomCriteria();
         roomCriteria.setCreatedUserId(Entity.Value.eq(user.getId()));
-        roomCriteria.setState(Entity.Value.ne(Room.state.DISMISS));
+        roomCriteria.setState(Entity.Value.ne(Room.state.DISMISS.getCode()));
         Room room = roomDao.selectOne(roomCriteria);
 
         if (room == null) {
-            throw CommonError.ROOM_NOT_EXIST.newException();
+            result.put("result", false);
+            return result;
         }
 
-        Entity.RoomMemberCriteria roomMemberCriteria = new Entity.RoomMemberCriteria();
-        roomMemberCriteria.setRoomId(Entity.Value.eq(room.getId()));
-        roomMemberCriteria.setLeaveTime(Entity.Value.isNull());
-        long count = roomMemberDao.selectCount(roomMemberCriteria);
+        Long count = roomRedis.getRoomMemberCount(room.getId().toString());
 
         long time = new Date().getTime() - room.getCreatedTime().getTime();
 
@@ -440,6 +464,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
         }
         return result;
     }
+
 
 
     /**
@@ -516,7 +541,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
         RoomMember roomMember = checkInRoom(user.getId());
 
         if (roomMember == null) {
-            throw CommonError.ROOM_USER_NOT_IN_ROOM.newException();
+            throw CommonError.USER_NOT_IN_ROOM.newException();
         }
 
         Room room = getRoomByRoomCode(roomCode);
@@ -594,7 +619,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
         roomMember.setState(RoomMember.state.UNREADY.getCode());
         roomMember = roomMemberDao.selectByUserIdForReady(roomMember);
         if (roomMember == null) {//需要在房间中并且之前的状态为待准备的玩家才能准备
-            throw CommonError.ROOM_READY_ERROR.newException();
+            throw CommonError.READY_ERROR.newException();
         }
 
         roomMember.setState(RoomMember.state.READY.getCode());
@@ -608,6 +633,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
             room.setStart(Room.start.STARTED.getCode());
             room.setState(Room.state.PLAYING.getCode());
             roomDao.update(room);
+            roomRedis.updateRoom(room);
             Map<String, Object> mahjongGameData = gameService.putOutHandCard(room, roomMembers);
             result.putAll(mahjongGameData);
             type = 2;
@@ -644,7 +670,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
             return result;
 
         } else {
-            throw CommonError.ROOM_USER_NOT_IN_ROOM.newException();
+            throw CommonError.USER_NOT_IN_ROOM.newException();
         }
 
 

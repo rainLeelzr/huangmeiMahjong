@@ -33,14 +33,27 @@ public class RoomRedis {
         );
         joinRoom(roomMember);
     }
+
+    /**
+     * 获取房间
+     */
+    public Room getRoom(Integer roomId) {
+        Room r = (Room) redis.hash.get(
+                String.format(ROOM_KEY, roomId),
+                ROOM_INFO_FIELD_KEY,
+                Room.class
+        );
+        return r;
+    }
+
     /**
      * 解散房间,清除redis中的房间信息
      */
     public void dismissRoom(Room room) {
-            redis.hash.delete(
-                    String.format(ROOM_KEY,room.getId()),
-                    ROOM_INFO_FIELD_KEY
-            );
+        redis.hash.delete(
+                String.format(ROOM_KEY, room.getId()),
+                ROOM_INFO_FIELD_KEY
+        );
 
     }
 
@@ -61,13 +74,14 @@ public class RoomRedis {
                 roomMember,
                 roomMember.getSeat());
     }
+
     /**
      * 退出房间
      */
     public void editRoom(RoomMember roomMember) {
         redis.sortedSet.deleteByScore(
-                String.format(ROOM_MEMBER_KEY,roomMember.getRoomId()),
-                        (double)roomMember.getSeat(),(double)roomMember.getSeat());
+                String.format(ROOM_MEMBER_KEY, roomMember.getRoomId()),
+                (double) roomMember.getSeat(), (double) roomMember.getSeat());
     }
 
 

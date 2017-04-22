@@ -834,12 +834,14 @@ public class GameService {
         for (Score score : scores) {
             if (score.getUserId().equals(user.getId())) {
                 winnerScore = score;
+                break;
             }
         }
 
         for (Score score : scores) {
             if (score.getUserId().equals(winnerScore.getUserId())) {
-
+                score.setScore(score.getScore() * (room.getPlayers() - 1));
+                score.setCoin(score.getCoin() * (room.getPlayers() - 1));
             } else {
                 score.setScore(-winnerScore.getScore());
                 score.setPaoNum(0);
@@ -868,6 +870,8 @@ public class GameService {
      * 好友房在没有达到局数上限时，所有玩家变成待准备状态，房间状态改为待开始
      */
     private List<SingleUserGameScoreVo> ready4NextGameOrFinishGame(MahjongGameData mahjongGameData, Room room, List<Score> scores) {
+        gameRedis.deleteCanOperates(room.getId());
+
         List<SingleUserGameScoreVo> singleUserGameScoreVos = null;
 
         if (mahjongGameData.getRoomType().equals(Room.type.COINS_ROOM.getCode())
@@ -1049,12 +1053,14 @@ public class GameService {
         for (Score score : scores) {
             if (score.getUserId().equals(user.getId())) {
                 winnerScore = score;
+                break;
             }
         }
 
         for (Score score : scores) {
             if (score.getUserId().equals(winnerScore.getUserId())) {
-
+                score.setScore(score.getScore() * (room.getPlayers() - 1));
+                score.setCoin(score.getCoin() * (room.getPlayers() - 1));
             } else {
                 score.setScore(-winnerScore.getScore());
                 score.setPaoNum(0);
@@ -1172,6 +1178,7 @@ public class GameService {
         for (Score score : scores) {
             if (score.getUserId().equals(user.getId())) {
                 winnerScore = score;
+                break;
             }
         }
 
@@ -1300,6 +1307,7 @@ public class GameService {
         for (Score score : scores) {
             if (score.getUserId().equals(user.getId())) {
                 winnerScore = score;
+                break;
             }
         }
 
@@ -1449,6 +1457,7 @@ public class GameService {
         for (Score score : scores) {
             if (score.getUserId().equals(user.getId())) {
                 winnerScore = score;
+                break;
             }
         }
 
@@ -1783,7 +1792,9 @@ public class GameService {
         // 为下一局游戏做准备，或者结束游戏
         List<SingleUserGameScoreVo> singleUserGameScoreVos = ready4NextGameOrFinishGame(mahjongGameData, room, scores);
 
-        return new Object[]{scores, singleUserGameScoreVos};
+        List<Integer> CancelTrusteeshipUserId = removeAllTrusteeshipUser(room.getId());
+
+        return new Object[]{scores, singleUserGameScoreVos, CancelTrusteeshipUserId};
     }
 
     /**
@@ -1821,7 +1832,7 @@ public class GameService {
                 roomMember.getState().equals(RoomMember.state.UNREADY.getCode())
                         || roomMember.getState().equals(RoomMember.state.READY.getCode())) {
             // DEBUGING　玩家未点击准备,或已准备，但游戏未开始时，踢出房间
-            roomService.outRoom(room.getRoomCode(), user.getId());
+            roomService.outRoom(room, user.getId());
         }
 
         return null;

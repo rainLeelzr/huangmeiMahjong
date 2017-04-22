@@ -137,6 +137,18 @@ public class Room implements Entity {
 
     /**  */
     protected Integer type;
+    /**
+     * 房主的uId
+     */
+    protected Integer roomOwnerUid;
+
+    public Integer getRoomOwnerUid() {
+        return roomOwnerUid;
+    }
+
+    public void setRoomOwnerUid(Integer roomOwnerUid) {
+        this.roomOwnerUid = roomOwnerUid;
+    }
 
     public Integer getId() {
         return id;

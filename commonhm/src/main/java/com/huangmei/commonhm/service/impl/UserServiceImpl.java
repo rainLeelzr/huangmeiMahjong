@@ -700,7 +700,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
                 throw CommonError.NOT_STANDS.newException();
             }
         } else {
-            throw CommonError.ROOM_USER_NOT_IN_ROOM.newException();
+            throw CommonError.USER_NOT_IN_ROOM.newException();
         }
     }
 
@@ -719,7 +719,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         String userMsg = (String) data.get("userMsg");
         if (query != null) {//查询滚动公告
             //查询系统滚动公告
-            result.put("administrator", "待开发");
+            result.put("administrator", "等待管理后台对接");
             //查询用户内容
             List<Notice> notices = noticeDao.selectAll();
             if (notices.size() > 0) {
