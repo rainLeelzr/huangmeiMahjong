@@ -117,14 +117,14 @@ public abstract class BaseScanTask {
             }
 
             if (!contain) {
-                log.debug(
+                log.trace(
                         "座位{}进行{}扫描，手牌：{}",
                         toBeScanPersonalCardInfo.getRoomMember().getSeat(),
                         getOperate().getName(),
                         toBeScanPersonalCardInfo.getHandCards()
                 );
                 if (doScan(toBeScanPersonalCardInfo)) {
-                    log.debug(
+                    log.trace(
                             "座位{}可以{}",
                             toBeScanPersonalCardInfo.getRoomMember().getSeat(),
                             getOperate().getName()
@@ -133,7 +133,7 @@ public abstract class BaseScanTask {
                     myOperates.add(getOperate());
                 }
             } else {
-                log.debug(
+                log.trace(
                         "座位{}已有{},无需再扫描{}！",
                         toBeScanPersonalCardInfo.getRoomMember().getSeat(),
                         getOperate().getBaseOperate().getName(),

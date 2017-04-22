@@ -49,7 +49,7 @@ public abstract class AbstractManager {
             }
         }
         Collections.sort(canDoOperates);
-        log.debug("最终扫描结果：{}", canDoOperates);
+        log.info("最终扫描结果：{}", canDoOperates);
         return canDoOperates;
     }
 
