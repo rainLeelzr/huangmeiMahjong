@@ -403,7 +403,7 @@ public class ActionRouter {
             throws Exception {
 
         User user = sessionManager.getUser(session.getId());
-        Map<String, Object> result = userService.getUser(data, user);
+        Map<String, Object> result = userService.getUser(user);
         //String userId = (String) data.get("userId");
         //User user = userService.selectOne(Integer.parseInt(userId));
         //if (user == null) {
@@ -431,6 +431,7 @@ public class ActionRouter {
             throws Exception {
 
         User user = sessionManager.getUser(session.getId());
+        //todome 创建房间user在session
         //Map<String, Object> result = roomService.createRoom(data,user);
         Map<String, Object> result = roomService.createRoom(data);
         if (result != null) {
@@ -501,7 +502,7 @@ public class ActionRouter {
 
         Room room = sessionManager.getRoom(session.getId());
         data.put("roomId", room.getId());
-        Map<String, Object> result = roomService.outRoom(data, user, room);
+        Map<String, Object> result = roomService.outRoom(user, room);
         messageManager.sendMessageToOtherRoomUsers(room.getId().toString(), user.getId(), new JsonResultY.Builder()
                 .setPid(PidValue.OUT_ROOM.getPid())
                 .setError(CommonError.SYS_SUSSES)
@@ -542,7 +543,7 @@ public class ActionRouter {
             throws Exception {
         User user = sessionManager.getUser(session.getId());
         Room room = sessionManager.getRoom(session.getId());
-        Map<String, Object> result = roomService.outRoom(data, user, room);
+        Map<String, Object> result = roomService.outRoom(user, room);
         if (result != null) {
 
             result.put("uId", user.getUId());
@@ -683,7 +684,8 @@ public class ActionRouter {
     public JsonResultY dismissRoom(WebSocketSession session, JSONObject data)
             throws Exception {
         User user = sessionManager.getUser(session.getId());
-        Map<String, Object> result = roomService.dismissRoom(data, user);
+        Room room = sessionManager.getRoom(session.getId());
+        Map<String, Object> result = roomService.dismissRoom(room, user);
         Integer roomId = (Integer) result.get("roomId");
 
         if (!(Boolean) result.get("result")) {//需要发起投票,开始计时任务
@@ -713,16 +715,16 @@ public class ActionRouter {
     public JsonResultY agreeDismiss(WebSocketSession session, JSONObject data)
             throws Exception {
         User user = sessionManager.getUser(session.getId());
-        Map<String, Object> result = roomService.agreeDismiss(data, user);
-        Integer roomId = (Integer) result.get("roomId");
-        result.remove("roomId");
+        Room room = sessionManager.getRoom(session.getId());
+        Map<String, Object> result = roomService.agreeDismiss(data, user, room);
+
         JsonResultY jsonResultY = new JsonResultY.Builder()
                 .setPid(PidValue.AGREE_DISMISS.getPid())
                 .setError(CommonError.SYS_SUSSES)
                 .setData(result)
                 .build();
         messageManager.sendMessageToRoomUsers(
-                roomId.toString(),
+                room.getId().toString(),
                 jsonResultY);
         return null;
     }
@@ -841,7 +843,7 @@ public class ActionRouter {
     public JsonResultY numberOfPlayers(WebSocketSession session, JSONObject data)
             throws Exception {
 
-        Map<String, Object> result = roomService.numberOfPlayers(data);
+        Map<String, Object> result = roomService.numberOfPlayers();
 
         return new JsonResultY.Builder()
                 .setPid(PidValue.NUMBER_OF_PLAYERS.getPid())
@@ -958,7 +960,7 @@ public class ActionRouter {
             throws Exception {
 
         User user = sessionManager.getUser(session.getId());
-        Map<String, Object> result = userService.systemNotice(data, user);
+        Map<String, Object> result = userService.systemNotice(user);
         if ((User) result.get("user") != null) {
             sessionManager.userUpdate((User) result.get("user"), session);
         }

@@ -289,11 +289,10 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
     /**
      * 退出房间
      *
-     * @param data
      * @return
      */
     @Override
-    public Map<String, Object> outRoom(JSONObject data, User user, Room room) {
+    public Map<String, Object> outRoom(User user, Room room) {
         Map<String, Object> result = new HashMap<>(2);
         if (user == null) {
             throw CommonError.USER_NOT_EXIST.newException();
@@ -469,16 +468,12 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
      * 未发牌前解散房间是可以直接解散
      * 发牌后解散需要发起解散房间申请,需其他玩家同意
      *
-     * @param data
      * @return
      */
     @Override
-    public Map<String, Object> dismissRoom(JSONObject data, User user) {
+    public Map<String, Object> dismissRoom(Room room, User user) {
         Map<String, Object> result = new HashMap<>(3);
         boolean r;
-        Integer roomCode = (Integer) data.get("roomCode");
-
-        Room room = getRoomByRoomCode(roomCode);
 
         if (room != null) {
 
@@ -527,10 +522,9 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
      * @return
      */
     @Override
-    public Map<String, Object> agreeDismiss(JSONObject data, User user) {
+    public Map<String, Object> agreeDismiss(JSONObject data, User user, Room room) {
         Map<String, Object> result = new HashMap<>(2);
         boolean isAgree = (boolean) data.get("isAgree");
-        Integer roomCode = (Integer) data.get("roomCode");
 
         if (user == null) {
             throw CommonError.USER_NOT_EXIST.newException();
@@ -540,8 +534,6 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
         if (roomMember == null) {
             throw CommonError.USER_NOT_IN_ROOM.newException();
         }
-
-        Room room = getRoomByRoomCode(roomCode);
 
         if (room == null) {
             throw CommonError.ROOM_NOT_EXIST.newException();
@@ -570,7 +562,6 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
         }
 
         result.put("result", isAgree);
-        result.put("roomId", room.getId());
         result.put("uId", user.getUId());
         result.put("nickName", user.getNickName());
         return result;
@@ -581,11 +572,10 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
     /**
      * 获取的金币房在玩人数
      *
-     * @param data
      * @return
      */
     @Override
-    public Map<String, Object> numberOfPlayers(JSONObject data) {
+    public Map<String, Object> numberOfPlayers() {
         Map<String, Object> result = new HashMap<>(2);
         long primary = roomDao.countForPlayers(Room.multiple.COINS_WITH_2000.getCode());
         long senior = roomDao.countForPlayers(Room.multiple.COINS_WITH_20000.getCode());
