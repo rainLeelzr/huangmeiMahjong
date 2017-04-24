@@ -408,6 +408,11 @@ public class GameService {
         // 玩家个人卡信息
         PersonalCardInfo personalCardInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), user);
 
+        // 如果是如果宝娘杠
+        if(toBeGangMahjongs.get(0).getNumber().equals(mahjongGameData.getBaoMother().getNumber())){
+            personalCardInfo.getHandCards().add(mahjongGameData.getBaoMother());
+        }
+
         // 判断玩家是否含有暗杠的牌
         boolean isYingAnGang = PersonalCardInfo.hasMahjongsWithTouchMahjong(personalCardInfo, toBeGangMahjongs);
         if (!isYingAnGang) {
@@ -659,6 +664,11 @@ public class GameService {
 
         // 玩家个人卡信息
         PersonalCardInfo personalCardInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), user);
+
+        // 如果是如果宝娘杠
+        if(mahjongs.get(0).getNumber().equals(mahjongGameData.getBaoMother().getNumber())){
+            personalCardInfo.getHandCards().add(mahjongGameData.getBaoMother());
+        }
 
         // 判断玩家手牌是否有3只跟别的玩家打出一样的麻将
         Mahjong playedMahjong = mahjongs.remove(mahjongs.size() - 1);
