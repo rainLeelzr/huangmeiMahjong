@@ -1140,7 +1140,7 @@ public class ActionRouter {
         List<User> users = getRoomUsers(mahjongGameData.getPersonalCardInfos());
 
         //正常杠，需要摸牌，宝牌杠不需要摸牌
-        if (mahjongGameData.getBaoMother().getNumber().equals(toBeGangMahjongIds.get(0))) {
+        if (mahjongGameData.getBaoMother().getNumber().equals(mahjongs.get(0).getNumber())) {
             CanDoOperate canOperate = new CanDoOperate();
             canOperate.setRoomMember(gangUserCarInfo.getRoomMember());
             canOperate.setOperates(new HashSet<Operate>(2));
