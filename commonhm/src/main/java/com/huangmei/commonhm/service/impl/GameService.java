@@ -849,10 +849,12 @@ public class GameService {
 
         List<Score> scores = genScores4Game(mahjongGameData, room, user, canOperates.get(0));
 
-        Score winnerScore = null;
+        Score winnerScore = new Score();
         for (Score score : scores) {
             if (score.getUserId().equals(user.getId())) {
-                winnerScore = score;
+                winnerScore.setUserId(score.getUserId());
+                winnerScore.setCoin(score.getCoin());
+                winnerScore.setScore(score.getScore());
                 break;
             }
         }
@@ -1075,10 +1077,12 @@ public class GameService {
             scores.add(score);
         }
 
-        Score winnerScore = null;
+        Score winnerScore = new Score();
         for (Score score : scores) {
             if (score.getUserId().equals(user.getId())) {
-                winnerScore = score;
+                winnerScore.setUserId(score.getUserId());
+                winnerScore.setCoin(score.getCoin());
+                winnerScore.setScore(score.getScore());
                 break;
             }
         }

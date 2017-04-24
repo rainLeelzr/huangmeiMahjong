@@ -97,6 +97,14 @@ public class SessionManager {
     }
 
     /**
+     * 更新session中的room信息
+     */
+    public void roomUpdate(Room room, WebSocketSession session) {
+
+        sessionIdRooms.put(session.getId(), room);
+    }
+
+    /**
      * 用户登出
      */
     public void userLogout(User user, WebSocketSession session) {

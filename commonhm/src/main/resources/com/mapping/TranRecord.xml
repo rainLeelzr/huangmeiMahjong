@@ -35,7 +35,8 @@
     </select>
     <select id="countForPrizeDraw" parameterType="com.huangmei.commonhm.model.TranRecord"
             resultType="_long">
-		select COUNT(id) from tb_tran_record where to_days(tran_times) = to_days(now()) AND way = #{way} AND user_id=#{userId};
+        select COUNT(id) from tb_tran_record where to_days(tran_times) = to_days(now()) AND way = #{way} AND
+        user_id=#{userId} AND QUANTITY > 0;
 	</select>
     <select id="selectRecent" parameterType="com.huangmei.commonhm.model.TranRecord"
             resultMap="TranRecordResultMap">
