@@ -1139,19 +1139,32 @@ public class ActionRouter {
         // 4个玩家，按座位号升序
         List<User> users = getRoomUsers(mahjongGameData.getPersonalCardInfos());
 
-        // 玩家在leftCards的开头摸一张牌，并广播
-        monitorManager.watch(new ClientTouchMahjongTask
-                .Builder()
-                .setToucher(new GangToucher())
-                .setGetACardManager(getACardManager)
-                .setMessageManager(messageManager)
-                .setMahjongGameData(mahjongGameData)
-                .setUser(user)
-                .setUsers(users)
-                .setGameRedis(gameRedis)
-                .setVersionRedis(versionRedis)
-                .setActionRouter(this)
-                .build());
+        //正常杠，需要摸牌，宝牌杠不需要摸牌
+        if (mahjongGameData.getBaoMother().getNumber().equals(toBeGangMahjongIds.get(0))) {
+            CanDoOperate canOperate = new CanDoOperate();
+            canOperate.setRoomMember(gangUserCarInfo.getRoomMember());
+            canOperate.setOperates(new HashSet<Operate>(2));
+
+            // 添加可以打牌操作
+            canOperate.getOperates().add(Operate.PLAY_A_MAHJONG);
+            // 保存可操作列表到redis，记录正在等待哪个玩家的什么操作
+            gameRedis.saveWaitingClientOperate(canOperate);
+        } else {
+            // 玩家在leftCards的开头摸一张牌，并广播
+            monitorManager.watch(new ClientTouchMahjongTask
+                    .Builder()
+                    .setToucher(new GangToucher())
+                    .setGetACardManager(getACardManager)
+                    .setMessageManager(messageManager)
+                    .setMahjongGameData(mahjongGameData)
+                    .setUser(user)
+                    .setUsers(users)
+                    .setGameRedis(gameRedis)
+                    .setVersionRedis(versionRedis)
+                    .setActionRouter(this)
+                    .build());
+
+        }
 
         return null;
     }
@@ -1230,8 +1243,21 @@ public class ActionRouter {
                 qiangGangManager.scan(mahjongGameData, mahjong, user);
 
         if (canOperates.size() == 0) {
-            // 给杠的用户在leftCards的开头摸一张牌，并广播
-            handleGangTouchAMahjong(mahjongGameData, user);
+            if (mahjongGameData.getBaoMother().getNumber().equals(mahjong.getNumber())) {
+                CanDoOperate canOperate = new CanDoOperate();
+                canOperate.setRoomMember(
+                        PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), user).getRoomMember()
+                );
+                canOperate.setOperates(new HashSet<Operate>(2));
+
+                // 添加可以打牌操作
+                canOperate.getOperates().add(Operate.PLAY_A_MAHJONG);
+                // 保存可操作列表到redis，记录正在等待哪个玩家的什么操作
+                gameRedis.saveWaitingClientOperate(canOperate);
+            } else {
+                // 给杠的用户在leftCards的开头摸一张牌，并广播
+                handleGangTouchAMahjong(mahjongGameData, user);
+            }
         } else {
             CanDoOperate firstCanDoOperate = canOperates.remove(0);
 
