@@ -28,6 +28,9 @@ public class YingAnGang extends AbstractGangScanTask {
         List<Mahjong> mahjongList = new ArrayList<>(personalCardInfo.getHandCards());
         mahjongList.add(specifiedMahjong);
 
+        // 宝娘暗杠
+        mahjongList.add(mahjongGameData.getBaoMother());
+
         Map<String, List<Mahjong>> numbers = new HashMap<>();
         for (Mahjong mahjong : mahjongList) {
             String numberStr = mahjong.getNumber().toString();
