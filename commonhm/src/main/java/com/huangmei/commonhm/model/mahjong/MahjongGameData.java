@@ -5,6 +5,7 @@ import com.huangmei.commonhm.manager.operate.Operate;
 import com.huangmei.commonhm.model.RoomMember;
 import com.huangmei.commonhm.model.mahjong.gameData.TouchMahjong;
 import com.huangmei.commonhm.util.PidValue;
+import com.huangmei.commonhm.util.mock.MockComboMahjongList;
 import org.apache.commons.lang.math.RandomUtils;
 
 import java.util.*;
@@ -128,7 +129,7 @@ public class MahjongGameData {
      */
     public static MahjongGameData initData(int players, int bankerSite, int currentTimes) {
         // 获取所有麻将牌
-        List<Mahjong> allMahjongs = Mahjong.getAllMahjongs();
+        //List<Mahjong> allMahjongs = Mahjong.getAllMahjongs();
         // DEBUGING 生成指定麻将列表
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1YingAnGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1RuanAnGangMahjongs();
@@ -139,13 +140,14 @@ public class MahjongGameData {
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1RuanMingGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2PengMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2AnGangMahjongs();
-//        List<Mahjong> allMahjongs = MockComboMahjongList.getSeat3QiangDaMingGangHuMahjongs();
+        List<Mahjong> allMahjongs = MockComboMahjongList.getSeat3QiangDaMingGangHuMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2ChiPingHuSeat3DaMingGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2ChiPingHu();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1ZiMoPingHu();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1RuanZiMoPingHu();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2RuanChiPengPengHuMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2YingChiQiDuiMahjongs();
+        //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1BaoNiangAnGangMahjongs();
 
         // 参数验证
         if (bankerSite > players || bankerSite < 0 || players == 0) {
@@ -181,7 +183,7 @@ public class MahjongGameData {
 
         // DEBUGING 打乱所有麻将牌顺序
         // 打乱所有麻将牌顺序
-        Collections.shuffle(allMahjongs);
+        //Collections.shuffle(allMahjongs);
         //System.out.println("乱序后麻将：" + allMahjongs);
 
         // allMahjongs的下标，一共120张牌，用于记录分到第几张牌

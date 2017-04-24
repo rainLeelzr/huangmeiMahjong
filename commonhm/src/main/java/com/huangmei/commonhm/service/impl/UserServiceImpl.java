@@ -608,7 +608,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
         String query = (String) data.get("query");
 
         TranRecord tr = new TranRecord();
-        tr.setWay(TranRecord.way.WIN.getCode());
+        tr.setWay(TranRecord.way.PLAYING.getCode());
         tr.setUserId(user.getId());
         Long num = tranRecordDao.countForPrizeDraw(tr);
 

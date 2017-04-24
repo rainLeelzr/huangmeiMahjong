@@ -10,7 +10,7 @@ public class TranRecord implements Entity {
 		FREE_COIN(3, "每日免费领取金币"),
 		BIND_PHONE(4, "绑定手机领取钻石"),
 		TEN_WINS(5, "胜利十局领取金币"),
-		WIN(6, "对局胜利获取金币"),
+        PLAYING(6, "对局金币变化"),
         BIND_PROMOTE_CODE(7, "绑定推广码");
 
 

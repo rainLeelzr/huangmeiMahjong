@@ -570,6 +570,7 @@ public class ActionRouter {
         Map<String, Object> result = roomService.ready(user);
         Integer type = (Integer) result.get("type");
 
+
         boolean isFirstPutOutCard = false;
         List<Object[]> firstPutOutCardBroadcasts = new ArrayList<>(4);
 
@@ -686,25 +687,23 @@ public class ActionRouter {
         User user = sessionManager.getUser(session.getId());
         Room room = sessionManager.getRoom(session.getId());
         Map<String, Object> result = roomService.dismissRoom(room, user);
-        Integer roomId = (Integer) result.get("roomId");
 
         if (!(Boolean) result.get("result")) {//需要发起投票,开始计时任务
             //2分钟计时无响应默认同意
             DismissRoomVoteTask dismissRoomVoteTask = new DismissRoomVoteTask();
             dismissRoomVoteTask.setRoomService(roomService);
-            dismissRoomVoteTask.setRoomId(roomId);
+            dismissRoomVoteTask.setRoomId(room.getId());
 
             monitorManager.schedule(dismissRoomVoteTask, 10 * 1000);
         }
 
-        result.remove("roomId");
         JsonResultY jsonResultY = new JsonResultY.Builder()
                 .setPid(PidValue.DISMISS_ROOM.getPid())
                 .setError(CommonError.SYS_SUSSES)
                 .setData(result)
                 .build();
         messageManager.sendMessageToRoomUsers(
-                roomId.toString(),
+                room.getId().toString(),
                 jsonResultY);
 
         return null;
@@ -902,16 +901,16 @@ public class ActionRouter {
     public JsonResultY communication(WebSocketSession session, JSONObject data)
             throws Exception {
         User user = sessionManager.getUser(session.getId());
+        Room room = sessionManager.getRoom(session.getId());
         Map<String, Object> result = roomService.communication(data, user);
         result.put("uId", user.getUId());
-        Integer roomId = (Integer) result.get("roomId");
-        result.remove("roomId");
+
         JsonResultY jsonResultY = new JsonResultY.Builder()
                 .setPid(PidValue.COMMUNICATION.getPid())
                 .setError(CommonError.SYS_SUSSES)
                 .setData(result)
                 .build();
-        messageManager.sendMessageToRoomUsers(roomId.toString(), jsonResultY);
+        messageManager.sendMessageToRoomUsers(room.getId().toString(), jsonResultY);
         return null;
     }
 

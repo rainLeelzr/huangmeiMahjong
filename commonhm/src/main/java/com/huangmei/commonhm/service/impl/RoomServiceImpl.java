@@ -293,6 +293,8 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
      */
     @Override
     public Map<String, Object> outRoom(User user, Room room) {
+        room = roomDao.selectOne(room.getId());
+
         Map<String, Object> result = new HashMap<>(2);
         if (user == null) {
             throw CommonError.USER_NOT_EXIST.newException();
@@ -474,7 +476,7 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
     public Map<String, Object> dismissRoom(Room room, User user) {
         Map<String, Object> result = new HashMap<>(3);
         boolean r;
-
+        room = roomDao.selectOne(room.getId());
         if (room != null) {
 
             if (room.getStart() == Room.start.UNSTART.getCode()) {//未开始游戏,可以直接解散房间
@@ -504,7 +506,6 @@ public class RoomServiceImpl extends BaseServiceImpl<Integer, Room> implements R
 
                 }
             }
-            result.put("roomId", room.getId());
             result.put("uId", user.getUId());
             result.put("nickName", user.getNickName());
             result.put("result", r);

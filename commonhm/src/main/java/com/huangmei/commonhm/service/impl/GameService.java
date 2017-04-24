@@ -1,9 +1,6 @@
 package com.huangmei.commonhm.service.impl;
 
-import com.huangmei.commonhm.dao.RoomDao;
-import com.huangmei.commonhm.dao.RoomMemberDao;
-import com.huangmei.commonhm.dao.ScoreDao;
-import com.huangmei.commonhm.dao.UserDao;
+import com.huangmei.commonhm.dao.*;
 import com.huangmei.commonhm.manager.getACard.GetACardManager;
 import com.huangmei.commonhm.manager.operate.BaseOperate;
 import com.huangmei.commonhm.manager.operate.CanDoOperate;
@@ -63,6 +60,9 @@ public class GameService {
 
     @Autowired
     private UserDao userDao;
+
+    @Autowired
+    private TranRecordDao tranRecordDao;
 
     @Autowired
     private RoomRedis roomRedis;
@@ -409,7 +409,7 @@ public class GameService {
         PersonalCardInfo personalCardInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), user);
 
         // 如果是如果宝娘杠
-        if(toBeGangMahjongs.get(0).getNumber().equals(mahjongGameData.getBaoMother().getNumber())){
+        if (toBeGangMahjongs.get(0).getNumber().equals(mahjongGameData.getBaoMother().getNumber())) {
             personalCardInfo.getHandCards().add(mahjongGameData.getBaoMother());
         }
 
@@ -666,7 +666,7 @@ public class GameService {
         PersonalCardInfo personalCardInfo = PersonalCardInfo.getPersonalCardInfo(mahjongGameData.getPersonalCardInfos(), user);
 
         // 如果是如果宝娘杠
-        if(mahjongs.get(0).getNumber().equals(mahjongGameData.getBaoMother().getNumber())){
+        if (mahjongs.get(0).getNumber().equals(mahjongGameData.getBaoMother().getNumber())) {
             personalCardInfo.getHandCards().add(mahjongGameData.getBaoMother());
         }
 
@@ -872,6 +872,11 @@ public class GameService {
             if (mahjongGameData.getRoomType().equals(Room.type.COINS_ROOM.getCode())
                     && score.getCoin() != 0) {
                 userDao.addCoin(score);
+                //增加一条金币变化记录
+                createRecord(score.getUserId(),
+                        TranRecord.way.PLAYING.getCode(),
+                        TranRecord.itemType.COIN.getCode(),
+                        score.getCoin());
             }
         }
 
@@ -1093,6 +1098,12 @@ public class GameService {
             if (mahjongGameData.getRoomType().equals(Room.type.COINS_ROOM.getCode())
                     && score.getCoin() != 0) {
                 userDao.addCoin(score);
+                //增加一条金币变化记录
+                createRecord(score.getUserId(),
+                        TranRecord.way.PLAYING.getCode(),
+                        TranRecord.itemType.COIN.getCode(),
+                        score.getCoin());
+
             }
         }
 
@@ -1221,6 +1232,11 @@ public class GameService {
             if (mahjongGameData.getRoomType().equals(Room.type.COINS_ROOM.getCode())
                     && score.getCoin() != 0) {
                 userDao.addCoin(score);
+                //增加一条金币变化记录
+                createRecord(score.getUserId(),
+                        TranRecord.way.PLAYING.getCode(),
+                        TranRecord.itemType.COIN.getCode(),
+                        score.getCoin());
             }
         }
 
@@ -1350,6 +1366,11 @@ public class GameService {
             if (mahjongGameData.getRoomType().equals(Room.type.COINS_ROOM.getCode())
                     && score.getCoin() != 0) {
                 userDao.addCoin(score);
+                //增加一条金币变化记录
+                createRecord(score.getUserId(),
+                        TranRecord.way.PLAYING.getCode(),
+                        TranRecord.itemType.COIN.getCode(),
+                        score.getCoin());
             }
         }
 
@@ -1500,6 +1521,11 @@ public class GameService {
             if (mahjongGameData.getRoomType().equals(Room.type.COINS_ROOM.getCode())
                     && score.getCoin() != 0) {
                 userDao.addCoin(score);
+                //增加一条金币变化记录
+                createRecord(score.getUserId(),
+                        TranRecord.way.PLAYING.getCode(),
+                        TranRecord.itemType.COIN.getCode(),
+                        score.getCoin());
             }
         }
 
@@ -1857,5 +1883,21 @@ public class GameService {
         }
 
         return null;
+    }
+
+    /**
+     * 创建一条交易记录
+     *
+     * @return
+     */
+    private void createRecord(Integer userId, Integer way, Integer itemType, Integer quantity) {
+        TranRecord tranRecord = new TranRecord();
+        tranRecord.setUserId(userId);
+        tranRecord.setWay(way);
+        tranRecord.setTranTimes(new Date());
+        tranRecord.setQuantity(quantity);
+        tranRecord.setItemType(itemType);
+        tranRecordDao.save(tranRecord);
+
     }
 }
