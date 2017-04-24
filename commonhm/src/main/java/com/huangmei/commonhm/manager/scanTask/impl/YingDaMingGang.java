@@ -5,18 +5,21 @@ import com.huangmei.commonhm.manager.putOutCard.scanTask.AbstractGangScanTask;
 import com.huangmei.commonhm.model.mahjong.Mahjong;
 import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 扫描是否可以硬大明杠
  */
 public class YingDaMingGang extends AbstractGangScanTask {
 
+    // 是否已经有碰扫描出来有人可以硬杠
+    private boolean hasGang = false;
+
     @Override
     public Operate getOperate() {
         return Operate.YING_DA_MING_GANG;
     }
-
-    // 是否已经有碰扫描出来有人可以硬杠
-    private boolean hasGang = false;
 
     @Override
     public boolean doScan(PersonalCardInfo personalCardInfo)
@@ -25,18 +28,18 @@ public class YingDaMingGang extends AbstractGangScanTask {
             return false;
         }
 
+        List<Mahjong> handCards = new ArrayList<>(personalCardInfo.getHandCards());
+
+        // 宝娘杠
+        if (specifiedMahjong.getNumber().equals(mahjongGameData.getBaoMother().getNumber())) {
+            handCards.add(mahjongGameData.getBaoMother());
+        }
+
         // 判断玩家手牌有没有三只与putOutMahjong相同的牌
         int match = 0;
-        for (Mahjong mahjong : personalCardInfo.getHandCards()) {
+        for (Mahjong mahjong : handCards) {
             if (mahjong.getNumber().equals(specifiedMahjong.getNumber())) {
                 match++;
-            }
-
-            //如果有一张牌为宝娘，则三张牌亦可暗杠，明杠依旧如此
-            if (match == 2 &&
-                    specifiedMahjong.getNumber().equals(mahjongGameData.getBaoMother().getNumber())) {
-                hasGang = true;
-                return true;
             }
 
             if (match == 3) {
