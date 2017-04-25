@@ -518,7 +518,8 @@ public class MockComboMahjongList {
 
         // 自定义所有4个玩家的初始麻将牌
         Mahjong[] m = new Mahjong[]{
-                null, all.remove(all.indexOf(Mahjong.ONE_WANG_1)), all.remove(all.indexOf(Mahjong.ONE_WANG_2)),
+                null, all.remove(all.indexOf(Mahjong.ONE_WANG_1)),
+                all.remove(all.indexOf(Mahjong.ONE_WANG_2)),
                 null, null, null,
                 null, null, null,
                 null, null, null,
@@ -543,7 +544,8 @@ public class MockComboMahjongList {
                 null, null, null,
                 null,
                 /////////////////////////////////////////////////
-                all.remove(all.indexOf(Mahjong.ONE_WANG_4)), null, null, null, null, null, null, null, null, null,
+                all.remove(all.indexOf(Mahjong.ONE_WANG_4)),
+                null, null, null, null, null, null, null, null, null,
                 null, null, null, null, null, null, null, null, null, null,
                 null, null, null, null, null, null, null, null, null, null,
                 null, null, null, null, null, null, null, null, null, null,
@@ -594,7 +596,8 @@ public class MockComboMahjongList {
                 null, null, null,
                 null,
                 /////////////////////////////////////////////////
-                all.remove(all.indexOf(Mahjong.ONE_WANG_4)), null, null, null, null, null, null, null, null, null,
+                all.remove(all.indexOf(Mahjong.ONE_WANG_4)),
+                null, null, null, null, null, null, null, null, null,
                 null, null, null, null, null, null, null, null, null, null,
                 null, null, null, null, null, null, null, null, null, null,
                 null, null, null, null, null, null, null, null, null, null,

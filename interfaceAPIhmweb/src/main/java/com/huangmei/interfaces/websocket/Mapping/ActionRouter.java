@@ -1544,6 +1544,15 @@ public class ActionRouter {
             singleUserScoreVo.setNickName(tempUser.getNickName());
             singleUserScoreVo.setImage(tempUser.getImage());
 
+            singleUserScoreVo.setHuType(score.getHuType());
+            Score.HuType[] values = Score.HuType.values();
+            for (Score.HuType value : values) {
+                if (value.getId().equals(score.getHuType())) {
+                    singleUserScoreVo.setHuName(value.getName());
+                    break;
+                }
+
+            }
             singleUserScoreVo.setPaoShu(score.getPaoNum());
             singleUserScoreVo.setScore(score.getScore());
             singleUserScoreVo.setState(SingleUserScoreVo.parseToState(score.getWinType()));

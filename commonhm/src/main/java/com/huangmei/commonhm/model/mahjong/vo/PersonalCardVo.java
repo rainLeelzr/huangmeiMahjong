@@ -23,15 +23,44 @@ public class PersonalCardVo {
      */
     private List<Integer> outCards;
 
+    /**
+     * 自己摸到的牌
+     *
+     * @return
+     */
+    private Integer touchMahjongId;
+
+    private List<Integer> operatePids;
+
+    public List<Integer> getOperatePids() {
+        return operatePids;
+    }
+
+    public void setOperatePids(List<Integer> operatePids) {
+        this.operatePids = operatePids;
+    }
+
+    public Integer getTouchMahjongId() {
+        return touchMahjongId;
+    }
+
+    public void setTouchMahjongId(Integer touchMahjongId) {
+        this.touchMahjongId = touchMahjongId;
+    }
+
     public PersonalCardVo(
             List<Integer> handCardIds,
             List<List<Integer>> pengMahjongIds,
             List<GangVo> gangs,
-            List<Integer> outCards) {
+            List<Integer> outCards,
+            Integer touchMahjongId,
+            List<Integer> operatePids) {
         this.handCardIds = handCardIds;
         this.pengMahjongIds = pengMahjongIds;
         this.gangs = gangs;
         this.outCards = outCards;
+        this.touchMahjongId = touchMahjongId;
+        this.operatePids = operatePids;
     }
 
     public List<Integer> getOutCards() {

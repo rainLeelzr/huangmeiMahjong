@@ -30,6 +30,32 @@ public class SingleUserScoreVo {
      */
     private Integer score;
 
+    public Integer getHuType() {
+        return huType;
+    }
+
+    public void setHuType(Integer huType) {
+        this.huType = huType;
+    }
+
+    /**
+     * 胡牌类型
+     */
+    private Integer huType;
+
+    public String getHuName() {
+        return huName;
+    }
+
+    public void setHuName(String huName) {
+        this.huName = huName;
+    }
+
+    /**
+     * 胡牌类型
+     */
+    private String huName;
+
     /**
      * 1 自摸 2 接炮 3 输
      */

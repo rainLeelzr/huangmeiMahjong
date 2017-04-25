@@ -1,6 +1,8 @@
 package com.huangmei.commonhm.service.impl;
 
 import com.huangmei.commonhm.dao.*;
+import com.huangmei.commonhm.manager.operate.CanDoOperate;
+import com.huangmei.commonhm.manager.operate.Operate;
 import com.huangmei.commonhm.model.*;
 import com.huangmei.commonhm.model.mahjong.*;
 import com.huangmei.commonhm.model.mahjong.vo.GameStartVo;
@@ -153,7 +155,6 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
                     mahjongGameData.getPersonalCardInfos(),
                     roomMember.getUserId()
             );
-
             // 去掉outMahjong列表中碰了的麻将
             for (Combo combo : personalCardInfo.getPengs()) {
                 OutCard.filterOutCard(outMahjongs, combo.getMahjongs());
@@ -164,18 +165,40 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
             for (Combo combo : gangs) {
                 OutCard.filterOutCard(outMahjongs, combo.getMahjongs());
             }
+        }
+
+        CanDoOperate waitingClientOperate = gameRedis.getWaitingClientOperate(room.getId());
+
+        for (RoomMember roomMember : roomMembers) {
+            PersonalCardInfo personalCardInfo = PersonalCardInfo.getPersonalCardInfo(
+                    mahjongGameData.getPersonalCardInfos(),
+                    roomMember.getUserId()
+            );
+
+            List<Integer> operatePids;
+            if (waitingClientOperate != null
+                    && waitingClientOperate.getRoomMember().getId().equals(roomMember.getId())) {
+                waitingClientOperate.getOperates().remove(Operate.GUO);
+                operatePids = Operate.parseToPids(waitingClientOperate.getOperates());
+            } else {
+                operatePids = new ArrayList<>(1);
+            }
+
 
             PersonalCardVo pCardVo = new PersonalCardVo(
                     Mahjong.parseToIds(personalCardInfo.getHandCards()),
                     Mahjong.parseCombosToMahjongIds(personalCardInfo.getPengs()),
                     GangVo.parseFromGangCombos(personalCardInfo.getGangs()),
-                    OutCard.filterByUserId(outMahjongs, roomMember.getUserId())
+                    OutCard.filterByUserId(outMahjongs, roomMember.getUserId()),
+                    personalCardInfo.getTouchMahjong() == null ?
+                            null : personalCardInfo.getTouchMahjong().getId(),
+                    operatePids
             );
             roomMember.setPersonalCardVo(pCardVo);
 
             // 设置庄家
-            if (personalCardInfo.getRoomMember().getSeat().equals(mahjongGameData.getBankerSite())) {
-                gameStart.setBankerUId(personalCardInfo.getRoomMember().getUserId());// uId在api层再设置
+            if (roomMember.getSeat().equals(mahjongGameData.getBankerSite())) {
+                gameStart.setBankerUId(roomMember.getUserId());// uId在api层再设置
             }
         }
 

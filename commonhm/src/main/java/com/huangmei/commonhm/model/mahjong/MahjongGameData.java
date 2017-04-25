@@ -140,7 +140,7 @@ public class MahjongGameData {
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1RuanMingGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2PengMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2AnGangMahjongs();
-        //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat3QiangDaMingGangHuMahjongs();
+        List<Mahjong> allMahjongs = MockComboMahjongList.getSeat3QiangDaMingGangHuMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2ChiPingHuSeat3DaMingGangMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2ChiPingHu();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1ZiMoPingHu();
@@ -148,7 +148,7 @@ public class MahjongGameData {
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2RuanChiPengPengHuMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2YingChiQiDuiMahjongs();
         //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat1BaoNiangAnGangMahjongs();
-        List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2BaoNiangDaMinGWGangMahjongs();
+        //List<Mahjong> allMahjongs = MockComboMahjongList.getSeat2BaoNiangDaMinGWGangMahjongs();
 
         // 参数验证
         if (bankerSite > players || bankerSite < 0 || players == 0) {

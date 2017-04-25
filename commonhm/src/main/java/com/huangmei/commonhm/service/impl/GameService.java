@@ -881,7 +881,10 @@ public class GameService {
                         score.getCoin());
             }
         }
-
+        if (mahjongGameData.getCurrentTimes().equals(1)
+                && room.getType().equals(Room.type.FRIENDS_ROOM.getCode())) {
+            deductDiamond(room);
+        }
         // 为下一局游戏做准备，或者结束游戏
         List<SingleUserGameScoreVo> singleUserGameScoreVos = ready4NextGameOrFinishGame(mahjongGameData, room, scores);
 
@@ -1109,8 +1112,13 @@ public class GameService {
                         score.getCoin());
 
             }
+
         }
 
+        if (mahjongGameData.getCurrentTimes().equals(1)
+                && room.getType().equals(Room.type.FRIENDS_ROOM.getCode())) {
+            deductDiamond(room);
+        }
         // 为下一局游戏做准备，或者结束游戏
         List<SingleUserGameScoreVo> singleUserGameScoreVos = ready4NextGameOrFinishGame(mahjongGameData, room, scores);
 
@@ -1243,7 +1251,10 @@ public class GameService {
                         score.getCoin());
             }
         }
-
+        if (mahjongGameData.getCurrentTimes().equals(1)
+                && room.getType().equals(Room.type.FRIENDS_ROOM.getCode())) {
+            deductDiamond(room);
+        }
         // 为下一局游戏做准备，或者结束游戏
         List<SingleUserGameScoreVo> singleUserGameScoreVos = ready4NextGameOrFinishGame(mahjongGameData, room, scores);
 
@@ -1377,7 +1388,10 @@ public class GameService {
                         score.getCoin());
             }
         }
-
+        if (mahjongGameData.getCurrentTimes().equals(1)
+                && room.getType().equals(Room.type.FRIENDS_ROOM.getCode())) {
+            deductDiamond(room);
+        }
         // 为下一局游戏做准备，或者结束游戏
         List<SingleUserGameScoreVo> singleUserGameScoreVos = ready4NextGameOrFinishGame(mahjongGameData, room, scores);
 
@@ -1532,7 +1546,10 @@ public class GameService {
                         score.getCoin());
             }
         }
-
+        if (mahjongGameData.getCurrentTimes().equals(1)
+                && room.getType().equals(Room.type.FRIENDS_ROOM.getCode())) {
+            deductDiamond(room);
+        }
         gameRedis.saveMahjongGameData(mahjongGameData);
 
         // 为下一局游戏做准备，或者结束游戏
@@ -1902,6 +1919,27 @@ public class GameService {
         tranRecord.setQuantity(quantity);
         tranRecord.setItemType(itemType);
         tranRecordDao.save(tranRecord);
+
+    }
+
+    /**
+     * 第一局结算后好友房扣除钻石
+     *
+     * @return
+     */
+    private void deductDiamond(Room room) {
+        if (room.getPayType().equals(Room.payType.PAY_BY_ONE.getCode())) {//一人支付
+            User user = userDao.selectOne(room.getCreatedUserId());
+            user.setDiamond(user.getDiamond() - room.getDiamond());
+            userDao.update(user);
+        } else if (room.getPayType().equals(Room.payType.PAY_BY_FOUR.getCode())) {//四人支付
+            Set<RoomMember> roomMembers = roomRedis.getRoomMembers(room.getId().toString());
+            for (RoomMember roomMember : roomMembers) {
+                User user = userDao.selectOne(roomMember.getUserId());
+                user.setDiamond(user.getDiamond() - room.getDiamond() / room.getPlayers());
+                userDao.update(user);
+            }
+        }
 
     }
 }
