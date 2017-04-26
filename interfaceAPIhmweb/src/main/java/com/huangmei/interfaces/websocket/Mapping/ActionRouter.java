@@ -357,8 +357,8 @@ public class ActionRouter {
                 result.remove("room");
 
                 if (loginType == 4) {
-                    ReconnectionVo reconnectionVo = (ReconnectionVo) result.get("gameData");
-
+                    Object[] gameData = (Object[]) result.get("gameData");
+                    ReconnectionVo reconnectionVo = (ReconnectionVo) gameData[0];
                     Integer bankerUserId = reconnectionVo.getGameStart().getBankerUId();
                     User user = getUserByUserId(bankerUserId);
                     reconnectionVo.getGameStart().setBankerUId(user.getUId());
@@ -370,6 +370,26 @@ public class ActionRouter {
 
                         roomMember.getPersonalCardVo().setuId(me.getUId());
                     }
+
+                    ClientOperate clientOperate = (ClientOperate) gameData[1];
+                    if (clientOperate != null) {
+                        Integer id = clientOperate.getuId();
+                        if (id != null) {
+                            clientOperate.setuId(getUserByUserId(id).getUId());
+                        }
+                        Integer playerUId = clientOperate.getPlayerUId();
+                        if (playerUId != 0) {
+                            clientOperate.setPlayerUId(getUserByUserId(playerUId).getUId());
+                        }
+
+                        messageManager.sendMessageByUserId(id, new JsonResultY.Builder()
+                                .setPid(PidValue.CLIENT_OPERATE)
+                                .setError(CommonError.SYS_SUSSES)
+                                .setData(clientOperate)
+                                .build());
+                    }
+                    result.put("gameData", reconnectionVo);
+
                 }
 
             }

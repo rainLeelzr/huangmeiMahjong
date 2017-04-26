@@ -16,6 +16,7 @@ public class ReconnectionVo {
 
     GameStartVo gameStart;
 
+
     /**
      * 剩下可以被摸牌的麻将的数量
      */

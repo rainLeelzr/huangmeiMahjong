@@ -30,15 +30,6 @@ public class PersonalCardVo {
      */
     private Integer touchMahjongId;
 
-    private List<Integer> operatePids;
-
-    public List<Integer> getOperatePids() {
-        return operatePids;
-    }
-
-    public void setOperatePids(List<Integer> operatePids) {
-        this.operatePids = operatePids;
-    }
 
     public Integer getTouchMahjongId() {
         return touchMahjongId;
@@ -53,14 +44,13 @@ public class PersonalCardVo {
             List<List<Integer>> pengMahjongIds,
             List<GangVo> gangs,
             List<Integer> outCards,
-            Integer touchMahjongId,
-            List<Integer> operatePids) {
+            Integer touchMahjongId) {
         this.handCardIds = handCardIds;
         this.pengMahjongIds = pengMahjongIds;
         this.gangs = gangs;
         this.outCards = outCards;
         this.touchMahjongId = touchMahjongId;
-        this.operatePids = operatePids;
+
     }
 
     public List<Integer> getOutCards() {

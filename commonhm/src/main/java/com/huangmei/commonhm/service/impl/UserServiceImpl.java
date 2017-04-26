@@ -5,10 +5,7 @@ import com.huangmei.commonhm.manager.operate.CanDoOperate;
 import com.huangmei.commonhm.manager.operate.Operate;
 import com.huangmei.commonhm.model.*;
 import com.huangmei.commonhm.model.mahjong.*;
-import com.huangmei.commonhm.model.mahjong.vo.GameStartVo;
-import com.huangmei.commonhm.model.mahjong.vo.GangVo;
-import com.huangmei.commonhm.model.mahjong.vo.PersonalCardVo;
-import com.huangmei.commonhm.model.mahjong.vo.ReconnectionVo;
+import com.huangmei.commonhm.model.mahjong.vo.*;
 import com.huangmei.commonhm.model.vo.ScoreVo;
 import com.huangmei.commonhm.model.vo.UserVo;
 import com.huangmei.commonhm.redis.GameRedis;
@@ -105,8 +102,8 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
                     loginType = 4;// 进入了房间，游戏中
 
                     // 组装游戏信息，返回给客户端渲染界面
-                    ReconnectionVo reconnectionVo = genReconnectionVo4Playing(room);
-                    result.put("gameData", reconnectionVo);
+                    Object[] objects = genReconnectionVo4Playing(room);
+                    result.put("gameData", objects);
 
                 } else if (roomMember.getState().equals(RoomMember.state.UNREADY.getCode())
                         || roomMember.getState().equals(RoomMember.state.READY.getCode())) {
@@ -133,7 +130,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
     /**
      * 生成正在游戏中的数据
      */
-    private ReconnectionVo genReconnectionVo4Playing(Room room) {
+    private Object[] genReconnectionVo4Playing(Room room) {
         MahjongGameData mahjongGameData = gameRedis.getMahjongGameData(room.getId());
 
         GameStartVo gameStart = new GameStartVo();
@@ -169,19 +166,28 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
 
         CanDoOperate waitingClientOperate = gameRedis.getWaitingClientOperate(room.getId());
 
+        ClientOperate clientOperate = null;
         for (RoomMember roomMember : roomMembers) {
             PersonalCardInfo personalCardInfo = PersonalCardInfo.getPersonalCardInfo(
                     mahjongGameData.getPersonalCardInfos(),
                     roomMember.getUserId()
             );
 
-            List<Integer> operatePids;
             if (waitingClientOperate != null
                     && waitingClientOperate.getRoomMember().getId().equals(roomMember.getId())) {
                 waitingClientOperate.getOperates().remove(Operate.GUO);
-                operatePids = Operate.parseToPids(waitingClientOperate.getOperates());
-            } else {
-                operatePids = new ArrayList<>(1);
+                waitingClientOperate.getOperates().remove(Operate.PLAY_A_MAHJONG);
+
+                clientOperate = new ClientOperate();
+                clientOperate.setuId(waitingClientOperate.getRoomMember().getUserId());
+                clientOperate.setOperatePids(Operate.parseToPids(waitingClientOperate.getOperates()));
+                clientOperate.setHandCardIds(Mahjong.parseToIds(personalCardInfo.getHandCards()));
+                clientOperate.setPengMahjongIs(Mahjong.parseCombosToMahjongIds(personalCardInfo.getPengs()));
+                clientOperate.setGangs(GangVo.parseFromGangCombos(personalCardInfo.getGangs()));
+                clientOperate.setPlayedMahjongId(waitingClientOperate.getSpecialMahjong() == null ?
+                        null : waitingClientOperate.getSpecialMahjong().getId());
+                clientOperate.setPlayerUId(waitingClientOperate.getSpecialUserId());
+
             }
 
 
@@ -191,8 +197,8 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
                     GangVo.parseFromGangCombos(personalCardInfo.getGangs()),
                     OutCard.filterByUserId(outMahjongs, roomMember.getUserId()),
                     personalCardInfo.getTouchMahjong() == null ?
-                            null : personalCardInfo.getTouchMahjong().getId(),
-                    operatePids
+                            null : personalCardInfo.getTouchMahjong().getId()
+
             );
             roomMember.setPersonalCardVo(pCardVo);
 
@@ -209,7 +215,7 @@ public class UserServiceImpl extends BaseServiceImpl<Integer, User> implements U
                 mahjongGameData.getLeftCards().size()
         );
 
-        return reconnectionVo;
+        return new Object[]{reconnectionVo, clientOperate};
     }
 
     /**
