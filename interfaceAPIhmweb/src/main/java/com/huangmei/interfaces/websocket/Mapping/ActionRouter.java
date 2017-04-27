@@ -713,8 +713,8 @@ public class ActionRouter {
             DismissRoomVoteTask dismissRoomVoteTask = new DismissRoomVoteTask();
             dismissRoomVoteTask.setRoomService(roomService);
             dismissRoomVoteTask.setRoomId(room.getId());
-
-            monitorManager.schedule(dismissRoomVoteTask, 10 * 1000);
+            //debuging 投票同意时间10秒
+            monitorManager.schedule(dismissRoomVoteTask, 120 * 1000);
         }
 
         JsonResultY jsonResultY = new JsonResultY.Builder()
@@ -1563,6 +1563,11 @@ public class ActionRouter {
 
             singleUserScoreVo.setNickName(tempUser.getNickName());
             singleUserScoreVo.setImage(tempUser.getImage());
+            List<Mahjong> baoMahjongs = mahjongGameData.getBaoMahjongs();
+            for (Mahjong baoMahjong : baoMahjongs) {
+                singleUserScoreVo.setBaoMahjongId(baoMahjong.getNumber());
+                break;
+            }
 
             singleUserScoreVo.setHuType(score.getHuType());
             Score.HuType[] values = Score.HuType.values();
@@ -1606,6 +1611,7 @@ public class ActionRouter {
             }
 
         }
+
         messageManager.sendMessageToRoomUsers(
                 room.getId().toString(),
                 new JsonResultY.Builder()

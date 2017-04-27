@@ -12,6 +12,15 @@ public class SingleUserScoreVo {
 
     private String nickName;
     private String image;
+    private Integer baoMahjongId;
+
+    public Integer getBaoMahjongId() {
+        return baoMahjongId;
+    }
+
+    public void setBaoMahjongId(Integer baoMahjongId) {
+        this.baoMahjongId = baoMahjongId;
+    }
 
     /**
      * [12,22]一个数组存牌的ID 12 是二万 22是二筒

@@ -847,7 +847,7 @@ public class GameService {
             throw CommonError.SYS_PARAM_ERROR.newException();
         }
 
-        List<Score> scores = genScores4Game(mahjongGameData, room, user, canOperates.get(0));
+        List<Score> scores = genScores4Game(mahjongGameData, room, user, canOperates.get(0), specialMahjong);
 
         Score winnerScore = new Score();
         for (Score score : scores) {
@@ -1060,7 +1060,7 @@ public class GameService {
                     break;
                 }
 
-                Score.HuType huType = Score.HuType.parse(operate);
+                Score.HuType huType = Score.HuType.parse(operate, personalCardInfo, mahjongGameData, specialMahjong);
                 score.setHuType(huType.getId());
 
                 // 计算总炮数
@@ -1194,7 +1194,7 @@ public class GameService {
                     break;
                 }
 
-                Score.HuType huType = Score.HuType.parse(operate);
+                Score.HuType huType = Score.HuType.parse(operate, personalCardInfo, mahjongGameData, specialMahjong);
                 score.setHuType(huType.getId());
 
                 // 计算总炮数
@@ -1331,7 +1331,7 @@ public class GameService {
                     break;
                 }
 
-                Score.HuType huType = Score.HuType.parse(operate);
+                Score.HuType huType = Score.HuType.parse(operate, personalCardInfo, mahjongGameData, specialMahjong);
                 score.setHuType(huType.getId());
 
                 // 计算总炮数
@@ -1489,7 +1489,7 @@ public class GameService {
                     break;
                 }
 
-                Score.HuType huType = Score.HuType.parse(operate);
+                Score.HuType huType = Score.HuType.parse(operate, personalCardInfo, mahjongGameData, specialMahjong);
                 score.setHuType(huType.getId());
 
                 // 计算总炮数
@@ -1570,7 +1570,7 @@ public class GameService {
             MahjongGameData mahjongGameData,
             Room room,
             User user,
-            CanDoOperate canOperate) {
+            CanDoOperate canOperate, Mahjong specialMahjong) {
         List<Score> scores = new ArrayList<>(mahjongGameData.getPersonalCardInfos().size());
 
         Operate operate = null;
@@ -1614,7 +1614,7 @@ public class GameService {
                 score.setWinType(Score.WinType.ZI_MO.getId());
 
                 // 设置胡牌类型
-                Score.HuType huType = Score.HuType.parse(operate);
+                Score.HuType huType = Score.HuType.parse(operate, personalCardInfo, mahjongGameData, specialMahjong);
                 score.setHuType(huType.getId());
 
                 // 计算总炮数
@@ -1851,7 +1851,9 @@ public class GameService {
      * 执行流局处理
      */
     public Object[] draw(Room room, MahjongGameData mahjongGameData) {
-        List<Score> scores = genScores4Game(mahjongGameData, room, null, null);
+        OutCard outCard = mahjongGameData.getOutCards().get(mahjongGameData.getOutCards().size() - 1);
+        Mahjong specialMahjong = outCard.getMahjong();
+        List<Score> scores = genScores4Game(mahjongGameData, room, null, null, specialMahjong);
 
         for (Score score : scores) {
             scoreDao.save(score);

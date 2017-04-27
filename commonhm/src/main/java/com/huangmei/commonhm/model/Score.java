@@ -1,7 +1,13 @@
 package com.huangmei.commonhm.model;
 
 import com.huangmei.commonhm.manager.operate.Operate;
+import com.huangmei.commonhm.model.mahjong.*;
+import com.huangmei.commonhm.model.mahjong.gameData.TouchMahjong;
 import com.huangmei.commonhm.util.CommonError;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 public class Score implements Entity {
 
@@ -298,7 +304,7 @@ public class Score implements Entity {
             this.name = name;
         }
 
-        public static HuType parse(Operate operate) {
+        public static HuType parse(Operate operate, PersonalCardInfo personalCardInfo, MahjongGameData mahjongGameData, Mahjong specialMahjong) {
             if (operate == null) {
                 throw CommonError.SYS_PARAM_ERROR.newException();
             }
@@ -344,6 +350,80 @@ public class Score implements Entity {
                 default:
                     throw CommonError.SYS_PARAM_ERROR.newException();
             }
+
+
+            List<Mahjong> ms = new ArrayList<>();
+
+            ms.add(specialMahjong);
+            //清一色
+            List<Combo> gangs = personalCardInfo.getGangs();
+            for (Combo gang : gangs) {
+                ms.addAll(gang.getMahjongs());
+            }
+            List<Combo> pengs = personalCardInfo.getPengs();
+            for (Combo peng : pengs) {
+                ms.addAll(peng.getMahjongs());
+            }
+            Set<Mahjong> handCards = personalCardInfo.getHandCards();
+            ms.addAll(handCards);
+            List<Mahjong> baoMahjongs = mahjongGameData.getBaoMahjongs();//宝牌
+            for (Mahjong baoMahjong : baoMahjongs) {
+                ms.remove(baoMahjong);
+            }
+
+            int wan = 0;
+            int tong = 0;
+            int tiao = 0;
+            for (Mahjong handCard : ms) {
+                Integer number = handCard.getNumber();
+                if (number >= Mahjong.ONE_WANG_1.getNumber() && number <= Mahjong.NINE_WANG_1.getNumber()) {
+                    wan++;
+                } else if (number >= Mahjong.ONE_TONG_1.getNumber() && number <= Mahjong.NINE_TONG_1.getNumber()) {
+                    tong++;
+                } else if (number >= Mahjong.ONE_TIAO_1.getNumber() && number <= Mahjong.NINE_TIAO_1.getNumber()) {
+                    tiao++;
+                }
+            }
+            if (wan == ms.size() || tiao == ms.size() || tong == ms.size()) {//清一色
+                switch (result) {
+                    case PENG_PENG_HU:
+                        result = QING_YI_SE_PENG_PENG_HU;
+                        break;
+                    case PING_HU:
+                        result = QING_YI_SE;
+                        break;
+                    case QI_DUI:
+                        result = QING_YI_SE_QI_DUI;
+                        break;
+                }
+
+            }
+            //杠上花
+            TouchMahjong touchMahjong = mahjongGameData.getTouchMahjongs()
+                    .get(mahjongGameData.getTouchMahjongs().size() - 1);
+            if (touchMahjong.getType().equals(TouchMahjong.Type.GANG.getId())) {//杠上花
+                switch (result) {
+                    case PENG_PENG_HU:
+                        result = PENG_PENG_HU_GANG_SHANG_HUA;
+                        break;
+                    case PING_HU:
+                        result = PING_HU_GANG_SHANG_HUA;
+                        break;
+                    case QI_DUI:
+                        result = QI_DUI_GANG_SHANG_HUA;
+                        break;
+                    case QING_YI_SE_PENG_PENG_HU:
+                        result = QING_YI_SE_PENG_PENG_HU_GANG_SHANG_HUA;
+                        break;
+                    case QING_YI_SE:
+                        result = QING_YI_SE_GANG_SHANG_HUA;
+                        break;
+                    case QING_YI_SE_QI_DUI:
+                        result = QING_YI_SE_QI_DUI_GANG_SHANG_HUA;
+                        break;
+                }
+            }
+
             return result;
         }
 
