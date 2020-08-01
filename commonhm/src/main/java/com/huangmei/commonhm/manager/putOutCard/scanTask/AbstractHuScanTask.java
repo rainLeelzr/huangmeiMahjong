@@ -1,15 +1,14 @@
 package com.huangmei.commonhm.manager.putOutCard.scanTask;
 
 
-import com.huangmei.commonhm.manager.scanTask.BaseScanTask;
-import com.huangmei.commonhm.model.mahjong.Combo;
-import com.huangmei.commonhm.model.mahjong.Mahjong;
-import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import com.huangmei.commonhm.manager.scanTask.BaseScanTask;
+import com.huangmei.commonhm.model.mahjong.Combo;
+import com.huangmei.commonhm.model.mahjong.Mahjong;
+import com.huangmei.commonhm.model.mahjong.PersonalCardInfo;
 
 /**
  * 扫描用户是否可以吃胡
